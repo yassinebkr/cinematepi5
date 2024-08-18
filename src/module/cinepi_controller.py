@@ -41,7 +41,7 @@ class CinePiController:
         self.wb_cg_rb_array = {}  # Initialize as an empty dictionary
         
         self.redis_listener = RedisListener(redis_controller)
-        self.fps = self.redis_listener.framerate if self.redis_listener.framerate else 1
+        self.fps = int(float(self.redis_controller.get_value('fps')))
         
         # Set startup flag
         self.startup = True
@@ -50,6 +50,10 @@ class CinePiController:
         self.iso_lock = False
         self.shutter_a_nom_lock = False
         self.fps_lock = False
+        
+        # Dictionary to store calculated values for different fps
+        self.calculated_values = {}
+        
         self.all_lock = False
         self.lock_override = False
         self.exposure_time_seconds = None
