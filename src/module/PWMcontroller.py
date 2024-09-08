@@ -1,131 +1,119 @@
-import pigpio
 import time
 import subprocess
-import logging  
+import logging
+import lgpio
 
 class PWMController:
-    def __init__(self, sensor_detect, PWM_pin=None, PWM_inv_pin=None, start_freq=24, shutter_angle=180, trigger_mode=0):
+    def __init__(self, h, sensor_detect, PWM_pin=None, PWM_inv_pin=None, start_freq=24, shutter_angle=180, trigger_mode=0):
+        self.h = h
         self.sensor_detect = sensor_detect
         
         self.PWM_pin = PWM_pin
         self.PWM_inv_pin = PWM_inv_pin
         
         if PWM_pin not in [None, 18, 19]:
-            logging.info("Invalid PWM_pin value. Should be None, 18, or 19.")
-            #return  # Exit the __init__ method if PWM_pin is invalid
+            logging.warning(f"Invalid PWM_pin value: {PWM_pin}. Should be None, 18, or 19.")
         
         self.fps = start_freq
         self.shutter_angle = shutter_angle
-
-        self.pi = pigpio.pi()  # Connect to the local Pi
-        #self.ramp_mode(0)
         
-        self.freq = 24  # 24 Hz   
+        self.freq = start_freq
         self.period = 1.0 / self.freq
-        self.duty_cycle = 500_000  # 50% duty cycle
-        self.exposure_time = 50000 - (self.duty_cycle * self.period)  # Initialize with default values
+        self.duty_cycle = 500000  # 50% duty cycle (0-1000000)
+        self.exposure_time = (self.shutter_angle / 360.0) * self.period
+        
+        self.pwm_active = False
+        
+        if PWM_pin in [18, 19]:
+            try:
+                lgpio.gpio_claim_output(self.h, self.PWM_pin)
+                logging.info(f"PWM controller instantiated on PWM_pin {PWM_pin}")
+            except lgpio.error as e:
+                logging.error(f"Failed to claim PWM pin {PWM_pin}: {str(e)}")
+                self.PWM_pin = None  # Set PWM_pin to None if we fail to claim it
         
         self.set_freq(start_freq)
         self.set_duty_cycle(shutter_angle)
-        
-        if PWM_pin in [18, 19]:
-            logging.info(f"PWM controller instantiated on PWM_pin {PWM_pin}")
-        
-            #logging.info(f"PWM controller instantiated on PWM_pin {PWM_pin}, PWM_inv_pin {PWM_inv_pin}, fps {start_freq}, shutter angle {shutter_angle},  trigger mode {trigger_mode}")
-        
-        #self.update_pwm()  # Start the PWM
-    
-    def start_pwm(self, freq, shutter_angle, trigger_mode):
-        self.set_freq(freq)
-        self.set_duty_cycle(shutter_angle)
         self.set_trigger_mode(trigger_mode)
-        self.update_pwm()
-        logging.info("PWM started")
+
+    def start_pwm(self, freq=None, shutter_angle=None, trigger_mode=None):
+        if freq is not None:
+            self.set_freq(freq)
+        if shutter_angle is not None:
+            self.set_duty_cycle(shutter_angle)
+        if trigger_mode is not None:
+            self.set_trigger_mode(trigger_mode)
         
+        if self.PWM_pin is not None:
+            try:
+                lgpio.tx_pwm(self.h, self.PWM_pin, self.freq, self.duty_cycle)
+                self.pwm_active = True
+                logging.info(f"PWM started on pin {self.PWM_pin} with freq {self.freq}Hz and duty cycle {self.duty_cycle/10000:.1f}%")
+            except lgpio.error as e:
+                logging.error(f"Failed to start PWM: {str(e)}")
+        else:
+            logging.warning("No PWM pin specified. PWM not started.")
+
     def stop_pwm(self):
-        self.set_trigger_mode(0)
-        self.pi.hardware_PWM(self.PWM_pin, 0, 0)  # Stop the PWM
-        if self.PWM_inv_pin is not None:
-            self.pi.hardware_PWM(self.PWM_inv_pin, 0, 0)  # Stop the inverted PWM
-        logging.info("PWM stopped")
+        if self.pwm_active and self.PWM_pin is not None:
+            try:
+                lgpio.tx_pwm(self.h, self.PWM_pin, 0, 0)
+                self.pwm_active = False
+                logging.info(f"PWM stopped on pin {self.PWM_pin}")
+            except lgpio.error as e:
+                logging.error(f"Failed to stop PWM: {str(e)}")
         
+        self.set_trigger_mode(0)
+
     def set_trigger_mode(self, value):
         if value not in [0, 2]:
-            raise ValueError("Invalid argument: must be 0 or 2")
+            raise ValueError("Invalid trigger mode. Must be 0 or 2.")
         
         if self.sensor_detect.camera_model == 'imx477':
             command = f'echo {value} > /sys/module/imx477/parameters/trigger_mode'
-
         elif self.sensor_detect.camera_model == 'imx296':
-            if value == 2: value = 1
-            command = f'echo {value} > /sys/module/imx296/parameters/trigger_mode'
-            
-        full_command = ['sudo', 'su', '-c', command]
-        subprocess.run(full_command, check=True)
-        logging.info(f"Trigger mode set to {value}")
+            command = f'echo {1 if value == 2 else 0} > /sys/module/imx296/parameters/trigger_mode'
+        else:
+            logging.warning(f"Unsupported camera model: {self.sensor_detect.camera_model}")
+            return
+        
+        try:
+            subprocess.run(['sudo', 'sh', '-c', command], check=True)
+            logging.info(f"Trigger mode set to {value}")
+        except subprocess.CalledProcessError as e:
+            logging.error(f"Failed to set trigger mode: {str(e)}")
 
-    def set_pwm(self, fps=None, shutter_angle=None):
-        if fps is not None:
-            self.fps = fps
-            self.freq = fps  # Update the frequency
-            self.set_freq(fps)
-        if shutter_angle is not None:
-            self.shutter_angle = shutter_angle
-            self.set_duty_cycle(shutter_angle)
+    def set_freq(self, new_freq):
+        self.freq = max(min(new_freq, 50), 1)  # Clamp between 1 and 50 Hz
+        self.period = 1.0 / self.freq
         self.update_pwm()
 
     def set_duty_cycle(self, shutter_angle):
-        self.shutter_angle = max(min(shutter_angle, 360), 1)  # Ensure shutter angle is within 1-360
-        frame_interval = 1.0 / self.fps  # Frame interval in seconds
-        shutter_time = (float(self.shutter_angle) / 360.0) * frame_interval  # Shutter open time in seconds
-        shutter_time_microseconds = shutter_time * 1_000_000  # Convert shutter time to microseconds
-        frame_length_microseconds = frame_interval * 1_000_000  # Convert frame interval to microseconds
-        duty_cycle = int((1 - ((shutter_time_microseconds - 14) / frame_length_microseconds)) * 1_000_000)
-        duty_cycle = max(min(duty_cycle, 1_000_000), 0)  # Ensure duty cycle is within 0-1M
-        self.duty_cycle = duty_cycle
-        self.exposure_time = shutter_time_microseconds  # Update the exposure time
+        self.shutter_angle = max(min(shutter_angle, 360), 1)  # Clamp between 1 and 360 degrees
+        self.exposure_time = (self.shutter_angle / 360.0) * self.period
+        self.duty_cycle = int((1 - (self.exposure_time / self.period)) * 1000000)
+        self.update_pwm()
 
-    def set_freq(self, new_freq):
-        safe_value = max(min(new_freq, 50), 1)
-        if self.fps == safe_value:  # If the frequency is already set to the new value
-            return  # Exit the method without updating the frequency
-        self.fps = safe_value
-        self.freq = safe_value  # Update the frequency
-        
-    def update_pwm(self, cycles=1):
-        frame_interval = 1.0 / self.fps
-        remaining_time = cycles * frame_interval - (time.time() % frame_interval)
-        if remaining_time > 0:  # Only sleep if remaining_time is positive
-            time.sleep(remaining_time)  # Wait for the current cycle to complete
-        shutter_angle = (1 - self.duty_cycle) * (1 / self.freq) * 360
-        self.pi.hardware_PWM(self.PWM_pin, self.freq, self.duty_cycle)
-        if self.PWM_inv_pin is not None:
-            self.pi.hardware_PWM(self.PWM_inv_pin, self.freq, 1_000_000 - self.duty_cycle)
-        
-        frame_length_microseconds = 1_000_000 / self.freq
-        shutter_time_microseconds = (1 - (self.duty_cycle / 1_000_000)) * frame_length_microseconds + 14
-        shutter_angle = (shutter_time_microseconds / frame_length_microseconds) * 360
+    def update_pwm(self):
+        if self.pwm_active and self.PWM_pin is not None:
+            try:
+                lgpio.tx_pwm(self.h, self.PWM_pin, self.freq, self.duty_cycle)
+                logging.info(f"PWM updated: freq={self.freq}Hz, duty_cycle={self.duty_cycle/10000:.1f}%, shutter_angle={self.shutter_angle}°")
+            except lgpio.error as e:
+                logging.error(f"Failed to update PWM: {str(e)}")
 
-        duty_cycle_percentage = 100 - ((self.duty_cycle / 1_000_000) * 100)
-        exposure_time = (1 - (self.duty_cycle / 1_000_000)) * (1 / self.freq)
-        logging.info(f"Updated PWM with frequency {self.freq}, duty cycle {duty_cycle_percentage:.2f}%, shutter angle {shutter_angle:.1f}, exposure time {exposure_time:.6f}")       
-        
+    def set_pwm(self, fps=None, shutter_angle=None):
+        if fps is not None:
+            self.set_freq(fps)
+        if shutter_angle is not None:
+            self.set_duty_cycle(shutter_angle)
+
     def ramp_mode(self, ramp_mode):
         if ramp_mode not in [0, 2, 3]:
-            raise ValueError("Invalid argument: must be 0, 2 or 3")
-        if ramp_mode == 2 or ramp_mode == 3:
+            raise ValueError("Invalid ramp mode. Must be 0, 2, or 3.")
+        
+        if ramp_mode in [2, 3]:
             self.start_pwm()
-            #self.update_pwm()
             self.set_trigger_mode(2)
         else:
-            self.set_trigger_mode(0)
             self.stop_pwm()
-            #self.stop()
-            
-    def stop(self):
-        self.set_trigger_mode(0)
-        self.pi.hardware_PWM(self.PWM_pin, 0, 0)  # Stop the PWM
-        if self.PWM_inv_pin is not None:
-            self.pi.hardware_PWM(self.PWM_inv_pin, 0, 0)  # Stop the inverted PWM
-        self.pi.stop()  # Disconnect from the Pi
-        logging.info("PWM stopped")       

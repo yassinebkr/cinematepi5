@@ -24,13 +24,15 @@ def enqueue_output(out, queue, event):
 class CinePi:
     _instance = None  # Singleton instance
 
-    def __new__(cls, *args, **kwargs):
+    def __new__(cls, redis_controller, sensor_detect):
         if cls._instance is None:
             cls._instance = super().__new__(cls)
         return cls._instance
 
-    def __init__(self):
+    def __init__(self, redis_controller, sensor_detect):
         if not hasattr(self, 'initialized'):  # only initialize once
+            self.redis_controller = redis_controller
+            self.sensor_detect = sensor_detect
             self.message = Event()
             self.suppress_output = False
             self.process = subprocess.Popen(['cinepi-raw'], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
