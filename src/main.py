@@ -2,24 +2,26 @@ import logging
 import sys
 import traceback
 import threading
-import RPi.GPIO as GPIO
-from signal import pause
 import json
-import argparse
+from signal import pause
+import lgpio
+import os
 
-GPIO.setwarnings(False)
-GPIO.setmode(GPIO.BCM)
+# Add the parent directory to the Python path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from module.redis_controller import RedisController
 from module.cinepi_app import CinePi
-from module.usb_monitor import USBMonitor, USBDriveMonitor
+from module.usb_monitor import USBMonitor
 from module.ssd_monitor import SSDMonitor
 from module.gpio_output import GPIOOutput
 from module.cinepi_controller import CinePiController
 from module.simple_gui import SimpleGUI
+from module.gpio_input import GPIOInput
 from module.analog_controls import AnalogControls
 from module.grove_base_hat_adc import ADC
 from module.keyboard import Keyboard
+from module.system_button import SystemButton
 from module.cli_commands import CommandExecutor
 from module.serial_handler import SerialHandler
 from module.logger import configure_logging
@@ -29,90 +31,51 @@ from module.sensor_detect import SensorDetect
 from module.mediator import Mediator
 from module.dmesg_monitor import DmesgMonitor
 from module.redis_listener import RedisListener
-from module.gpio_input import ComponentInitializer
-from module.battery_monitor import BatteryMonitor
-
 
 MODULES_OUTPUT_TO_SERIAL = ['cinepi_controller']
 
-fps_steps = None
-
 def load_settings(filename):
     with open(filename, 'r') as file:
-        original_settings = json.load(file)
-
-        # Initialize an empty settings dictionary
-        settings = {}
-
-        # Dynamically load settings based on what's available in the JSON file
-        if 'gpio_output' in original_settings:
-            settings['gpio_output'] = original_settings['gpio_output']
-
-        if 'arrays' in original_settings:
-            arrays_settings = original_settings['arrays']
-            fps_steps = arrays_settings.get('fps_steps', list(range(1, 51)))
-            # Ensure fps_steps is a list if it's null in the JSON
-            fps_steps = fps_steps if fps_steps is not None else list(range(1, 51))
-
-            settings['arrays'] = {
-                'iso_steps': arrays_settings.get('iso_steps', []),
-                'shutter_a_steps': sorted(set(range(1, 361)).union(arrays_settings.get('additional_shutter_a_steps', []))),
-                'fps_steps': fps_steps
-            }
-
-        if 'analog_controls' in original_settings:
-            settings['analog_controls'] = original_settings['analog_controls']
-
-        if 'buttons' in original_settings:
-            settings['buttons'] = original_settings['buttons']
-
-        if 'two_way_switches' in original_settings:
-            settings['two_way_switches'] = original_settings['two_way_switches']
-
-        if 'rotary_encoders' in original_settings:
-            settings['rotary_encoders'] = original_settings['rotary_encoders']
-
-        if 'combined_actions' in original_settings:
-            settings['combined_actions'] = original_settings['combined_actions']
-
+        settings = json.load(file)
+        additional_shutter_a_steps = settings.get('additional_shutter_a_steps', [])
+        shutter_a_steps = sorted(set(range(1, 361)).union(additional_shutter_a_steps))
+        settings['shutter_a_steps'] = shutter_a_steps
         return settings
-    
+
 if __name__ == "__main__":
+    logger, log_queue = configure_logging(MODULES_OUTPUT_TO_SERIAL)
     
-    # Create the argument parser
-    parser = argparse.ArgumentParser(description="Run the CinePi application.")
-
-    # Add the debug argument
-    parser.add_argument("-debug", action="store_true", help="Enable debug logging level.")
-
-    # Parse the arguments
-    args = parser.parse_args()
-
-    # Determine the logging level based on the presence of the -debug flag
-    logging_level = logging.DEBUG if args.debug else logging.INFO
-
-    logger, log_queue = configure_logging(MODULES_OUTPUT_TO_SERIAL, logging_level)
-
     settings = load_settings('/home/pi/cinemate/src/settings.json')
+
+    # Initialize lgpio
+    h = lgpio.gpiochip_open(0)
+    if h < 0:
+        logger.error("Failed to open gpiochip")
+        sys.exit(1)
 
     # Detect sensor
     sensor_detect = SensorDetect()
     
-    # Instantiate the CinePi instance
-    cinepi_app = CinePi()
+    # Instantiate the PWMController
+    pwm_controller = PWMController(h, sensor_detect, PWM_pin=settings['pwm_pin'])
 
     # Instantiate other necessary components
     redis_controller = RedisController()
+
+    # Instantiate the CinePi instance
+    cinepi_app = CinePi(redis_controller, sensor_detect)
+
     ssd_monitor = SSDMonitor()
     usb_monitor = USBMonitor(ssd_monitor)
+
+    try:
+        gpio_output = GPIOOutput(h, rec_out_pin=settings['rec_out_pin'])
+    except Exception as e:
+        logging.error(f"Failed to initialize GPIOOutput: {str(e)}")
+        gpio_output = None
+
+    #gpio_output = GPIOOutput(h, rec_out_pin=settings['rec_out_pin'])
     
-    usb_drive_monitor = USBDriveMonitor(ssd_monitor=ssd_monitor)
-    threading.Thread(target=usb_drive_monitor.start_monitoring, daemon=True).start()
-    
-    gpio_output = GPIOOutput(rec_out_pin=settings['gpio_output']['rec_out_pin'])
-    
-    pwm_controller = PWMController(sensor_detect, PWM_pin=settings['gpio_output']['pwm_pin'])
-     
     dmesg_monitor = DmesgMonitor("/var/log/kern.log")
     dmesg_monitor.start() 
 
@@ -122,19 +85,30 @@ if __name__ == "__main__":
                                         usb_monitor, 
                                         ssd_monitor,
                                         sensor_detect,
-                                        iso_steps=settings['arrays']['iso_steps'],
-                                        shutter_a_steps=settings['arrays']['shutter_a_steps'],
-                                        fps_steps=fps_steps
+                                        iso_steps=settings['iso_steps'],
+                                        shutter_a_steps=settings['shutter_a_steps'],
+                                        fps_steps=settings['fps_steps'],
+                                        wb_steps=settings.get('wb_steps', [])
                                         )
-    
-    gpio_input = ComponentInitializer(cinepi_controller, settings)
 
-    analog_controls = AnalogControls(
-        cinepi_controller,
-        iso_pot=settings['analog_controls']['iso_pot'],
-        shutter_a_pot=settings['analog_controls']['shutter_a_pot'],
-        fps_pot=settings['analog_controls']['fps_pot']
-    )
+    # Instantiate the AnalogControls component
+    analog_controls = AnalogControls(cinepi_controller, redis_controller, 
+                                 iso_pot=settings['analog_controls']['iso_pot'], 
+                                 shutter_a_pot=settings['analog_controls']['shutter_a_pot'], 
+                                 fps_pot=settings['analog_controls']['fps_pot'])
+    # analog_controls = AnalogControls(cinepi_controller, iso_pot=settings['analog_controls']['iso_pot'], shutter_a_pot=settings['analog_controls']['shutter_a_pot'], fps_pot=settings['analog_controls']['fps_pot'])
+
+    # Instantiate the GPIOControls component
+    gpio_input = GPIOInput(h, cinepi_controller, redis_controller, **settings['gpio_input'])
+
+    # Instantiate SystemButton
+    system_button = SystemButton(h, cinepi_controller, redis_controller, ssd_monitor, **settings['system_button'])
+                                
+    # Instantiate rotary encoders
+    iso_encoder = SimpleRotaryEncoder(h, cinepi_controller, setting="iso", **settings['iso_encoder'])
+    shu_encoder = SimpleRotaryEncoder(h, cinepi_controller, setting="shutter_a_nom", **settings['shu_encoder'])
+    fps_encoder = SimpleRotaryEncoder(h, cinepi_controller, setting="fps", **settings['fps_encoder'])
+
     # Instantiate the Mediator and pass the components to it
     mediator = Mediator(cinepi_app, redis_controller, usb_monitor, ssd_monitor, gpio_output)
 
@@ -145,7 +119,7 @@ if __name__ == "__main__":
     keyboard = Keyboard(cinepi_controller, usb_monitor)
     
     # Instantiate the CommandExecutor with all necessary components and settings
-    command_executor = CommandExecutor(cinepi_controller)
+    command_executor = CommandExecutor(cinepi_controller, system_button)
 
     # Start the CommandExecutor thread
     command_executor.start()
@@ -155,20 +129,17 @@ if __name__ == "__main__":
     
     redis_listener = RedisListener(redis_controller)
     
-    battery_monitor = BatteryMonitor()
-    
     simple_gui = SimpleGUI(pwm_controller, 
                            redis_controller, 
                            cinepi_controller, 
                            usb_monitor, 
                            ssd_monitor, 
                            serial_handler,
-                           dmesg_monitor,
-                           battery_monitor
+                           dmesg_monitor
                            )
 
     # Log initialization complete message
-    logging.info(f"--- initialization complete")
+    logging.info("--- initialization complete")
 
     try:
         redis_controller.set_value('is_recording', 0)
@@ -179,7 +150,7 @@ if __name__ == "__main__":
         logging.error("An unexpected error occurred:\n" + traceback.format_exc())
         sys.exit(1)
     finally:
-        # Reset trigger mode to deafult 0
+        # Reset trigger mode to default 0
         pwm_controller.stop_pwm()
         pwm_controller.set_trigger_mode(0)
         # Reset redis values to default
@@ -194,5 +165,5 @@ if __name__ == "__main__":
         serial_handler.join()
         command_executor.join()
         
-        # Cleanup GPIO pins
-        GPIO.cleanup()
+        # Cleanup GPIO
+        lgpio.gpiochip_close(h)
