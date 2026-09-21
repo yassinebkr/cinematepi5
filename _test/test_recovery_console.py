@@ -656,6 +656,119 @@ class AuthenticationTests(unittest.TestCase):
 
 
 
+class RecoveryUiTests(unittest.TestCase):
+    def config(self, token="secret"):
+        return rc._merge(
+            {"enabled": True, "port": 8080, "token": token},
+            rc.CONFIG_RUNG_CONF,
+            "test",
+        )
+
+    def test_page_uses_one_nonpersistent_token_field_without_javascript(self):
+        markup = rc.page(
+            "Test",
+            "<button type='submit' formaction='/service/cinemate-autostart/restart'>Restart</button>",
+            cfg=self.config(),
+        ).decode("utf-8")
+        self.assertEqual(markup.count("type='password'"), 1)
+        self.assertEqual(markup.count("name='token'"), 1)
+        self.assertEqual(markup.count("<form"), 1)
+        self.assertIn("autocomplete='off'", markup)
+        self.assertIn("navigation or reload clears it", markup)
+        self.assertNotIn("<script", markup.lower())
+
+    def test_status_renders_one_auth_field_for_all_service_actions(self):
+        h = rc.RecoveryHandler.__new__(rc.RecoveryHandler)
+        h.config = self.config()
+        h.runner = fake_run(stdout="active\n")
+        markup = h.view_status().decode("utf-8")
+        self.assertEqual(markup.count("name='token'"), 1)
+        self.assertEqual(markup.count("formaction='/service/"), len(rc.ALLOWED_SERVICES))
+        self.assertNotIn("<form method='post' action='/service/", markup)
+
+    def test_responsive_breakpoints_cover_desktop_phone_and_landscape(self):
+        self.assertIn(".dashboard-grid", rc.CSS)
+        self.assertIn("minmax(0, 2.15fr)", rc.CSS)
+        self.assertIn("112rem", rc.CSS)
+        self.assertIn(".recovery-form", rc.CSS)
+        self.assertIn("gap: 1rem", rc.CSS)
+        self.assertIn("@media (max-width: 900px)", rc.CSS)
+        self.assertIn("@media (max-width: 620px)", rc.CSS)
+        self.assertIn("(orientation: landscape)", rc.CSS)
+        self.assertIn(".page-shell", rc.CSS)
+        self.assertIn(".service-row", rc.CSS)
+        self.assertIn(".recovery-strip", rc.CSS)
+
+    def test_status_desktop_layout_is_compact_dashboard(self):
+        h = rc.RecoveryHandler.__new__(rc.RecoveryHandler)
+        h.config = self.config()
+        h.runner = fake_run(stdout="active\n")
+        markup = h.view_status().decode("utf-8")
+        self.assertIn("class='dashboard-grid'", markup)
+        self.assertEqual(markup.count("class='service-row'"), len(rc.ALLOWED_SERVICES))
+        self.assertIn("class='card system-panel'", markup)
+        self.assertIn("class='recovery-strip'", markup)
+
+    def test_status_nav_is_marked_active(self):
+        markup = rc.page("Status", "<div>ok</div>", cfg=self.config()).decode("utf-8")
+        self.assertIn("href='/' class='active' aria-current='page'", markup)
+
+    def test_editors_use_formaction_instead_of_nested_forms(self):
+        source = (SERVICE_DIR / "cinemate-recovery.py").read_text(encoding="utf-8")
+        self.assertIn("formaction='/edit/settings'", source)
+        self.assertIn("formaction='/edit/config'", source)
+        self.assertNotIn("<form method='post' action='/edit/settings'>", source)
+        self.assertNotIn("<form method='post' action='/edit/config'>", source)
+
+
+
+class RecoveryHttpServerTests(unittest.TestCase):
+    def _call_handle_error(self, exc):
+        server = rc.RecoveryHTTPServer.__new__(rc.RecoveryHTTPServer)
+        try:
+            raise exc
+        except type(exc):
+            return server.handle_error(None, ("10.42.0.2", 12345))
+
+    def test_connection_reset_is_suppressed(self):
+        self.assertIsNone(self._call_handle_error(ConnectionResetError(104, "reset")))
+
+    def test_broken_pipe_is_suppressed(self):
+        self.assertIsNone(self._call_handle_error(BrokenPipeError(32, "pipe")))
+
+    def test_other_server_errors_still_delegate_to_stdlib(self):
+        calls = []
+        original = rc.http.server.ThreadingHTTPServer.handle_error
+
+        def fake_base(self, request, client_address):
+            calls.append((request, client_address))
+
+        rc.http.server.ThreadingHTTPServer.handle_error = fake_base
+        try:
+            server = rc.RecoveryHTTPServer.__new__(rc.RecoveryHTTPServer)
+            try:
+                raise RuntimeError("real failure")
+            except RuntimeError:
+                server.handle_error("request", ("127.0.0.1", 9999))
+        finally:
+            rc.http.server.ThreadingHTTPServer.handle_error = original
+
+        self.assertEqual(calls, [("request", ("127.0.0.1", 9999))])
+
+    def test_make_server_uses_filtered_server_class(self):
+        cfg = rc._merge(
+            {"enabled": True, "port": 0, "token": "secret"},
+            rc.CONFIG_RUNG_CONF,
+            "test",
+        )
+        server = rc.make_server(cfg, bind="127.0.0.1")
+        try:
+            self.assertIsInstance(server, rc.RecoveryHTTPServer)
+            self.assertTrue(server.daemon_threads)
+        finally:
+            server.server_close()
+
+
 # ---------------------------------------------------------------------------
 # The one rule
 # ---------------------------------------------------------------------------

@@ -697,42 +697,301 @@ def read_failure_block(path: Path | None = None) -> str | None:
 # ---------------------------------------------------------------------------
 
 CSS = """
-:root { color-scheme: light dark; }
+:root {
+  color-scheme: light dark;
+  --bg: #f4f6f8;
+  --panel: #ffffff;
+  --panel-soft: #eef2f5;
+  --text: #18202a;
+  --muted: #65707d;
+  --border: #d7dde4;
+  --accent: #087ea4;
+  --accent-strong: #066782;
+  --good: #2b7a0b;
+  --bad: #b42318;
+  --warn: #9a6700;
+  --shadow: 0 8px 28px #0f172a12;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #11151b;
+    --panel: #1a2028;
+    --panel-soft: #202833;
+    --text: #edf1f5;
+    --muted: #aab3be;
+    --border: #343e4b;
+    --accent: #42b8df;
+    --accent-strong: #75cbea;
+    --good: #7ccf5b;
+    --bad: #ff7b72;
+    --warn: #e3b341;
+    --shadow: 0 10px 34px #00000030;
+  }
+}
 * { box-sizing: border-box; }
-body { font-family: -apple-system, system-ui, sans-serif; margin: 0;
-       padding: 1rem; line-height: 1.45; max-width: 60rem; }
-h1 { font-size: 1.3rem; margin: 0 0 .2rem; }
-h2 { font-size: 1.05rem; margin: 1.5rem 0 .4rem; }
-nav a { display: inline-block; margin-right: .9rem; padding: .35rem 0; }
-table { border-collapse: collapse; width: 100%; margin: .4rem 0; }
-td, th { text-align: left; padding: .35rem .5rem; border-bottom: 1px solid #8884; }
-pre { background: #8881; padding: .7rem; overflow-x: auto; font-size: .8rem;
-      white-space: pre-wrap; word-break: break-word; }
-textarea { width: 100%; min-height: 24rem; font-family: ui-monospace, monospace;
-           font-size: .8rem; }
-button { font-size: 1rem; padding: .5rem 1rem; margin: .2rem .3rem .2rem 0; }
-.banner { padding: .8rem; margin: .5rem 0; border-radius: 4px; }
-.red { background: #cc000022; border: 2px solid #cc0000; }
-.amber { background: #c4a00022; border: 1px solid #c4a000; }
-.green { background: #4e9a0622; border: 1px solid #4e9a06; }
-.ok { color: #4e9a06; font-weight: bold; }
-.bad { color: #cc0000; font-weight: bold; }
-.muted { opacity: .7; font-size: .85rem; }
+html { min-height: 100%; }
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  line-height: 1.45;
+}
+a { color: var(--accent); text-underline-offset: .16em; }
+a:hover { color: var(--accent-strong); }
+nav a.active {
+  border-color: var(--accent);
+  background: var(--panel-soft);
+  color: var(--text);
+}
+.page-shell {
+  width: min(calc(100% - 2rem), 112rem);
+  margin: 0 auto;
+  padding: clamp(.75rem, 1.5vw, 1.5rem);
+}
+.topbar {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  margin-bottom: 1rem;
+}
+.brand h1 { margin: 0; font-size: clamp(1.25rem, 2vw, 1.7rem); line-height: 1.15; }
+.brand p { margin: .3rem 0 0; color: var(--muted); font-size: .88rem; }
+nav { display: flex; flex-wrap: wrap; gap: .35rem; justify-content: flex-end; }
+nav a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.5rem;
+  padding: .5rem .75rem;
+  border: 1px solid var(--border);
+  border-radius: .55rem;
+  background: var(--panel);
+  text-decoration: none;
+  font-weight: 600;
+}
+main { min-width: 0; }
+.recovery-form {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+h2 { margin: 0 0 .65rem; font-size: 1.05rem; }
+.section { min-width: 0; }
+.card, .auth-panel, .banner {
+  border: 1px solid var(--border);
+  border-radius: .75rem;
+  background: var(--panel);
+  box-shadow: var(--shadow);
+}
+.card { padding: 1rem; }
+.auth-panel {
+  display: grid;
+  grid-template-columns: minmax(16rem, 1fr) minmax(19rem, 23rem);
+  align-items: center;
+  gap: .75rem 1.25rem;
+  padding: .78rem 1rem;
+}
+.auth-copy strong { display: block; }
+.auth-copy span { display: block; margin-top: .18rem; color: var(--muted); font-size: .82rem; }
+.auth-control label { display: block; font-size: .78rem; color: var(--muted); margin-bottom: .25rem; }
+input[type="password"] {
+  width: 100%;
+  min-height: 2.6rem;
+  padding: .5rem .65rem;
+  border: 1px solid var(--border);
+  border-radius: .5rem;
+  background: var(--panel-soft);
+  color: var(--text);
+  font: inherit;
+}
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 2.15fr) minmax(20rem, 1fr);
+  gap: .9rem;
+  align-items: start;
+}
+.service-list { overflow: hidden; padding: 0; }
+.service-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: .75rem 1rem;
+  min-height: 4.15rem;
+  padding: .7rem .85rem;
+  border-bottom: 1px solid var(--border);
+}
+.service-row:last-child { border-bottom: 0; }
+.service-row button {
+  min-width: 7rem;
+  min-height: 2.35rem;
+  padding: .4rem .75rem;
+}
+.service-line { display: flex; align-items: start; justify-content: space-between; gap: .75rem; }
+.service-name { min-width: 0; overflow-wrap: anywhere; font-weight: 700; }
+.eyebrow {
+  display: block;
+  margin-bottom: .18rem;
+  color: var(--muted);
+  font-size: .7rem;
+  font-weight: 700;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+.state-pill {
+  flex: 0 0 auto;
+  padding: .24rem .5rem;
+  border-radius: 999px;
+  background: var(--panel-soft);
+  font-size: .78rem;
+  font-weight: 800;
+}
+.ok { color: var(--good); }
+.bad { color: var(--bad); }
+.system-panel { padding: .25rem 1rem; }
+.system-fact {
+  padding: .85rem 0;
+  border-bottom: 1px solid var(--border);
+}
+.system-fact:last-child { border-bottom: 0; }
+.fact { min-width: 0; }
+.fact-value { font-size: 1.08rem; font-weight: 750; overflow-wrap: anywhere; }
+.fact-detail { margin-top: .35rem; color: var(--muted); font-size: .82rem; overflow-wrap: anywhere; }
+button {
+  min-height: 2.7rem;
+  padding: .55rem .9rem;
+  border: 1px solid var(--border);
+  border-radius: .55rem;
+  background: var(--panel-soft);
+  color: var(--text);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible, a:focus-visible, input:focus-visible, textarea:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+.actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .75rem; }
+.banner { padding: .85rem 1rem; box-shadow: none; }
+.red { background: #b4231814; border-color: var(--bad); }
+.amber { background: #9a670014; border-color: var(--warn); }
+.green { background: #2b7a0b14; border-color: var(--good); }
+pre {
+  max-width: 100%;
+  margin: 0;
+  padding: 1rem;
+  overflow: auto;
+  border: 1px solid var(--border);
+  border-radius: .65rem;
+  background: var(--panel);
+  font-size: .82rem;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+textarea {
+  width: 100%;
+  min-height: clamp(22rem, 62vh, 48rem);
+  resize: vertical;
+  padding: .8rem;
+  border: 1px solid var(--border);
+  border-radius: .65rem;
+  background: var(--panel);
+  color: var(--text);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: .82rem;
+  line-height: 1.45;
+}
+.recovery-strip {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
+}
+.recovery-item {
+  padding: .68rem .8rem;
+  border: 1px solid var(--border);
+  border-radius: .6rem;
+  background: var(--panel);
+}
+.recovery-item strong { display: block; margin-top: .12rem; }
+.log-links { display: flex; flex-wrap: wrap; gap: .45rem; }
+.log-links a { padding: .42rem .6rem; border: 1px solid var(--border); border-radius: .5rem; text-decoration: none; }
+.muted { color: var(--muted); font-size: .85rem; }
+footer { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--border); }
+@media (max-width: 900px) {
+  .topbar { align-items: start; flex-direction: column; }
+  nav { justify-content: flex-start; }
+  .dashboard-grid { grid-template-columns: 1fr; }
+  .service-row { grid-template-columns: minmax(0, 1fr) auto; }
+  .service-row button { grid-column: 1 / -1; width: 100%; }
+  .recovery-strip { grid-template-columns: 1fr 1fr; }
+  .auth-panel { grid-template-columns: 1fr; }
+  input[type="password"] { width: 100%; }
+}
+@media (max-width: 620px) {
+  .page-shell { width: 100%; padding: .7rem; }
+  nav { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); width: 100%; }
+  nav a { justify-content: center; text-align: center; }
+  .service-row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    min-height: 0;
+    padding: .8rem;
+  }
+  .service-row button { grid-column: 1 / -1; width: 100%; }
+  .recovery-strip { grid-template-columns: 1fr; }
+  .actions button { width: 100%; }
+  .actions { display: grid; grid-template-columns: 1fr; }
+  .card, .auth-panel, .banner { border-radius: .6rem; }
+}
+@media (max-height: 520px) and (orientation: landscape) {
+  .page-shell { padding-top: .55rem; padding-bottom: .55rem; }
+  .topbar { margin-bottom: .6rem; }
+  .brand p { display: none; }
+  nav a { min-height: 2.2rem; padding-top: .35rem; padding-bottom: .35rem; }
+  .recovery-form { gap: .65rem; }
+  textarea { min-height: 68vh; }
+}
 """
 
 
-def page(title: str, body: str, *, banner: str = "") -> bytes:
+def nav_active(active: bool) -> str:
+    return " class='active' aria-current='page'" if active else ""
+
+
+def page(
+    title: str,
+    body: str,
+    *,
+    banner: str = "",
+    cfg: ConsoleConfig | None = None,
+) -> bytes:
+    content = f"{banner}{body}"
+    if cfg is not None:
+        content = (
+            "<form class='recovery-form' method='post'>"
+            f"{token_field(cfg)}{content}</form>"
+        )
     return (
         "<!doctype html><html><head><meta charset='utf-8'>"
-        "<meta name='viewport' content='width=device-width,initial-scale=1'>"
+        "<meta name='viewport' content='width=device-width,initial-scale=1,viewport-fit=cover'>"
         f"<title>{html.escape(title)}</title><style>{CSS}</style></head><body>"
-        f"<h1>Cinemate recovery console</h1>"
-        "<nav><a href='/'>Status</a><a href='/why'>Why it failed</a>"
-        "<a href='/log'>Log</a><a href='/edit/settings'>settings.json</a></nav>"
-        f"{banner}{body}"
-        f"<p class='muted'>{html.escape(utc_now())} &middot; "
-        "recovery console, stdlib only</p>"
-        "</body></html>"
+        "<div class='page-shell'>"
+        "<header class='topbar'><div class='brand'>"
+        "<h1>Cinemate recovery console</h1>"
+        "<p>Independent diagnostics and repair surface</p></div>"
+        "<nav aria-label='Recovery navigation'>"
+        f"<a href='/'{nav_active(title == 'Status')}>Status</a>"
+        f"<a href='/why'{nav_active(title == 'Why it failed')}>Why it failed</a>"
+        f"<a href='/log'{nav_active(title.startswith('Log:'))}>Log</a>"
+        f"<a href='/edit/settings'{nav_active(title == 'Edit settings.json')}>settings.json</a></nav>"
+        "</header><main>"
+        f"{content}"
+        "</main><footer>"
+        f"<span class='muted'>{html.escape(utc_now())} &middot; "
+        "recovery console, stdlib only</span>"
+        "</footer></div></body></html>"
     ).encode("utf-8")
 
 
@@ -742,9 +1001,16 @@ def token_field(cfg: ConsoleConfig) -> str:
             "<div class='banner red'><strong>Mutating actions locked.</strong> "
             "No recovery token is configured.</div>"
         )
-    return ("<p><label>Access token "
-            "<input type='password' name='token' autocomplete='current-password'>"
-            "</label></p>")
+    return (
+        "<section class='auth-panel' aria-label='Recovery authorization'>"
+        "<div class='auth-copy'><strong>Privileged actions</strong>"
+        "<span>Enter the recovery token once for this page. It is not stored; "
+        "navigation or reload clears it.</span></div>"
+        "<div class='auth-control'><label for='recovery-token'>Access token</label>"
+        "<input id='recovery-token' type='password' name='token' "
+        "autocomplete='off' autocapitalize='none' spellcheck='false'></div>"
+        "</section>"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -814,9 +1080,9 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             "<div class='banner red'><strong>config.txt change awaiting "
             f"confirmation.</strong><br>Reverting in {left}s and rebooting "
             "unless you confirm."
-            "<form method='post' action='/confirm-config'>"
-            f"{token_field(self.config)}"
-            "<button type='submit'>KEEP THIS CONFIG</button></form></div>"
+            "<div class='actions'>"
+            "<button type='submit' formaction='/confirm-config'>KEEP THIS CONFIG</button>"
+            "</div></div>"
         )
 
     # -- routing -----------------------------------------------------------
@@ -873,67 +1139,75 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
     # -- views -------------------------------------------------------------
 
     def view_status(self) -> bytes:
-        rows = []
+        service_rows = []
         for svc in ALLOWED_SERVICES:
             state = service_state(svc, runner=self.runner)
             css = "ok" if state == "active" else "bad"
-            stop = ("" if svc in PROTECTED_SERVICES
-                    else "<button name='a' value='stop'>Stop</button>")
-            rows.append(
-                f"<tr><td>{html.escape(svc)}</td>"
-                f"<td class='{css}'>{html.escape(state)}</td><td>"
-                f"<form method='post' action='/service/{svc}/restart' "
-                "style='display:inline'>"
-                f"{token_field(self.config)}"
-                "<button type='submit'>Restart</button></form></td></tr>"
+            service_rows.append(
+                "<div class='service-row'>"
+                "<div><span class='eyebrow'>Service</span>"
+                f"<div class='service-name'>{html.escape(svc)}</div></div>"
+                f"<span class='state-pill {css}'>{html.escape(state)}</span>"
+                f"<button type='submit' formaction='/service/{svc}/restart'>Restart</button>"
+                "</div>"
             )
 
         hotspot = read_hotspot_state()
         if hotspot:
-            rung = hotspot.get("rung")
-            css = "green" if rung == 1 else "amber"
-            hot = (
-                f"<div class='banner {css}'>Hotspot SSID "
-                f"<strong>{html.escape(str(hotspot.get('ssid', '?')))}</strong> "
-                f"from rung {html.escape(str(rung))} "
-                f"({html.escape(str(hotspot.get('rung_name', '?')))})<br>"
-                f"<span class='muted'>{html.escape(str(hotspot.get('reason', '')))}"
-                "</span></div>"
+            hotspot_value = html.escape(str(hotspot.get("ssid", "?")))
+            hotspot_detail = (
+                f"rung {html.escape(str(hotspot.get('rung', '?')))} · "
+                f"{html.escape(str(hotspot.get('rung_name', '?')))}"
             )
         else:
-            hot = ("<p class='muted'>No hotspot state file yet "
-                   "(wifi-hotspot.service writes it on its first pass).</p>")
+            hotspot_value = "Unavailable"
+            hotspot_detail = "wifi-hotspot.service has not written state yet"
 
         failure = read_failure_block()
-        why = ("<p><a href='/why'>Cinemate recorded a startup failure &rarr;</a></p>"
-               if failure else
-               "<p class='muted'>No recorded startup failure.</p>")
+        if failure:
+            failure_value = "<a href='/why'>Recorded — inspect details</a>"
+            failure_detail = "Cinemate persisted a startup failure"
+        else:
+            failure_value = "None"
+            failure_detail = "No recorded startup failure"
 
         body = (
-            f"{hot}"
-            "<h2>Services</h2>"
-            f"<table><tr><th>Service</th><th>State</th><th></th></tr>"
-            f"{''.join(rows)}</table>"
-            f"{why}"
-            "<h2>System</h2><table>"
-            f"<tr><td>Uptime</td><td>{html.escape(read_uptime())}</td></tr>"
-            f"<tr><td>Disk</td><td>{html.escape(read_disk_free())}</td></tr>"
-            f"<tr><td>Config rung</td><td>{self.config.rung} "
-            f"<span class='muted'>{html.escape(self.config.reason)}</span></td></tr>"
-            "</table>"
+            "<section class='recovery-strip' aria-label='Recovery state'>"
+            "<div class='recovery-item'><span class='eyebrow'>Hotspot state</span>"
+            f"<strong>{hotspot_value}</strong>"
+            f"<div class='fact-detail'>{hotspot_detail}</div></div>"
+            "<div class='recovery-item'><span class='eyebrow'>Startup failure</span>"
+            f"<strong>{failure_value}</strong>"
+            f"<div class='fact-detail'>{failure_detail}</div></div>"
+            "</section>"
+            "<section class='dashboard-grid'>"
+            "<div class='section'><h2>Services</h2>"
+            f"<div class='card service-list'>{''.join(service_rows)}</div></div>"
+            "<div class='section'><h2>System</h2>"
+            "<div class='card system-panel'>"
+            "<div class='system-fact'><span class='eyebrow'>Uptime</span>"
+            f"<div class='fact-value'>{html.escape(read_uptime())}</div></div>"
+            "<div class='system-fact'><span class='eyebrow'>System disk</span>"
+            f"<div class='fact-value'>{html.escape(read_disk_free())}</div></div>"
+            "<div class='system-fact'><span class='eyebrow'>Config rung</span>"
+            f"<div class='fact-value'>{self.config.rung}</div>"
+            f"<div class='fact-detail'>{html.escape(self.config.reason)}</div></div>"
+            "</div></div></section>"
         )
         if self.config.allow_config_txt:
-            body += "<p><a href='/edit/config'>Edit config.txt &rarr;</a></p>"
-        return page("Status", body, banner=self._banner())
+            body += "<div class='card'><a href='/edit/config'>Edit config.txt &rarr;</a></div>"
+        return page("Status", body, banner=self._banner(), cfg=self.config)
 
     def view_why(self) -> bytes:
         block = read_failure_block()
         if block is None:
-            body = ("<p>No startup failure recorded. Cinemate either started "
-                    "cleanly or has not run since the file was last cleared.</p>")
+            body = (
+                "<div class='card'><p>No startup failure recorded. Cinemate either "
+                "started cleanly or has not run since the file was last cleared.</p></div>"
+            )
         else:
             body = f"<pre>{ansi_to_html(block)}</pre>"
-        return page("Why it failed", body, banner=self._banner())
+        return page("Why it failed", body, banner=self._banner(), cfg=self.config)
 
     def view_log(self, query: dict) -> bytes:
         service = query.get("service", ["cinemate-autostart"])[0]
@@ -943,43 +1217,50 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             lines = int(query.get("n", [DEFAULT_LOG_LINES])[0])
         except ValueError:
             lines = DEFAULT_LOG_LINES
-        text = journal_tail(service, lines, runner=self.runner)
-        links = " ".join(
+        log_text = journal_tail(service, lines, runner=self.runner)
+        links = "".join(
             f"<a href='/log?service={s}'>{html.escape(s)}</a>" for s in ALLOWED_SERVICES
         )
-        body = (f"<p>{links}</p><pre>{html.escape(text)}</pre>")
-        return page(f"Log: {service}", body, banner=self._banner())
+        body = f"<div class='log-links'>{links}</div><pre>{html.escape(log_text)}</pre>"
+        return page(f"Log: {service}", body, banner=self._banner(), cfg=self.config)
 
     def view_edit_settings(self, message: str = "") -> bytes:
         try:
-            text = SETTINGS_PATH.read_text(encoding="utf-8")
+            settings_text = SETTINGS_PATH.read_text(encoding="utf-8")
         except OSError as exc:
-            text = ""
-            message += f"<div class='banner amber'>Could not read {SETTINGS_PATH}: {html.escape(str(exc))}</div>"
+            settings_text = ""
+            message += (
+                f"<div class='banner amber'>Could not read {SETTINGS_PATH}: "
+                f"{html.escape(str(exc))}</div>"
+            )
         body = (
             f"{message}"
-            "<form method='post' action='/edit/settings'>"
-            f"<textarea name='content' spellcheck='false'>{html.escape(text)}</textarea>"
-            f"{token_field(self.config)}"
-            "<button type='submit'>Save</button>"
-            "<button type='submit' name='restart' value='1'>Save and restart Cinemate</button>"
-            "</form>"
+            "<section class='section'><h2>settings.json</h2>"
+            f"<textarea name='content' spellcheck='false'>{html.escape(settings_text)}</textarea>"
+            "<div class='actions'>"
+            "<button type='submit' formaction='/edit/settings'>Save</button>"
+            "<button type='submit' formaction='/edit/settings' name='restart' value='1'>"
+            "Save and restart Cinemate</button></div></section>"
         )
-        return page("Edit settings.json", body, banner=self._banner())
+        return page("Edit settings.json", body, banner=self._banner(), cfg=self.config)
 
     def view_edit_config(self, message: str = "") -> bytes:
         if not self.config.allow_config_txt:
             return page(
                 "Disabled",
-                "<p>config.txt editing is disabled. Set "
+                "<div class='card'><p>config.txt editing is disabled. Set "
                 "<code>system.recovery.allow_config_txt</code> to true in "
-                "settings.json to enable it.</p>",
+                "settings.json to enable it.</p></div>",
+                cfg=self.config,
             )
         try:
-            text = CONFIG_TXT.read_text(encoding="utf-8")
+            config_text = CONFIG_TXT.read_text(encoding="utf-8")
         except OSError as exc:
-            text = ""
-            message += f"<div class='banner amber'>Could not read {CONFIG_TXT}: {html.escape(str(exc))}</div>"
+            config_text = ""
+            message += (
+                f"<div class='banner amber'>Could not read {CONFIG_TXT}: "
+                f"{html.escape(str(exc))}</div>"
+            )
         body = (
             "<div class='banner red'><strong>A bad config.txt can make this Pi "
             "unbootable, and nothing running on the Pi can recover that.</strong>"
@@ -989,12 +1270,12 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             f"After saving you have {self.config.config_confirm_timeout_s}s to "
             "confirm, or the change reverts and the Pi reboots.</div>"
             f"{message}"
-            "<form method='post' action='/edit/config'>"
-            f"<textarea name='content' spellcheck='false'>{html.escape(text)}</textarea>"
-            f"{token_field(self.config)}"
-            "<button type='submit'>Save and arm revert</button></form>"
+            "<section class='section'><h2>config.txt</h2>"
+            f"<textarea name='content' spellcheck='false'>{html.escape(config_text)}</textarea>"
+            "<div class='actions'><button type='submit' formaction='/edit/config'>"
+            "Save and arm revert</button></div></section>"
         )
-        return page("Edit config.txt", body, banner=self._banner())
+        return page("Edit config.txt", body, banner=self._banner(), cfg=self.config)
 
     # -- actions -----------------------------------------------------------
 
@@ -1017,7 +1298,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             + (f"<pre>{html.escape(detail)}</pre>" if detail else "")
             + "<p><a href='/'>Back to status</a></p>"
         )
-        return page("Service", body, banner=self._banner())
+        return page("Service", body, banner=self._banner(), cfg=self.config)
 
     def _arm_hotspot_rearm(self):
         """Restore the AP if a hotspot restart does not bring it back (4.7)."""
@@ -1078,7 +1359,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
         body = ("<div class='banner green'>Configuration kept.</div>"
                 if cleared else
                 "<div class='banner amber'>Nothing was pending.</div>")
-        return page("Confirmed", body + "<p><a href='/'>Back to status</a></p>")
+        return page("Confirmed", body + "<p><a href='/'>Back to status</a></p>", cfg=self.config)
 
 
 # ---------------------------------------------------------------------------
@@ -1124,9 +1405,20 @@ def start_revert_watchdog(cfg: ConsoleConfig, *, path: Path = PENDING_PATH):
 # Entry point
 # ---------------------------------------------------------------------------
 
+class RecoveryHTTPServer(http.server.ThreadingHTTPServer):
+    """Threaded HTTP server that ignores only routine client disconnect noise."""
+
+    def handle_error(self, request, client_address):
+        exc = sys.exc_info()[1]
+        if isinstance(exc, (ConnectionResetError, BrokenPipeError)):
+            log.debug("Client disconnected early: %s", client_address)
+            return
+        super().handle_error(request, client_address)
+
+
 def make_server(cfg: ConsoleConfig, *, bind: str = "0.0.0.0"):
     handler = type("BoundRecoveryHandler", (RecoveryHandler,), {"config": cfg})
-    server = http.server.ThreadingHTTPServer((bind, cfg.port), handler)
+    server = RecoveryHTTPServer((bind, cfg.port), handler)
     server.daemon_threads = True
     return server
 

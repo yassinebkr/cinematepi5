@@ -13,7 +13,7 @@ The recovery console provides a limited maintenance surface from a phone or comp
 - recent service logs
 - editing and validating src/settings.json
 - optional editing of /boot/firmware/config.txt
-- controlled restart or stop actions for an explicit service allowlist
+- controlled restart actions for an explicit service allowlist
 
 It is not a replacement for the normal CineMate web interface. Use it when the normal interface on port 5000 is unavailable or the camera application fails early during startup.
 
@@ -28,6 +28,20 @@ When mDNS is available, the same service can normally be reached at:
     http://cinepi.local:8080
 
 The recovery service is intentionally independent of cinemate-autostart.service. Restarting or crashing CineMate therefore does not stop the recovery web server.
+
+## Responsive interface
+
+The recovery UI is intentionally self-contained: its HTML and CSS are emitted by the standard-library service and do not require JavaScript, a frontend bundle, Flask or the CineMate virtual environment.
+
+The status page adapts to the device instead of assuming a fixed viewport:
+
+- desktop uses a near-full-width dashboard with compact service rows and a separate system-status panel
+- tablet collapses the dashboard to a single main column where necessary
+- phone uses stacked controls with full-width touch targets
+- phone landscape has a dedicated compact-height layout
+- navigation shows the active page explicitly
+
+The desktop shell is capped at 112 rem to use normal monitors efficiently without stretching the dashboard indefinitely on ultrawide displays.
 
 ## Read-only diagnostics
 
@@ -56,7 +70,9 @@ To view the token locally over SSH:
 
     sudo awk -F= '$1 == "token" {print $2}' /etc/cinemate-recovery.conf
 
-The token is entered into the recovery form when saving settings or requesting an allowed service action.
+The console presents **one page-level access-token field** for privileged actions. The same field is used by every mutating control on that page, including service restarts and configuration saves.
+
+The token is deliberately not stored in cookies, localStorage or sessionStorage. Navigating to another page or reloading the current page clears it and requires re-entry. This keeps the recovery surface stateless and avoids leaving a privileged token behind in the browser.
 
 If no token is configured, the console becomes **read-only**. Mutating requests are denied instead of becoming unauthenticated.
 
@@ -70,9 +86,9 @@ The console does not pass arbitrary service names to systemctl. Only these servi
 - wifi-hotspot
 - storage-automount
 
-Only start, stop and restart are valid actions.
+At the server boundary, only start, stop and restart are accepted actions. The web interface intentionally exposes **Restart** only; it does not surface generic Start/Stop controls.
 
-The hotspot has additional protection: it may be restarted, but the recovery console refuses to stop it. This avoids cutting off the operator's only connection to the camera.
+The hotspot has additional protection: even if a stop request is sent directly, the recovery console refuses it. This avoids cutting off the operator's only connection to the camera.
 
 ## Editing settings.json
 
@@ -164,3 +180,9 @@ The recovery console is designed to survive failures in:
 - malformed settings.json
 
 It cannot recover a Pi that never boots far enough to start systemd, a failed boot device, or a network failure that prevents all access to the Pi.
+
+## HTTP failure logging
+
+Phone and browser clients can close keep-alive connections abruptly while navigating, sleeping or changing networks. The threaded recovery server suppresses only the routine ConnectionResetError and BrokenPipeError cases at the server boundary so they do not flood the journal with misleading tracebacks.
+
+Other server exceptions are not suppressed and continue through Python's normal error-reporting path.

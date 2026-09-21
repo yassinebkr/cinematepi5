@@ -60,13 +60,32 @@ The first two parts of upstream's degraded-boot work have been adapted:
 
 These behaviours have dedicated no-camera regression tests.
 
+### Recovery console
+
+Status: integrated, hardened and live-tested.
+
+The upstream recovery idea has been adapted as an independent cinemate-recovery.service on port 8080. It remains usable when the main CineMate application, Redis, Flask or the CineMate virtual environment is unavailable.
+
+The local implementation adds:
+
+- strict-JSON validation aligned with this branch's settings.json contract
+- installer-generated fallback credentials with blank-token mode locked read-only
+- one non-persistent page-level token field for privileged actions
+- atomic configuration writes and retained backups
+- confirm-or-revert protection for optional config.txt edits
+- an explicit service/action allowlist with hotspot-stop protection
+- responsive desktop, tablet, phone and phone-landscape layouts
+- benign client-disconnect filtering without suppressing unrelated server faults
+- dedicated regression tests plus live Pi failure/recovery validation
+
+The recovery console is therefore no longer part of the pending upstream-feature queue; remaining work in this hardening phase is the degraded/no-camera follow-up.
+
 ## Upstream features still to evaluate
 
 | Feature family | Assessment |
 | --- | --- |
 | Settings editor | High value; large subsystem. Integrate after configuration format is finalized. |
 | settings.jsonc preservation | High value for human-edited settings; requires migration design from current JSON runtime. |
-| Recovery console | Integrated as a standalone standard-library service, adapted to strict settings.json and hardened so blank-token mode is read-only. |
 | Web API, SSE and UDP control | Useful external-control surface; command authorization and destructive actions need review. |
 | No-camera startup follow-up | Continue testing the remaining degraded-state paths before moving on. |
 | DNG thumbnails | Useful for RAW inspection and playback; must coexist with current proxy Clips workflow. |
