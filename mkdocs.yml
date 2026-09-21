@@ -22,7 +22,7 @@ nav:
       - Real 3D LUTs: 3d-luts.md
       - Rec.709 and post workflow: rec709-post-workflow.md
       - Monitoring tools — operator guide: monitoring-tools-user-guide.md
-      - Monitoring tools: monitoring-tools.md
+      - Monitoring tools — implementation: monitoring-tools.md
       - Camera sensors and frame rates: sensors.md
       - Audio recording: audio-recording.md
       - Digital zoom: digital-zoom.md
