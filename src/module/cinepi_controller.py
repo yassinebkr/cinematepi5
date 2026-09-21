@@ -126,8 +126,21 @@ class CinePiController:
         self.wb_cg_rb_array = {}  # Initialize as an empty dictionary
         self.file_size = 0.0  # No usable camera frame size until a real mode is known.
         
-        self.fps = int(round(float(self.redis_controller.get_value(ParameterKey.FPS_LAST.value))))
-        self.current_fps = float(self.redis_controller.get_value(ParameterKey.FPS_USER.value))
+        if self.sensor_detect.res_modes:
+            self.fps = int(round(float(
+                self.redis_controller.get_value(ParameterKey.FPS_LAST.value)
+            )))
+            self.current_fps = float(
+                self.redis_controller.get_value(ParameterKey.FPS_USER.value)
+            )
+        else:
+            # Degraded/no-camera startup must not let hardware-independent
+            # initialization rewrite the operator's persisted FPS targets.
+            # Choose a usable runtime value in memory only; the healthy camera
+            # path below keeps its existing FPS_LAST/FPS_USER behaviour.
+            degraded_fps = self._get_degraded_startup_fps()
+            self.fps = int(round(degraded_fps))
+            self.current_fps = float(degraded_fps)
         
         self.shutter_a_steps_dynamic = self.calculate_dynamic_shutter_angles(self.fps)
 
@@ -178,7 +191,19 @@ class CinePiController:
         self.exposure_time_seconds = None
         self.exposure_time_fractions = None
         self.fps_multiplier = 1
-        self.fps_saved = float(self.redis_controller.get_value(ParameterKey.FPS.value))
+        if self.sensor_detect.res_modes:
+            self.fps_saved = float(
+                self.redis_controller.get_value(ParameterKey.FPS.value)
+            )
+        else:
+            raw_fps_saved = self.redis_controller.get_value(ParameterKey.FPS.value)
+            try:
+                parsed_fps_saved = float(raw_fps_saved)
+            except (TypeError, ValueError):
+                parsed_fps_saved = 0.0
+            self.fps_saved = (
+                parsed_fps_saved if parsed_fps_saved > 0 else float(self.current_fps)
+            )
         self.fps_double = False
         self.ramp_up_speed = 0.2
         self.ramp_down_speed = 0.2
@@ -226,7 +251,15 @@ class CinePiController:
             self.dynamic_resolution_desired_mode = self.sensor_mode
         self.fps_max = self._refresh_fps_max()
         self.gui_layout = self.sensor_detect.get_gui_layout(self.current_sensor, self.sensor_mode)
-        self.exposure_time_s = float(self.redis_controller.get_value(ParameterKey.SHUTTER_A.value)) / 360 * (1 / self.fps) 
+        if self.sensor_detect.res_modes:
+            runtime_shutter_angle = float(
+                self.redis_controller.get_value(ParameterKey.SHUTTER_A.value)
+            )
+        else:
+            runtime_shutter_angle = self._get_degraded_startup_shutter_angle()
+            self.shutter_angle_nom = runtime_shutter_angle
+            self.shutter_angle_actual = runtime_shutter_angle
+        self.exposure_time_s = runtime_shutter_angle / 360 * (1 / self.fps)
         self.exposure_time_saved = self.exposure_time_s
         if self.sensor_detect.res_modes:
             try:
@@ -268,14 +301,68 @@ class CinePiController:
         # Communicate the initial fps without changing resolution. Storage
         # pre-roll should stress the selected mode before dynamic resolution
         # restores the user's FPS and chooses a sustainable mode.
-        prev_dynamic_suspended = self.dynamic_resolution_suspended
-        self.dynamic_resolution_suspended = True
-        try:
-            self.set_fps(self.fps)
-        finally:
-            self.dynamic_resolution_suspended = prev_dynamic_suspended
+        if self.sensor_detect.res_modes:
+            prev_dynamic_suspended = self.dynamic_resolution_suspended
+            self.dynamic_resolution_suspended = True
+            try:
+                self.set_fps(self.fps)
+            finally:
+                self.dynamic_resolution_suspended = prev_dynamic_suspended
+        else:
+            logging.info(
+                "No camera mode table -- keeping degraded startup FPS %.3f "
+                "in memory without rewriting FPS/FPS_USER",
+                self.current_fps,
+            )
         logging.info(f"Initialized fps: {self.fps}")
         
+    def _configured_conform_frame_rate(self) -> float:
+        try:
+            value = float(
+                self.settings.get("settings", {}).get("conform_frame_rate", 24)
+            )
+        except (AttributeError, TypeError, ValueError):
+            value = 24.0
+        return value if value > 0 else 24.0
+
+    def _get_degraded_startup_fps(self) -> float:
+        """Return a usable FPS for no-camera runtime state without writing Redis."""
+        for key in (
+            ParameterKey.FPS_USER.value,
+            ParameterKey.FPS.value,
+            ParameterKey.FPS_LAST.value,
+        ):
+            raw = self.redis_controller.get_value(key)
+            try:
+                value = float(raw)
+            except (TypeError, ValueError):
+                continue
+            if value > 0:
+                return value
+
+        target = self._configured_conform_frame_rate()
+        configured = []
+        for step in (self.fps_steps or []):
+            try:
+                value = float(step)
+            except (TypeError, ValueError):
+                continue
+            if value > 0:
+                configured.append(value)
+
+        if configured:
+            return min(configured, key=lambda value: abs(value - target))
+        return target
+
+    def _get_degraded_startup_shutter_angle(self) -> float:
+        """Use stored shutter angle if valid, otherwise 180 degrees in memory only."""
+        raw = self.redis_controller.get_value(ParameterKey.SHUTTER_A.value)
+        try:
+            value = float(raw)
+        except (TypeError, ValueError):
+            value = 0.0
+        return value if value > 0 else 180.0
+
     def _get_startup_sensor_mode(self) -> int:
         value = self.redis_controller.get_value(ParameterKey.SENSOR_MODE.value)
         try:
@@ -560,7 +647,13 @@ class CinePiController:
             self.redis_controller.set_value(ParameterKey.ANAMORPHIC_FACTOR.value, next_value)
             logging.info(f"Anamorphic factor toggled to: {next_value}")
         
-        self.cinepi.restart()
+        if self.sensor_detect.res_modes:
+            self.cinepi.restart()
+        else:
+            logging.info(
+                "Anamorphic preview factor updated in degraded mode; "
+                "camera restart skipped"
+            )
                       
     def initialize_shutter_angle_steps(self):
         base_steps = self.settings['arrays']['shutter_a_steps']
@@ -587,6 +680,8 @@ class CinePiController:
     def set_shutter_a_sync_mode(self, value=None):
         if value is None and self._imu_cal_input('confirm'):
             return
+        if not self._camera_control_available("shutter sync mode"):
+            return
         if value is not None:
             if value in (0, False):
                 self.shutter_a_sync_mode = 0
@@ -612,6 +707,8 @@ class CinePiController:
         return float(shutter_a_nom) / 360.0 / float(fps)
 
     def set_iso_free(self, value=None):
+        if not self._camera_control_available("ISO free mode"):
+            return
         if value is None:
             self.iso_free = not self.iso_free
         else:
@@ -620,6 +717,8 @@ class CinePiController:
         logging.info(f"ISO Free Mode set to {self.iso_free}")
 
     def set_shutter_a_free(self, value=None):
+        if not self._camera_control_available("shutter free mode"):
+            return
         if value is None:
             self.shutter_a_free = not self.shutter_a_free
         else:
@@ -628,6 +727,8 @@ class CinePiController:
         logging.info(f"Shutter Angle Free Mode set to {self.shutter_a_free}")
 
     def set_fps_free(self, value=None):
+        if not self._camera_control_available("FPS free mode"):
+            return
         if value is None:
             self.fps_free = not self.fps_free
         else:
@@ -636,6 +737,8 @@ class CinePiController:
         logging.info(f"FPS Free Mode set to {self.fps_free}")
 
     def set_wb_free(self, value=None):
+        if not self._camera_control_available("WB free mode"):
+            return
         if value is None:
             self.wb_free = not self.wb_free
         else:
@@ -678,6 +781,8 @@ class CinePiController:
         logging.info(f"Initialized fps_steps: {self.fps_steps_dynamic}")
 
     def set_free_mode(self, iso_free, shutter_a_free, fps_free, wb_free):
+        if not self._camera_control_available("free-mode configuration"):
+            return
         self.settings['free_mode']['iso_free'] = iso_free
         self.settings['free_mode']['shutter_a_free'] = shutter_a_free
         self.settings['free_mode']['fps_free'] = fps_free
@@ -718,6 +823,8 @@ class CinePiController:
 
         
     def update_shutter_angle_nom(self, new_angle):
+        if not self._camera_control_available("nominal shutter update"):
+            return
         self.shutter_angle_nom = new_angle
         self.redis_controller.set_value(ParameterKey.SHUTTER_A_NOM.value, new_angle)
 
@@ -736,13 +843,28 @@ class CinePiController:
 
     def end_shutter_angle_transient(self):
         self.is_shutter_angle_transient = False
+        if not self._camera_control_available("shutter transient completion"):
+            return
         self.redis_controller.set_value(ParameterKey.SHUTTER_A_TRANSIENT.value, 0)
 
         if self.shutter_a_sync_mode == 1:
             adjusted_fps = (self.shutter_angle_nom / 360) / self.exposure_time_nominal
             self.update_fps(round(adjusted_fps, 1))
 
+    def _camera_control_available(self, action: str) -> bool:
+        """Return False for camera controls while running degraded/no-camera."""
+        if getattr(self.sensor_detect, "res_modes", None):
+            return True
+        logging.warning(
+            "Camera control '%s' ignored in degraded/no-camera mode",
+            action,
+        )
+        return False
+
     def set_fps(self, value, update_user_target=True):
+        if not self._camera_control_available("fps"):
+            return
+
         """
         Apply a new FPS, observing:
             • hardware limit (fps_max)
@@ -1065,6 +1187,24 @@ class CinePiController:
 
     def _maybe_schedule_storage_profile_restart(self, reason: str) -> None:
         target_profile = self._current_storage_recorder_profile()
+
+        # Storage state changes must not become an implicit camera-discovery
+        # mechanism. With no active sensor table there is no cinepi-raw process
+        # whose recorder profile needs relaunching, and restart_camera() would
+        # only trigger another full camera discovery window. Record the current
+        # profile in memory and wait for an explicit/normal camera start.
+        if not self.sensor_detect.res_modes:
+            with self._storage_profile_restart_lock:
+                self._active_storage_recorder_profile = target_profile
+                self._storage_profile_restart_pending = False
+            logging.info(
+                "Skipping automatic cinepi-raw restart for storage profile %s "
+                "(%s) -- no active camera",
+                target_profile,
+                reason,
+            )
+            return
+
         with self._storage_profile_restart_lock:
             if target_profile == self._active_storage_recorder_profile:
                 self._storage_profile_restart_pending = False
@@ -1535,6 +1675,8 @@ class CinePiController:
         return None  # Return None if no matching sensor mode is found
 
     def set_iso(self, value):
+        if not self._camera_control_available("iso"):
+            return
         if not self.iso_lock:
             with self.parameters_lock_obj:
                 safe_value = max(min(value, max(self.iso_steps)), min(self.iso_steps))
@@ -1542,6 +1684,8 @@ class CinePiController:
                 logging.info(f"Setting iso to {safe_value}")
 
     def set_shutter_a(self, value):
+        if not self._camera_control_available("shutter"):
+            return
         logging.info(f"Entering set_shutter_a() with value: {value}")
         with self.parameters_lock_obj:
             # Only clamp when we're NOT in sync mode and NOT in free-mode
@@ -1580,6 +1724,8 @@ class CinePiController:
 
 
     def set_shutter_a_nom(self, value):
+        if not self._camera_control_available("nominal shutter"):
+            return
         logging.info(f"Entering set_shutter_a_nom() with value: {value}")
         # Always rebuild the flicker-free array before snapping
         self.shutter_a_steps_dynamic = self.calculate_dynamic_shutter_angles(self.current_fps)
@@ -1756,6 +1902,8 @@ class CinePiController:
         return flicker_free_angles
 
     def update_fps(self, new_fps):
+        if not self._camera_control_available("internal fps update"):
+            return
         self.current_fps = new_fps
         self.redis_controller.set_value(ParameterKey.FPS.value, new_fps)
 
@@ -1777,6 +1925,11 @@ class CinePiController:
 
 
     def increment_setting(self, setting_name, steps, fps=None):
+        if (
+            setting_name in {"iso", "shutter_a", "shutter_a_nom", "fps"}
+            and not self._camera_control_available(f"increase {setting_name}")
+        ):
+            return
         current_value = float(self.get_setting(setting_name))
         
         if setting_name == 'shutter_a':
@@ -1810,6 +1963,11 @@ class CinePiController:
 
 
     def decrement_setting(self, setting_name, steps, fps=None):
+        if (
+            setting_name in {"iso", "shutter_a", "shutter_a_nom", "fps"}
+            and not self._camera_control_available(f"decrease {setting_name}")
+        ):
+            return
         current_value = float(self.get_setting(setting_name))
 
         if setting_name == 'shutter_a':
@@ -2156,6 +2314,8 @@ class CinePiController:
 
     def set_wb(self, kelvin_temperature=None, direction='next'):
         """Set white balance based on the Kelvin temperature or direction."""
+        if not self._camera_control_available("white balance"):
+            return
         logging.debug(f"WB steps available: {self.wb_steps}")
         
         if not self.wb_steps:
@@ -2226,6 +2386,8 @@ class CinePiController:
         
 
     def set_fps_double(self, value=None):
+        if not self._camera_control_available("fps double"):
+            return
         target_double_state = not self.fps_double if value is None else value in (1, True)
         was_recording = self._is_recording()
 
@@ -2271,6 +2433,8 @@ class CinePiController:
         logging.info(f"FPS double mode is {'enabled' if self.fps_double else 'disabled'}, Current FPS: {self.fps}")
 
     def _ramp_fps(self, target_double_state):
+        if not self._camera_control_available("fps ramp"):
+            return
         if target_double_state and not self.fps_double:
             self.fps_saved = self.fps
             target_fps = min(self.fps_temp * 2, self.fps_max)

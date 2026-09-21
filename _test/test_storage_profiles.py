@@ -18,7 +18,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-sys.modules.setdefault("redis", types.SimpleNamespace(StrictRedis=object))
+try:
+    import redis as _redis_dependency  # prefer the real app dependency when available
+except ImportError:
+    sys.modules.setdefault(
+        "redis",
+        types.SimpleNamespace(StrictRedis=object, Redis=object),
+    )
 
 from module.storage_profiles import (  # noqa: E402
     PI4_MAX_DISK_WORKERS,

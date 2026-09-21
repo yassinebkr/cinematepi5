@@ -60,6 +60,41 @@ The first two parts of upstream's degraded-boot work have been adapted:
 
 These behaviours have dedicated no-camera regression tests.
 
+
+Camera discovery deliberately retains a **10-second retry window** with one-second polling. This is not a generic delay to optimize away: the IMX283 can take several seconds after boot before it becomes visible to the system. CineMate therefore treats absence as authoritative only after that grace window expires.
+
+If discovery still finds no camera after the full window, CineMate clears only the active runtime sensor identity and mode table (camera_model and res_modes). The reusable sensor database/cache and persisted operator state such as sensor mode, dynamic-resolution intent and FPS ceiling are preserved so the next healthy boot can restore the previous configuration without trusting stale hardware capabilities in the meantime.
+
+
+The controller follows the same rule for frame rate during degraded startup. With no active camera mode table it selects a usable in-memory FPS from FPS_USER, then FPS, then FPS_LAST, falling back to the configured FPS steps if necessary. It does not publish that fallback through the normal set_fps path, so a no-camera boot cannot rewrite the operator's persisted FPS/FPS_USER values. Normal detected-camera startup keeps the existing reconciliation behaviour.
+
+
+Storage events also remain camera-independent in degraded mode. A mount or filesystem-profile change may refresh storage/FPS-derived in-memory state, but when no active sensor table exists it does not automatically restart cinepi-raw or start another camera-discovery cycle. The recorder-profile marker is updated in memory and the next explicit or normal camera start uses the current storage profile.
+
+
+CSI sensor hot-plugging is intentionally unsupported. The camera ribbon and sensor board must only be connected or disconnected with the Pi powered off. After CineMate exhausts the IMX283-aware discovery window and enters degraded/no-camera mode, a camera-only restart is refused; recovery is to restart CineMate or reboot with the sensor already connected. Normal camera-only restart remains available while an active sensor table is present, for example to recover the camera process or rebind preview without changing hardware.
+
+
+The local GUI also avoids camera-derived capacity math while degraded. If storage is mounted but no usable frame size/FPS exists, the recording-capacity field shows NO CAM instead of dividing by zero or inventing a minutes estimate. NO DISK remains reserved for absent/unmounted storage, and measured storage write speed can still be displayed independently.
+
+
+A first boot with an empty Redis database follows the same non-mutating rule. Missing FPS state is resolved in memory from the configured conform frame rate (25 fps in the current project settings), snapped to the nearest configured FPS step when needed. Missing shutter state uses 180 degrees in memory. These fallbacks keep the controller and GUI operational but do not seed FPS, FPS_USER, FPS_LAST, SHUTTER_A, sensor-mode or geometry keys into Redis without a working camera.
+
+
+The local camera-status display is also strict about runtime truth. When CAMERAS is empty, remembered/default camera geometry is not presented as active hardware: the RES field shows NO CAM, resolution/aspect and camera-derived ISO/shutter/WB/exposure readouts show --, and any displayed resolution-switching state is suppressed. Persisted operator values remain untouched and are available again on the next healthy camera boot.
+
+
+Camera controls are read-only while degraded. ISO, shutter angle (including nominal shutter), FPS, white balance, FPS-double and their increment/decrement paths are rejected before reading or writing camera-control Redis state. This applies uniformly to web, CLI, keyboard and analog/rotary callers because the guard lives in CinePiController. Non-camera controls such as storage, system actions and zoom remain available. Normal camera-control behavior is unchanged when an active sensor mode table exists.
+
+
+Camera-control modes follow the same degraded lock: shutter-sync, ISO/shutter/FPS/WB free-mode toggles, and combined free-mode configuration are ignored while no active sensor table exists. The IMU calibration confirm routing that shares the shutter-sync control remains available before this guard, so degraded camera state does not break the independent calibration UI.
+
+
+The web control surface mirrors the controller lock instead of acknowledging rejected commands. When degraded, ISO/shutter/FPS/WB/resolution Socket.IO handlers return before parsing camera-derived Redis state or emitting parameter changes, the initial payload clears remembered camera-control selections, and those selectors are disabled with a NO CAM placeholder. This prevents both fresh-Redis float(None) failures and UI state that falsely suggests a rejected setting was applied.
+
+
+Internal camera-state paths obey the same invariant: direct FPS correction, nominal-shutter updates, and delayed shutter-transient completion cannot write camera state once the active sensor table is gone. The anamorphic preview factor remains a display preference that may be changed while degraded, but its camera-process restart is skipped until a healthy camera start.
+
 ### Recovery console
 
 Status: integrated, hardened and live-tested.

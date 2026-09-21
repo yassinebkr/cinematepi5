@@ -160,7 +160,17 @@ class CameraInfo:
     
 
 # ──────────────────────── camera discovery ────────────────────────
-def discover_cameras(timeout: float = 10.0, interval: float = 1.0) -> List[CameraInfo]:
+# The IMX283 can take several seconds after boot before it is visible to
+# cinepi-raw/libcamera. Keep this grace period long enough for the sensor to
+# enumerate; a no-camera result becomes authoritative only after it expires.
+CAMERA_DISCOVERY_TIMEOUT_S = 10.0
+CAMERA_DISCOVERY_INTERVAL_S = 1.0
+
+
+def discover_cameras(
+    timeout: float = CAMERA_DISCOVERY_TIMEOUT_S,
+    interval: float = CAMERA_DISCOVERY_INTERVAL_S,
+) -> List[CameraInfo]:
     rx = re.compile(r'^\s*(\d+)\s*:\s*(\w+)\s*\[([^]]+)\]\s*\(([^)]+)\)')
     end = time.monotonic() + timeout
     attempt = 0
@@ -635,6 +645,19 @@ class CinePiManager:
         self.start_all(preview_enabled=preview_enabled)
 
     def restart(self, preview_enabled: Optional[bool] = None):
+        # CSI sensor hot-plugging is not a supported recovery mechanism. Once
+        # startup has exhausted the IMX283 discovery window and entered
+        # degraded/no-camera mode, require a CineMate restart/reboot rather than
+        # allowing a camera-only restart to rediscover newly attached hardware.
+        # This guard also covers the CLI, which calls CinePiManager.restart()
+        # directly instead of going through CinePiController.restart_camera().
+        if not self.sensor_detect.res_modes:
+            logging.warning(
+                "Camera-only restart refused in degraded/no-camera mode; "
+                "restart CineMate or reboot with the sensor already connected"
+            )
+            return
+
         self.stop_all()
         self.start_all(preview_enabled=preview_enabled)
 
@@ -695,7 +718,18 @@ class CinePiManager:
             json.dumps([c.as_dict() for c in cams])
         )
         if not cams:
-            logging.error("No cameras found – aborting start_all()")
+            # Discovery has already exhausted the IMX283-aware grace window.
+            # Any previous camera_model/res_modes now describe hardware that is
+            # no longer detectable, so clear only that active runtime state.
+            # Keep sensor_resolutions (the database/cache) and Redis-persisted
+            # operator choices intact for the next healthy discovery.
+            self.sensor_detect.camera_model = None
+            self.sensor_detect.res_modes = {}
+            logging.error(
+                "No cameras found after %.1fs discovery window – "
+                "clearing active sensor state and aborting start_all()",
+                CAMERA_DISCOVERY_TIMEOUT_S,
+            )
             return
         
         self.redis_controller.set_value(ParameterKey.IS_RECORDING.value, 0)  # reset recording flag

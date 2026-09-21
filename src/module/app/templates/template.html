@@ -189,6 +189,29 @@
             return value === true || normalized === '1' || normalized === 'true';
         }
 
+        function setCameraControlsAvailable(cameraPresent) {
+            const ids = [
+                'iso-select',
+                'shutter-speed-select',
+                'fps-select',
+                'wb-select',
+                'resolution-select'
+            ];
+            ids.forEach(id => {
+                const select = document.getElementById(id);
+                if (!select) return;
+                select.disabled = !cameraPresent;
+                if (!cameraPresent) {
+                    select.innerHTML = '';
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'NO CAM';
+                    option.selected = true;
+                    select.appendChild(option);
+                }
+            });
+        }
+
         function updateResolutionSelection(mode, switching) {
             const resolutionSelect = document.getElementById('resolution-select');
             if (!resolutionSelect) {
@@ -224,6 +247,7 @@
                 resolutionSelect.appendChild(option);
             });
             updateResolutionSelection(data.selected_resolution_mode, data.resolution_switching);
+            setCameraControlsAvailable(!!data.camera_present);
         });
 
         socket.on('parameter_change', data => {

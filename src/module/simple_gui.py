@@ -104,6 +104,60 @@ def _calculate_preview_guide_rect(
     ]
 
 
+def _disk_space_recording_label(space_left, is_mounted, file_size, fps):
+    """Return a truthful recording-capacity label for the local GUI."""
+    if not space_left or not is_mounted:
+        return "NO DISK"
+
+    try:
+        frame_size = float(file_size)
+        frame_rate = float(fps)
+    except (TypeError, ValueError):
+        return "NO CAM"
+
+    if frame_size <= 0 or frame_rate <= 0:
+        return "NO CAM"
+
+    try:
+        minutes = (float(space_left) * 1000) / (frame_size * frame_rate * 60)
+    except (TypeError, ValueError, ZeroDivisionError):
+        return "NO CAM"
+
+    return f"{round(minutes)} MIN"
+
+
+def _display_fps_value(redis_fps_user, runtime_fps):
+    """Return the GUI FPS value without requiring persisted camera state."""
+    for candidate in (redis_fps_user, runtime_fps):
+        try:
+            value = float(candidate)
+        except (TypeError, ValueError):
+            continue
+        if value > 0:
+            return round(value)
+    return 0
+
+
+def _apply_camera_presence_display(values, camera_present):
+    """Make camera-derived GUI fields truthful when no sensor is active."""
+    if camera_present:
+        return values
+
+    values.update({
+        "resolution": "--",
+        "iso": "--",
+        "shutter_speed": "--",
+        "color_temp": "--",
+        "color_temp_libcamera": "",
+        "res": "NO CAM",
+        "resolution_switching": False,
+        "sensor": "",
+        "aspect": "--",
+        "exposure_time": "--",
+    })
+    return values
+
+
 class SimpleGUI(threading.Thread):
     def __init__(self, 
                 redis_controller, 
@@ -777,7 +831,10 @@ class SimpleGUI(threading.Thread):
             "shutter_label":  "SHUTTER",
             "shutter_speed":  shutter_speed,
             "fps_label":      "FPS",
-            "fps":            round(float(self.redis_controller.get_value(ParameterKey.FPS_USER.value))),
+            "fps":            _display_fps_value(
+                self.redis_controller.get_value(ParameterKey.FPS_USER.value),
+                getattr(self.cinepi_controller, "current_fps", self.cinepi_controller.fps),
+            ),
             "wb_label":       "WB",
             "color_temp":     f"{self.redis_controller.get_value(ParameterKey.WB_USER.value)} K",
             "color_temp_libcamera": f"/ {self.redis_listener.colorTemp}K",
@@ -822,6 +879,8 @@ class SimpleGUI(threading.Thread):
             "missing_frame_count": int(self.redis_controller.get_value(ParameterKey.MISSING_FRAME_COUNT.value) or 0),
 
         }
+        _apply_camera_presence_display(values, bool(cam_list))
+
         # drop_frame_latched drives the persistent UI warning overlay.
         # Option 1: live drop_frame pulse = TC hole advisory (flashes during recording).
         # Option 2: drop_frame_during_last_take = only set when files are genuinely
@@ -1013,13 +1072,15 @@ class SimpleGUI(threading.Thread):
             values["battery_level"] = f"{self.battery_monitor.battery_level}%"
         self.colors["battery_level"]["normal"] = "lightgreen" if self.battery_monitor.charging else "white"
 
-        if self.ssd_monitor.space_left and self.ssd_monitor.is_mounted:
-            mins = (self.ssd_monitor.space_left * 1000) / (self.cinepi_controller.file_size *
-                                                        float(self.cinepi_controller.fps) * 60)
-            values["disk_space"] = f"{round(mins)} MIN"
+        values["disk_space"] = _disk_space_recording_label(
+            self.ssd_monitor.space_left,
+            self.ssd_monitor.is_mounted,
+            self.cinepi_controller.file_size,
+            self.cinepi_controller.fps,
+        )
+        if self.ssd_monitor.is_mounted:
             values["write_speed"] = f"{self.ssd_monitor.write_speed_mb_s:.0f} MB/s"
         else:
-            values["disk_space"] = "NO DISK"
             values["write_speed"] = ""
         
         if self.ssd_monitor.write_speed_mb_s > 0:

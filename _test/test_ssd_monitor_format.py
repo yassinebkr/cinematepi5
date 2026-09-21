@@ -20,7 +20,13 @@ class _DummyBus:
 
 
 sys.modules.setdefault("smbus", types.SimpleNamespace(SMBus=lambda *_args: _DummyBus()))
-sys.modules.setdefault("redis", types.SimpleNamespace(StrictRedis=object))
+try:
+    import redis as _redis_dependency  # prefer the real app dependency when available
+except ImportError:
+    sys.modules.setdefault(
+        "redis",
+        types.SimpleNamespace(StrictRedis=object, Redis=object),
+    )
 
 from module import ssd_monitor
 

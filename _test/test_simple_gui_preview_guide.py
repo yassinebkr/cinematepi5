@@ -13,13 +13,21 @@ _MISSING = object()
 _STUBS = {
     "flask_socketio": types.SimpleNamespace(SocketIO=object),
     "gpiozero": types.SimpleNamespace(CPUTemperature=object),
-    "redis": types.SimpleNamespace(StrictRedis=object),
     "sugarpie": types.SimpleNamespace(pisugar=types.SimpleNamespace()),
 }
+try:
+    import redis as _redis_dependency
+except ImportError:
+    _STUBS["redis"] = types.SimpleNamespace(StrictRedis=object, Redis=object)
 _saved_modules = {name: sys.modules.get(name, _MISSING) for name in _STUBS}
 try:
     sys.modules.update(_STUBS)
-    from module.simple_gui import _calculate_preview_guide_rect
+    from module.simple_gui import (
+        _apply_camera_presence_display,
+        _calculate_preview_guide_rect,
+        _disk_space_recording_label,
+        _display_fps_value,
+    )
 finally:
     for name, previous in _saved_modules.items():
         if previous is _MISSING:
@@ -27,6 +35,91 @@ finally:
         else:
             sys.modules[name] = previous
     sys.modules.pop("module.simple_gui", None)
+
+
+class DegradedCameraDisplayTests(unittest.TestCase):
+    def test_no_camera_hides_remembered_camera_readouts(self):
+        values = {
+            "resolution": "2K",
+            "iso": "800",
+            "shutter_speed": "180.0 deg",
+            "fps": 25,
+            "color_temp": "5600 K",
+            "color_temp_libcamera": "/ 5400K",
+            "res": "1920x1080 :10b",
+            "resolution_switching": True,
+            "sensor": "",
+            "aspect": "1.78",
+            "exposure_time": "1/50",
+        }
+
+        result = _apply_camera_presence_display(values, False)
+
+        self.assertEqual(result["resolution"], "--")
+        self.assertEqual(result["iso"], "--")
+        self.assertEqual(result["shutter_speed"], "--")
+        self.assertEqual(result["color_temp"], "--")
+        self.assertEqual(result["color_temp_libcamera"], "")
+        self.assertEqual(result["res"], "NO CAM")
+        self.assertFalse(result["resolution_switching"])
+        self.assertEqual(result["sensor"], "")
+        self.assertEqual(result["aspect"], "--")
+        self.assertEqual(result["exposure_time"], "--")
+        # Runtime FPS remains available for controller/UI timing context.
+        self.assertEqual(result["fps"], 25)
+
+    def test_active_camera_display_is_unchanged(self):
+        values = {
+            "resolution": "4K",
+            "iso": "800",
+            "shutter_speed": "180.0 deg",
+            "fps": 25,
+            "color_temp": "5600 K",
+            "res": "5472x3648 :12b",
+            "aspect": "1.5",
+        }
+        original = dict(values)
+
+        result = _apply_camera_presence_display(values, True)
+
+        self.assertEqual(result, original)
+
+
+class DegradedFpsDisplayTests(unittest.TestCase):
+    def test_missing_redis_fps_uses_runtime_controller_fps(self):
+        self.assertEqual(_display_fps_value(None, 25.0), 25)
+
+    def test_persisted_fps_user_keeps_precedence(self):
+        self.assertEqual(_display_fps_value("23.976", 25.0), 24)
+
+    def test_invalid_values_fall_back_without_exception(self):
+        self.assertEqual(_display_fps_value("bad", None), 0)
+
+
+class DegradedDiskSpaceLabelTests(unittest.TestCase):
+    def test_mounted_disk_without_camera_reports_no_cam(self):
+        self.assertEqual(
+            _disk_space_recording_label(512.0, True, 0.0, 24.0),
+            "NO CAM",
+        )
+
+    def test_mounted_disk_with_zero_runtime_fps_reports_no_cam(self):
+        self.assertEqual(
+            _disk_space_recording_label(512.0, True, 8.0, 0.0),
+            "NO CAM",
+        )
+
+    def test_unmounted_storage_reports_no_disk(self):
+        self.assertEqual(
+            _disk_space_recording_label(512.0, False, 8.0, 24.0),
+            "NO DISK",
+        )
+
+    def test_valid_camera_preserves_recording_minutes_estimate(self):
+        self.assertEqual(
+            _disk_space_recording_label(120.0, True, 10.0, 25.0),
+            "8 MIN",
+        )
 
 
 class PreviewGuideGeometryTests(unittest.TestCase):
