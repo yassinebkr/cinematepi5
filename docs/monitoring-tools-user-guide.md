@@ -4,7 +4,7 @@ CineMate provides a set of live monitoring tools for exposure, focus, colour and
 
 The monitoring tools analyse the camera's Rec.709 preview signal. A creative LUT can change the displayed picture, but the scopes continue to analyse the underlying source preview so a look cannot hide clipping or change what counts as a focus edge.
 
-![Actual CineMate monitoring interface](images/monitoring/web-ui-monitoring-overview.jpg)
+![Actual CineMate monitoring interface](images/monitoring/web-ui-monitoring-overview.png)
 
 *Actual CineMate web interface with Histogram, Waveform and Vectorscope visible beside the live preview.*
 
@@ -45,11 +45,11 @@ When Zebra is active, the button shows the selected level, for example **Z 90**.
 
 **Solid red** means at least one 8-bit preview RGB channel has reached 250/255 or higher. Treat this as a stronger near-clipping warning.
 
-![Actual CineMate Zebra example](images/monitoring/zebra-overexposure-example.jpg)
+![Actual CineMate Zebra example](images/monitoring/zebra-live.png)
 
-*Actual CineMate preview used during Zebra validation. The frame is intentionally overexposed to make highlight behaviour obvious.*
+*Actual CineMate web interface with Zebra enabled at the default 90 IRE threshold.*
 
-The earlier 95 IRE-only behaviour was too conservative for practical exposure work. On the test frame above, the measured preview distribution was:
+The earlier 95 IRE-only behaviour was too conservative for practical exposure work. During threshold validation, a deliberately bright test frame produced the following preview distribution:
 
 | Measurement | Result |
 | --- | ---: |
@@ -81,7 +81,7 @@ Peaking highlights fine local detail in cyan. It is intended to make manual focu
 
 The current detector uses BT.709 luminance, a small Gaussian denoise, Sobel gradients, an image-derived noise estimate, an adaptive threshold and local-maximum thinning.
 
-![Actual CineMate focus peaking](images/monitoring/focus-peaking-live.jpg)
+![Actual CineMate focus peaking](images/monitoring/focus-peaking-live.png)
 
 *Actual CineMate preview with the current cyan focus-peaking overlay.*
 
@@ -178,7 +178,7 @@ ETTR is an aid, not an instruction to increase exposure regardless of the shot. 
 
 The monitoring controls are designed to remain usable in landscape on phones and tablets.
 
-![Actual CineMate mobile landscape view](images/monitoring/mobile-landscape-monitoring.jpg)
+![Actual CineMate mobile landscape view](images/monitoring/mobile-landscape-monitoring.png)
 
 *Actual CineMate landscape interface on a phone-sized viewport.*
 
