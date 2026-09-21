@@ -1,462 +1,164 @@
-![CineMate RX100 build](docs/images/cinemate_20.png)
+# CineMate Pi 5
 
-![Version](https://img.shields.io/badge/Version-2.0.0-green?style=flat-square)
+CineMate is an open-source camera-control and monitoring stack for building a Raspberry Pi 5 digital cinema camera around CinePi RAW.
 
-![Raspberry Pi](https://img.shields.io/badge/-RaspberryPi-C51A4A?style=for-the-badge&logo=Raspberry-Pi)
-![Python](https://img.shields.io/badge/python-3670A0?style=for-the-badge&logo=python&logoColor=ffdd54)
+The project combines 12-bit CinemaDNG recording, a responsive browser controller, HDMI monitoring, physical controls, storage management, IMU telemetry and post-production helpers in one camera-oriented runtime.
 
+![CineMate web monitoring interface](docs/images/monitoring/web-ui-monitoring-overview.jpg)
 
-# Overview
-CineMate scripts is a way for users to implement and customize manual controls for their [cinepi-raw](https://github.com/cinepi/cinepi-raw) build. 
+## Current focus
 
-Project aims at offering an easy way to build a custom camera. 
+This Pi 5 branch is being hardened around a Sony IMX283 camera, while keeping the sensor database and control architecture usable with other supported CinePi sensors.
 
-For basic operation and experimentation, only Raspberry Pi, camera board and monitor is needed. For practical use, buttons and switches can easily be added, allowing for a custom build.
+The current development priorities are reliability, deterministic configuration, colour-management clarity, useful field monitoring, reproducible installation and regression coverage.
 
-A ready made disk image, with a Raspbian Bullseye Lite installation + cinepi-raw and CineMate scripts can be found in the release section of this repo.
+## Main capabilities
 
-Join the CinePi Discord [here](https://discord.gg/Hr4dfhuK).
+- 12-bit CinemaDNG recording through CinePi RAW
+- Raspberry Pi 5 / PiSP camera pipeline
+- browser-based Camera and Clips interfaces
+- responsive phone, tablet and desktop layouts
+- real WebGL2 3D .cube LUT monitoring
+- first-party CinePi Rec.709 LUT pack
+- Histogram, Waveform and Vectorscope
+- adjustable Zebra exposure warnings
+- adaptive focus Peaking
+- roll, pitch and shake monitoring from the IMU
+- per-take 1 kHz Gyroflow-compatible gyro/accelerometer logs
+- HDMI Simple GUI
+- GPIO buttons, rotary encoders, analog controls and I2C devices
+- SSD monitoring, automount and recording safeguards
+- Redis-backed camera state and control
+- dynamic resolution profiles
+- camera-specific libcamera tuning-file support with validation and safe fallback
 
-# Functions
-- Trigger recording and control camera settings with CineMate CLI, RPi GPIO, serial input via USB or USB keyboard.
-- Easy user customization of GPIO and camera controls using a settings file
-- Simple GUI on the HDMI display (normal computer screen or field monitor can be used)
-- Support for rotary encoders for iso, shutter angle and fps controls.
-- Support for Grove Base HAT for iso, shutter angle and fps controls via potentiometers.
--  System button for safe shutdown of the Pi, start-up and unmounting of SSD drive
-- Support for PiSugar (displays battery status in Simple GUI)
-- Experimental PWM mode, for hardware control of frame rate and shutter speed, allowing for in-camera speed ramping
+## Recorded image and monitoring path
 
-# Hardware requirements
-- Rasberry Pi 4B
-- Official HQ or GS camera
-- HDMI monitor
+CinemaDNG remains the camera negative. Creative LUTs are display transforms and do not alter the recorded RAW frames.
 
-_For recording, use a high speed SSD (min 200 MB/s write speed). Samsung T5, T7 and Extreme have been confirmed to work. SSD needs to be formatted as NTFS and named "RAW"._
+The monitoring path is intentionally separated from the RAW path:
 
-# Getting started 
+    IMX283 RAW
+        -> libcamera PiSP development
+        -> Rec.709 monitoring signal
+        -> optional CinePi creative LUT
+        -> browser or HDMI display
 
-Download the disk image from here: https://github.com/Tiramisioux/cinemate/releases/tag/custom_cinepi%2Bcinemate2
+This separation lets the same CinePi creative .cube files be used in post-production without baking the look into the CinemaDNG sequence.
 
-Burn to SD card (> 8 GB) using Raspberry Pi imager or Balena Etcher. 
+See [Rec.709 and post-production workflow](docs/rec709-post-workflow.md) and [Real 3D LUTs in CineMate](docs/3d-luts.md).
 
-| :exclamation:  When connecting the camera module to the Pi, make sure it is the Pi is not powered. It is not advised to hot-swap the camera cable.   |
-|-----------------------------------------|
+## Monitoring tools
 
-## Basic build
+The web controller includes field-oriented monitoring rather than decorative overlays.
 
-Insert the SD card into the Pi. Connect camera, HDMI monitor and SSD drive.
+- **Histogram** shows luma and individual RGB channel distributions.
+- **Waveform** preserves horizontal image position and shows IRE guides.
+- **Vectorscope** shows hue and saturation direction.
+- **Zebra** supports 70, 80, 85, 90, 95 and 100 IRE thresholds.
+- **Peaking** uses denoised Sobel gradients and an adaptive noise threshold.
+- **Level** displays roll and pitch from the calibrated IMU.
+- **ETTR** estimates remaining highlight headroom from the brightest RGB channel.
 
-Connect simple push buttons or use a paper clip for basic camera operation. 
+The [Monitoring tools operator guide](docs/monitoring-tools-user-guide.md) uses real CineMate screenshots and explains how to read each tool.
 
-|Camera function                 |GPIO push button |
-|--------------------------------|-----------------|
-|start/stop recording            |4, 5             |
-|increase iso one step           |27               |
-|decrease iso one step           |15               |
-|change resolution               |26 (single click)|
-|reboot                          |26 (double click)|
-|safe shutdown                   |26 (triple click)|
-|unmount SSD                     |26 (hold for 3 seconds)|
+## IMU and stabilization
 
-Rec light LED can be connected to pins 6 or 21. 
+The ICM-42688 is used for both live camera orientation and post-production motion data.
 
+Recorded takes can include a Gyroflow-compatible **gyro.gcsv** file containing 1 kHz gyro and accelerometer samples. The current implementation is suitable for Gyroflow workflows; tighter first-frame timestamp synchronization remains an area for further hardening.
 
-| :exclamation:  When connecting an LED to the GPIOs, be sure to use a resistor   |
-|-----------------------------------------|
+See [IMU calibration, HDMI preview and live HUD](docs/imu-calibration-and-live-hud.md).
 
+## Installation
 
-|:point_up:  Connect GPIO 26 to GPIO 03 using a jumper wire, and the system button attached to GPIO 26 will also wake up the Pi, after being shutdown.   |
-|-----------------------------------------|
+The repository includes an installation script for the Pi 5 camera stack:
 
-## Adding rotary encoders
+    git clone https://github.com/yassinebkr/cinematepi5.git
+    cd cinematepi5
+    sudo ./cinemate-install.sh
 
-For controlling iso, shutter angle and frame rate rotary encoders can be used. To engage parameter lock, click the rotary encoder push button.
+The installer builds and configures the CineMate dependencies, CinePi RAW/libcamera stack and system services. Review [Installation and building from source](docs/installation-steps.md) before installing on a camera that already contains irreplaceable configuration or footage.
 
-|                                 |clk |dt  |encoder button|
-|---------------------------------|----|----|--------------|
-|set iso                          |9   |11  |10            |
-|set shutter angle                |23  |25  |13            |
-|set fps                          |7   |8   |20            |
+For development work, use a dedicated branch and keep a tested rollback image of the camera SD card.
 
-The button also allows for combined actions together with the system button (GPIO 26).
+## Running and services
 
-# Simple GUI
+The main runtime is managed by **cinemate-autostart.service**.
 
-to be added
+Useful service commands:
 
-# Connecting via SSH
+    sudo systemctl status cinemate-autostart
+    sudo systemctl restart cinemate-autostart
+    journalctl -u cinemate-autostart -f
 
-For SSH:ing to the Pi, use the following credentials:
+CineMate also includes support services for storage automount, Wi-Fi hotspot management and Redis log maintenance.
 
-    User: pi
-    Password: 1
+See [System services](docs/system-services.md) and [Troubleshooting](docs/troubleshooting.md).
 
-# CineMate CLI
+## Configuration
 
-Cinemate offers a set of Command-Line Interface (CLI) commands that allow users to control camera settings directly from the terminal.
+Camera and hardware behaviour is configured through the CineMate settings structure. The current Pi 5 configuration includes per-camera geometry, display routing, tuning-file overrides, dynamic-resolution profiles, physical controls and storage policies.
 
-## Disabling CineMate autostart
+See [Custom settings](docs/settings-json.md) and [Hardware controls](docs/hardware-controls.md).
 
-To stop the autostarted instance:
+## Colour pipeline
 
-    cd cinemate
-    make stop
+The current IMX283 build uses the full PiSP tuning from the camera's matching libcamera checkout rather than the earlier compact experimental tuning.
 
-To enable (and start) again:
+The colour pipeline is intentionally split into two jobs:
 
-    cd cinemate
-    make start
+1. sensor/ISP calibration: black level, white balance, CCM, lens shading and tone mapping
+2. creative monitoring: optional Rec.709 3D LUTs
 
-To disable autostart:
+Creative LUTs should not be used to hide sensor calibration errors.
 
-    cd cinemate
-    make uninstall
+See [IMX283 colour calibration](docs/imx283-color-calibration.md).
 
-To enable autostart:
+## LUT distribution
 
-    cd cinemate
-    make install
+The shipping LUT directory contains first-party CinePi looks generated deterministically by **tools/generate_cinepi_luts.py**.
 
+- CinePi Rec.709 Reference
+- CinePi Natural
+- CinePi Filmic Neutral
+- CinePi Cinema Warm
+- CinePi Soft Portrait
 
-## Running CineMate manually
+The manifest stores SHA-256 hashes so the pack can be reproduced and verified. Third-party development LUTs are intentionally excluded from the shipping set.
 
-Anywhere in the CLI, type
+## Tests
 
-    cinemate
+Regression tests cover configuration migration, dynamic resolution, sensor parsing, storage behaviour, preview geometry, camera-control logic, tuning-file safety, LUT API behaviour, monitoring UI invariants and deterministic LUT generation.
 
-This will show a startup sequence. Terminal will now accept the commands from the list below.
+Run the standard-library suites with:
 
-![CineMate startup sequence](docs/images/cinemate_cli.png)
+    PYTHONPATH=src python3 -m unittest discover -v _test
 
-*Example startup sequence, showing the output from CineMates modules*
+Tests that exercise the full camera environment should be run inside the CineMate virtual environment on a Raspberry Pi 5.
 
-For extensive logging and troubleshooting, CineMate can be started using the `cinemate -debug` command.
+## Documentation
 
-## Example CLI commands
+Start with the [documentation home](docs/index.md). Useful entry points include:
 
-Start/stop recording:
+- [Quick start](docs/getting-started.md)
+- [Web GUI](docs/web-gui.md)
+- [Monitoring tools operator guide](docs/monitoring-tools-user-guide.md)
+- [Rec.709 and post-production workflow](docs/rec709-post-workflow.md)
+- [IMX283 colour calibration](docs/imx283-color-calibration.md)
+- [System services](docs/system-services.md)
+- [Troubleshooting](docs/troubleshooting.md)
 
-    > rec
+The MkDocs site configuration is in **mkdocs.yml**.
 
-Adjust the ISO setting. Requires an integer argument.
+## Project lineage
 
-    > set_iso 800
+CineMate originates from the work by Tiramisioux and the wider CinePi project. This Pi 5 fork preserves that foundation while integrating local Pi 5, IMX283, web-monitoring, colour-pipeline and reliability work.
 
-Set the shutter angle. Requires a float argument for the angle.
+See [Acknowledgements](docs/acknowledgments.md) for project credits and related repositories.
 
-    > set_shutter_a 172.8
+## Development status
 
-Configure the frames per second. Requires an integer argument.
+The Pi 5 hardening work is intentionally developed on a review branch before being merged to main. Camera-facing UI changes should be tested on the actual camera, phone and desktop controller before release.
 
-    > set_fps 24
-
-
-Lock/unlock iso, shutter angle or fps: Toggle locks or set them directly. Providing an argument directly sets the value. Omitting the argument will toggle the control.
-
-    > set_iso_lock
-
-    > set_shutter_a_nom_lock 1
-
-    > set_fps_lock
-
-Enable or disable doubling the FPS rate. 
-
-    > set_fps_double
-    
-    > set_fps_double 1
-
-## Command index
-
-This table includes all the available commands (method calls) + arguments for the CineMate CLI and the GPIO default settings of `cinemate/src/settings.json`. 
-
-Commands are also possible to send to the Pi via USB serial.
-
-| Camera function           | CineMate CLI/USB serial command | arguments                     | GPIO button         | GPIO rotary encoder       | GPIO switch |Grove Base HAT|USB keyboard|
-| ------------------------- | ------------------------------- | ----------------------------- | ------------------- | ------------------------- | ----------- |-----------| -----------|
-| start/stop recording      | `rec`                           | None (toggle control)         | 4, 5                   |                           |             |           | `0`           |
-| set iso                   | `set_iso`                       | integer                       |                     | clk 9, dt 11, bu 10       |             |A0          |
-| iso increase              | `inc_iso`                       | \-                            | 17                  |                           |             |            | `1`           |
-| iso decrease              | `dec_iso`                       | \-                            | 14                  |                           |             |            |`2`            |
-| set shutter angle         | `set_shutter_a_nom`             | float                         |                     | clk 23, dt 25, bu 13      |             |A2          |
-| shu increase 1 deg        | `inc_shutter_a_nom`             | \-                            |                     |                           |             |            |`3`            |
-| shu decrease 1 deg        | `dec_shutter_a_nom`             | \-                            |                     |                           |             |            |`4`         |
-| set fps                   | `set_fps`                       | integer                       |                     | clk 7, dt 8, bu 20        |             |A4          |
-| fps increase 1 fps        | `inc_fps`                       | \-                            |                     |                           |             |            |`5`            |
-| fps decrease 1 fps        | `dec_fps`                       | \-                            |                     |                           |             |            |`6`            |
-| lock iso                  | `set_iso_lock`                  | 0, 1 or None (toggle control) |                     | 10 (single click)         |             |            |            |
-| lock shutter angle        | `set_shutter_a_nom_lock`        | 0, 1 or None (toggle control) |                     | 13 (single click)         |             |            |            |
-| lock fps                  | `set_fps_lock`                  | 0, 1 or None (toggle control) |                     | 20 (single click)         |             |            |            |
-| lock all controls         | `set_all_lock`                  | 0, 1 or None (toggle control) |                     |                           |             |            |            |
-| lock shutter angle + fps  | `set_shutter_a_nom_fps_lock`    | 0, 1 or None (toggle control) |                     |                           | 24          |            |            |
-| sync shutter angle to fps | `set_shutter_a_sync`            | 0, 1 or None (toggle control) |                     | hold 13 + single click 26 | 16          |            |            |
-| double fps                | `set_fps_double`                | 0, 1 or None (toggle control) | 12                  | hold 20 + single click 26 |             |            |            |
-| pwm mode                  | `set_pwm_mode`                  | 0, 1 or None (toggle control) |                     | hold 10 + single click 26 | 22          |            |            |
-| change resolution         | `set_resolution`                | 0, 1 or None (toggle control) | 26 (single click)   |                           |             |            |`8`            |
-| reboot                    | `reboot`                        | \-                            | 26 (double click)   |                           |             |            |            |
-| safe shutdown             | `shutdown`                      | \-                            | 26 (triple click)   |                           |             |            |            |
-| unmount drive             | `unmount`                       | \-                            | 26 (hold for 3 sec) |                           |             |            |`9`            |
-
-
-## Default iso, shutter angle and fps arrays
-|Setting|Values                     |
-|--------------|---------------------------------------------------|
-|iso           |100, 200, 400, 640, 800, 1200, 1600, 2500 and 3200.|
-|shutter angle |1-360 in one degree increments + 172.8 and 346.6   |
-|fps           |1-50 fps @ 2028x1080, 1-40 fps @ 2028x1520         |
-
-The arrays can be customized using the settings file (see below).
-
-# Customizing camera functions and GPIO settings
-
-The settings file can be found in `cinemate/src/settings.json`. Here the user can define their own buttons, switches, rotary encoders and combined actions, modifying the table above.
-
-![CineMate settings file](docs/images/cinemate_settings_file.png)
-
-## General Settings
-Define your hardware setup and desired application behavior:
-
-    {
-    "pwm_pin": 19,
-    "rec_out_pin": [6, 21],
-    "iso_steps": [100, 200, 400, 640, 800, 1200, 1600, 2500, 3200],
-    "additional_shutter_a_steps": [172.8, 346.6],
-    "fps_steps": null
-    }
-
-## Analog Controls
-Map Grove Base HAT ADC channels to iso, shutter angle and fps controls:
-
-    "analog_controls": {
-    "iso_pot": "A0",
-    "shutter_a_pot": "A2",
-    "fps_pot": "A4"
-    }
-
-## Buttons
-Setup buttons with actions for different interactions:
-
-    "buttons": [
-    {
-        "pin": 5,
-        "pull_up": "False",
-        "debounce_time": "0.1",
-        "press_action": {"method": "rec"}
-    }
-    ]
-
-Each button can be configured with a variety of actions based on different interactions:
-
-**Press Action:** Triggers a specified method upon a simple press.
-
-**Single, Double, and Triple Click Actions:** Specify methods to execute based on the number of successive clicks.
-
-**Hold Action:** Executes a method when the button is held down for a longer duration.
-
-Each action can specify a method that corresponds to a function within the application, and args, an array of arguments that the method requires.
-
-Note that if you have both a Press Action and a Single-Click action on a pin, the pin will first execute the Press Action and when released, execute the Single-Click Action. Combining Press Action and Click actions on the same pin is therefore not recommended.
-
-## Two-way switches
-Two-way switches are configured in the two_way_switches section and have actions for both states:
-
-**State On Action** and **State Off Action**: Define what actions to take when the switch is turned on or off, respectively. Similar to button actions, these can specify a method and args.
-
-    "two_way_switches": [
-    {
-        "pin": 16,
-        "state_on_action": {"method": "set_shutter_a_sync", "args": [false]},
-        "state_off_action": {"method": "set_shutter_a_sync", "args": [true]}
-      },
-    }
-    ]
-
-## Rotary Encoders
-Configure rotary encoders for settings adjustments and optional button presses:
-
-    "rotary_encoders": [
-      {
-        "clk_pin": 9,
-        "dt_pin": 11,
-        "button_pin": 10,
-        "pull_up": "False",
-        "debounce_time": "0.05",
-        "button_actions": {
-          "press_action": "None",
-          "single_click_action": {"method": "set_iso_lock"},
-          "double_click_action": "None",
-          "hold_action": "None"
-        },
-        "encoder_actions": {
-          "rotate_clockwise": {"method": "inc_iso", "args": []},
-          "rotate_counterclockwise": {"method": "dec_iso", "args": []}
-        }
-    }
-    ]
-
-**Clockwise and Counterclockwise Actions**: Specify methods to execute when the encoder is rotated in either direction.
-
-**Button Actions:** If the encoder has a push button, configure actions similar to standalone buttons, including press, click, and hold interactions.
-
-## Combined Actions
-Set up interactions involving multiple inputs:
-
-    "combined_actions": [
-    {
-      "hold_button_pin": 13,
-      "action_button_pin": 26,
-      "action_type": "press",
-      "action": {"method": "set_shutter_a_sync"}
-    }
-
-Combined actions allow for complex interactions involving multiple buttons or switches:
-
-**Hold Button Pin** and **Action Button Pin:** Define the pins of the buttons involved in the combined action.
-
-**Action Type:** Specifies the type of action required from the action_button_pin (e.g., press). 
-
-**Action:** Determines the method to execute when the combined action condition is met.
-
-# Additional hardware
-
-## Grove Base HAT
-to be added
-
-![CineMate build using a Grove Base HAT](docs/images/cinemate_26.JPG)
-
-## Petroblock
-to be added
-
-## Pisugar
-to be added
-
-## PWM mode (experimental)
-PWM mode sets the Raspberry Pi HQ/GS sensors in sink mode, as explained here: https://github.com/Tiramisioux/libcamera-imx477-speed-ramping
-
-This makes it possible to feed the sensor XVS input with hardware PWM signal from the pi (CineMate uses pin 19 as default, but pin 18 also supports hardware PWM), allowing for hardware control of fps and shutter angle during recording, without restarting the camera. 
-
-| :exclamation:  Note! Be sure to use a voltage divider so PWM signal is converted to 1.65V.   |
-|-----------------------------------------|
-
-This function is an experiment inspired by my old Nizo 8mm camera which has a button for doubling the motor speed, achieving in-camera speed ramping. 
-
-From my tests I have noticed that changing fps works fine, but sometimes camera has to be reset a couple of times to work properly (toggling the PWM mode button). Changing shutter angle in PWM mode (or having shutter angle sync engaged) also doesn't seem to work properly.
-
-# Updating CineMate while keeping your custom ```settings.json```
-
-| :exclamation:  Note that if you update this repo, your setting-file will be overwritten with the latest default CineMate settings file. If you are using a custom settings file, be sure to copy it to somewhere outside of the cinemate folder before updating, or see below for how to exclude the file from git update.   |
-|-----------------------------------------|
-
-To ensure that you can update the cinemate repository on your Raspberry Pi while retaining your custom settings in ```/src/settings.json```, follow these steps:
-
-1) Navigate to the CineMate directory and stop any autostarted instance of CineMate.
-
-    ```
-    cd cinemate
-    make stop
-    ```
-
-2) Stash Your Custom Settings File
-
-    Before updating, stash your ```settings.json``` file to prevent it from being overwritten during the update:
-    
-    ```
-    git stash push src/settings.json -m "Saving custom settings.json"
-    ```
-
-3. Pull the Latest Updates
-
-    Pull the latest updates from the development branch of the cinemate repository:
-    
-    ```
-    git pull origin development
-    ```
-
-4. Reapply Your Custom Settings
-    
-    After pulling the updates, reapply your ```settings.json``` file:
-
-    ```
-    git stash pop
-    ```
-
-    If you encounter any merge conflicts with ```settings.json```, Git will notify you. Resolve the conflicts by manually merging the changes, and then commit the resolved version of ```settings.json```.
-
-5. Restart CineMate
-
-    ```
-    cinemate
-    ```
-
-
-# Note on future updates
-
-It's a good practice to keep a backup of your ```settings.json``` file outside the repository directory. This ensures that you have a copy of your custom settings in case of unexpected changes or merge conflicts.
-
-# Notes on audio sync
-
-Actual frame rate of the IMX477 sensor fluctuates about 0.01% around the mean value. This has no visual impact but will impact syncing of external audio. If recording synced audio, make sure to use a clapper board in the beginning and the end of the take. This will make it easier to sync the sound, but sync might still drift back and forth.
-
-
-# Notes on RTC
-
-Cinepi-raw names the clips according to system time. For clips to use the current time of day, an RTC (Realtime Clock Unit) can be installed.
-
-To get the right system time on the Pi, simply connect to a computer connected to the internet via SSH and the Pi will update its system time.
-
-To check system time in the CineMate CLI: 
-
-    time
-
-To write system time to a connected RTC, in the Cinemate CLI:
-
-    set time
-
-Now, if not connected to the internet, on startup the Pi will get its system time from the RTC.
-
-
-# Backing up the SD card
-
-To make a compressed image backup of the SD card onto the SSD:
-
-    sudo dd if=/dev/mmcblk0 bs=1M status=progress | xz -c > /media/RAW/cinepi_cinemate_raspbian_image_$(date +%Y-%m-%d_%H-%M-%S).img.xz
-
-Backing up an 8 GB CineMate image takes about 2 hours.
-
-# Builds
-
-## CineMate Vertical
-
-![CineMate verical still](docs/images/cinemate_29.JPG)
-
-Tinkercad model [here](https://www.tinkercad.com/things/7WibyUJoqFL-cinemate-vertical-build).
-
-## CineMate Komodo
-![CineMate Komodo still](https://cdn.thingiverse.com/assets/63/24/b0/5e/67/large_display_82aafbd6-e88e-4525-905c-bf00883de18c.png)
-
-Tinkercad model [here](https://www.thingiverse.com/thing:6516798)
-
-by Alexander Weigand
-
-## CineMate RX100
-
-![CineMate still](docs/images/cinemate_3.jpeg)
-
-Tinkercad model [here](https://www.tinkercad.com/things/eNhTTYdgOM0-cinemate-camera-body-for-sony-rx-100-cage).
-
-# Image examples
-
-Images shot with Schneider Kreuznach Variagon 18-40 zoom from 1967. Developed as BMD RAW in Davinci Resolve with Arri LogC to Rec LUT
-
-![CineMate still](docs/images/cinemate_still_3.jpeg)
-
-![CineMate still](docs/images/cinemate_still_2.jpeg)
-
-![CineMate still](docs/images/cinemate_still_1.jpeg)
-
-![CineMate still](docs/images/cinemate_still_4.jpeg)
-
-![CineMate still](docs/images/cinemate_still_5.jpeg)
-
-![CineMate still](docs/images/cinemate_still_6.jpeg)
-
+Before relying on the system for an important shoot, verify recording, storage throughput, preview, IMU logging and clip playback with the exact camera hardware and media that will be used.
