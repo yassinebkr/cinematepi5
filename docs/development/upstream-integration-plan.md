@@ -66,7 +66,7 @@ These behaviours have dedicated no-camera regression tests.
 | --- | --- |
 | Settings editor | High value; large subsystem. Integrate after configuration format is finalized. |
 | settings.jsonc preservation | High value for human-edited settings; requires migration design from current JSON runtime. |
-| Recovery console | High operational value; good next isolated service feature. |
+| Recovery console | Integrated as a standalone standard-library service, adapted to strict settings.json and hardened so blank-token mode is read-only. |
 | Web API, SSE and UDP control | Useful external-control surface; command authorization and destructive actions need review. |
 | No-camera startup follow-up | Continue testing the remaining degraded-state paths before moving on. |
 | DNG thumbnails | Useful for RAW inspection and playback; must coexist with current proxy Clips workflow. |
