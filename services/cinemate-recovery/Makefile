@@ -1,8 +1,8 @@
 # Makefile for cinemate-recovery
 #
-# Deviates from the wifi-hotspot Makefile in one way: the script is installed
-# into a private LIBDIR rather than $(PREFIX)/bin. Keeping the recovery
-# implementation outside PATH also makes the service boundary explicit.
+# The script is installed into a private LIBDIR rather than $(PREFIX)/bin.
+# It deliberately has no Python package dependencies beyond the standard
+# library so it remains available when the main CineMate environment is broken.
 PREFIX  ?= /usr/local
 LIBDIR  ?= $(PREFIX)/lib/cinemate-recovery
 SYSDDIR ?= /etc/systemd/system

@@ -1,6 +1,6 @@
 [Unit]
 Description=Cinemate Recovery Console
-Documentation=https://yassinebkr.github.io/cinematepi5/recovery-console/
+Documentation=https://tiramisioux.github.io/cinemate/recovery-console/
 # NOTE: there is deliberately NO Wants= or After= on cinemate-autostart.
 # Coupling the recovery console to the service it exists to recover is the
 # exact bug this unit was written to fix. Do not "tidy" this by adding one.

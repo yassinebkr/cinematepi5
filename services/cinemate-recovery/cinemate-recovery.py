@@ -11,8 +11,7 @@ with no laptop and no SSH.
 
 THE ONE RULE
 ============
-STANDARD LIBRARY ONLY, plus the vendored jsonc.py sibling. No flask, no jinja,
-no redis, and nothing from src/module/. "Cinemate's Python packages are
+STANDARD LIBRARY ONLY. No flask, no jinja, no redis, and nothing from src/module/. "Cinemate's Python packages are
 missing or broken" and "redis is down" are supported failure modes that this
 console exists to survive; every import it makes is another way for it to
 die exactly when it is needed.
@@ -47,6 +46,8 @@ from pathlib import Path
 from typing import Callable, NamedTuple
 from urllib.parse import parse_qs, urlparse
 
+# This branch uses strict JSON for settings. The recovery console remains
+# standard-library-only and does not accept syntax the main runtime rejects.
 log = logging.getLogger("cinemate-recovery")
 
 # ---------------------------------------------------------------------------
@@ -170,17 +171,25 @@ def load_config(
     settings_path: Path = SETTINGS_PATH,
     conf_path: Path = CONF_PATH,
 ) -> ConsoleConfig:
-    """Resolve console configuration through the three-rung ladder.
+    """Resolve console configuration without depending on CineMate itself.
 
-    1. settings.json parses -> system.recovery
-    2. it does not parse     -> /etc/cinemate-recovery.conf (installer-written)
-    3. that is missing too   -> compiled-in DEFAULTS
-
-    The bootstrap paradox this solves: "settings.json is unparseable" is the
-    console's primary use case, so it cannot read its own configuration only
-    from there.
+    Rung 1: valid settings.json. Values from system.recovery override the
+            installer fallback file; omitted values (notably token) inherit
+            from /etc/cinemate-recovery.conf when it is available.
+    Rung 2: settings.json is unavailable/invalid -> fallback config file.
+    Rung 3: neither is usable -> compiled defaults. With no token, mutating
+            HTTP actions are locked rather than unauthenticated.
     """
-    # -- rung 1 ------------------------------------------------------------
+    conf_raw = {}
+    conf_ok = False
+    conf_error = "not read"
+    try:
+        conf_raw = parse_conf(Path(conf_path).read_text(encoding="utf-8"))
+        conf_ok = True
+        conf_error = ""
+    except Exception as exc:
+        conf_error = f"{type(exc).__name__}: {exc}"
+
     try:
         text = Path(settings_path).read_text(encoding="utf-8")
         data = json.loads(text)
@@ -188,34 +197,33 @@ def load_config(
             raise ValueError("top level is not an object")
         system = data.get("system", {})
         if not isinstance(system, dict):
-            raise ValueError("system block is not an object")
-        if "recovery" in system:
-            block = system.get("recovery")
-            if not isinstance(block, dict):
-                raise ValueError("system.recovery block is not an object")
-            return _merge(
-                block,
-                CONFIG_RUNG_SETTINGS,
-                "settings.json parsed; using system.recovery",
+            system = {}
+        block = system.get("recovery", {})
+        if not isinstance(block, dict):
+            block = {}
+
+        raw = dict(conf_raw) if conf_ok else {}
+        raw.update(block)
+        if block:
+            reason = "settings.json parsed; system.recovery applied"
+        elif conf_ok:
+            reason = (
+                "settings.json parsed; no system.recovery block, "
+                "using installer fallback values"
             )
-        # No recovery block on this branch's existing settings files. Continue
-        # to the installer-written fallback so its generated token is honoured.
-        settings_error = "settings.json parsed; no system.recovery block"
+        else:
+            reason = "settings.json parsed; no recovery block or fallback config"
+        return _merge(raw, CONFIG_RUNG_SETTINGS, reason)
     except Exception as exc:
         settings_error = f"{type(exc).__name__}: {exc}"
 
-    # -- rung 2 ------------------------------------------------------------
-    try:
-        raw = parse_conf(Path(conf_path).read_text(encoding="utf-8"))
+    if conf_ok:
         return _merge(
-            raw,
+            conf_raw,
             CONFIG_RUNG_CONF,
             f"settings.json unusable ({settings_error}); using {conf_path}",
         )
-    except Exception as exc:
-        conf_error = f"{type(exc).__name__}: {exc}"
 
-    # -- rung 3 ------------------------------------------------------------
     return _merge(
         {},
         CONFIG_RUNG_DEFAULTS,
@@ -377,23 +385,19 @@ def validate_settings_text(
     *,
     python_bin: Path = CINEMATE_PYTHON,
     src_dir: Path = CINEMATE_SRC,
-    stdlib_loader: Callable | None = json.loads,
     runner: Callable = subprocess.run,
 ) -> Validation:
-    """Validate candidate settings.json content through the three-rung ladder.
+    """Validate candidate settings.json through two independent rungs.
 
-    1. Cinemate's own interpreter + module.config_loader.load_settings -> the
-       EXACT error the operator would see on tty1, with line, column and
-       context. No duplicated parsing logic.
-    2. that interpreter missing or import fails -> stdlib json.loads,
-       which applies the same strict-JSON syntax contract.
-    3. neither available -> allow the write, labelled "unvalidated".
+    1. CineMate's own config_loader gives the same detailed error the main
+       process would report.
+    2. If that interpreter/import path is unavailable, stdlib json validates
+       syntax and requires the same top-level object shape.
 
-    Rung 3 is deliberately fail-OPEN. The file being edited is already broken;
-    refusing to write it would strand the operator with no way to fix it.
-    Safety comes from the backup, not from the refusal.
+    This strict-JSON recovery path never
+    accepts comments/trailing commas and never writes malformed JSON merely
+    because the main runtime is unavailable.
     """
-    # -- rung 1 ------------------------------------------------------------
     if Path(python_bin).exists() and Path(src_dir).exists():
         tmp_path = None
         try:
@@ -410,12 +414,16 @@ def validate_settings_text(
                 return Validation(True, VALIDATE_RUNG_INTERPRETER, "Valid.", True)
             if proc.returncode == 2:
                 return Validation(
-                    False, VALIDATE_RUNG_INTERPRETER, proc.stdout.strip() or "Invalid.", True
+                    False,
+                    VALIDATE_RUNG_INTERPRETER,
+                    proc.stdout.strip() or "Invalid.",
+                    True,
                 )
-            # returncode 3 or anything else: the validator itself failed, so
-            # fall through rather than reporting a bogus verdict.
-            log.warning("interpreter validator unusable (rc=%s): %s",
-                        proc.returncode, (proc.stderr or proc.stdout)[:400])
+            log.warning(
+                "interpreter validator unusable (rc=%s): %s",
+                proc.returncode,
+                (proc.stderr or proc.stdout)[:400],
+            )
         except Exception as exc:
             log.warning("interpreter validation rung unavailable: %s", exc)
         finally:
@@ -425,30 +433,23 @@ def validate_settings_text(
                 except OSError:
                     pass
 
-    # -- rung 2 ------------------------------------------------------------
-    if stdlib_loader is not None:
-        try:
-            parsed = stdlib_loader(text)
-            if not isinstance(parsed, dict):
-                raise ValueError("settings.json must contain a top-level object")
-            return Validation(
-                True, VALIDATE_RUNG_STDLIB,
-                "Valid (checked with the standard-library JSON parser).", True,
-            )
-        except Exception as exc:
-            return Validation(
-                False, VALIDATE_RUNG_STDLIB,
-                f"{type(exc).__name__}: {exc}", True,
-            )
-
-    # -- rung 3: fail open --------------------------------------------------
-    return Validation(
-        True, VALIDATE_RUNG_NONE,
-        "UNVALIDATED: no working validator on this system. The file was written "
-        "as given and has NOT been checked. A backup of the previous content was "
-        "taken first.",
-        False,
-    )
+    try:
+        data = json.loads(text)
+        if not isinstance(data, dict):
+            raise ValueError("top level must be a JSON object")
+        return Validation(
+            True,
+            VALIDATE_RUNG_STDLIB,
+            "Valid (checked with Python stdlib JSON; CineMate validator unavailable).",
+            True,
+        )
+    except Exception as exc:
+        return Validation(
+            False,
+            VALIDATE_RUNG_STDLIB,
+            f"{type(exc).__name__}: {exc}",
+            True,
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -738,8 +739,8 @@ def page(title: str, body: str, *, banner: str = "") -> bytes:
 def token_field(cfg: ConsoleConfig) -> str:
     if not cfg.token:
         return (
-            "<p class='warn'>Write actions are disabled because no recovery "
-            "token is configured.</p>"
+            "<div class='banner red'><strong>Mutating actions locked.</strong> "
+            "No recovery token is configured.</div>"
         )
     return ("<p><label>Access token "
             "<input type='password' name='token' autocomplete='current-password'>"
@@ -1169,7 +1170,7 @@ def main(argv=None) -> int:
     server = make_server(cfg, bind=args.bind)
     log.info("Listening on %s:%d (token %s, config.txt editing %s)",
              args.bind, cfg.port,
-             "required" if cfg.token else "not set (writes disabled)",
+             "required" if cfg.token else "missing; mutations locked",
              "enabled" if cfg.allow_config_txt else "disabled")
     try:
         server.serve_forever()

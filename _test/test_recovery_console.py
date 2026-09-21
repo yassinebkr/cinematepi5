@@ -82,9 +82,9 @@ class ConfigLadderTests(TempCase):
         self.assertTrue(cfg.allow_config_txt)
         self.assertEqual(cfg.config_confirm_timeout_s, 120)
 
-    def test_jsonc_syntax_is_not_silently_accepted(self):
+    def test_comments_are_not_accepted_as_settings_json(self):
         self.settings.write_text(
-            '{\n // comment\n "system": {"recovery": {"port": 9091,}}\n}',
+            '{\n // comment\n "system": {"recovery": {"port": 9091}}\n}',
             encoding="utf-8",
         )
         self.conf.write_text("port=8087\n", encoding="utf-8")
@@ -92,35 +92,16 @@ class ConfigLadderTests(TempCase):
         self.assertEqual(cfg.rung, rc.CONFIG_RUNG_CONF)
         self.assertEqual(cfg.port, 8087)
 
-    def test_missing_recovery_block_uses_installer_fallback(self):
+    def test_missing_recovery_block_gives_documented_defaults(self):
+        # Requiring an edit to settings.json to get a working recovery
+        # console would be circular.
         self.settings.write_text('{"system": {}}', encoding="utf-8")
-        self.conf.write_text(
-            "port=8086\ntoken=generated-token\nallow_config_txt=false\n",
-            encoding="utf-8",
-        )
-        cfg = self.load()
-        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_CONF)
-        self.assertEqual(cfg.port, 8086)
-        self.assertEqual(cfg.token, "generated-token")
-        self.assertFalse(cfg.allow_config_txt)
-
-    def test_missing_recovery_block_and_conf_uses_read_only_defaults(self):
-        self.settings.write_text('{"system": {}}', encoding="utf-8")
-        cfg = self.load()
-        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_DEFAULTS)
-        self.assertEqual(cfg.port, rc.DEFAULTS["port"])
-        self.assertEqual(cfg.token, "")
-        self.assertFalse(cfg.allow_config_txt)
-
-    def test_explicit_empty_recovery_block_intentionally_uses_defaults(self):
-        self.settings.write_text(
-            '{"system": {"recovery": {}}}',
-            encoding="utf-8",
-        )
-        self.conf.write_text("token=should-not-win\n", encoding="utf-8")
         cfg = self.load()
         self.assertEqual(cfg.rung, rc.CONFIG_RUNG_SETTINGS)
+        self.assertEqual(cfg.port, rc.DEFAULTS["port"])
+        self.assertTrue(cfg.enabled)
         self.assertEqual(cfg.token, "")
+        self.assertFalse(cfg.allow_config_txt)
 
     def test_partial_block_fills_the_rest_from_defaults(self):
         self.settings.write_text(
@@ -168,6 +149,16 @@ class ConfigLadderTests(TempCase):
         # long as the values are the documented ones.
         self.assertEqual(cfg.port, 8080)
         self.assertFalse(cfg.allow_config_txt)
+
+    def test_valid_settings_inherits_installer_token_when_omitted(self):
+        self.settings.write_text(
+            '{"system": {"recovery": {"port": 9092}}}', encoding="utf-8"
+        )
+        self.conf.write_text("token=installer-secret\nport=8080\n", encoding="utf-8")
+        cfg = self.load()
+        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_SETTINGS)
+        self.assertEqual(cfg.port, 9092)
+        self.assertEqual(cfg.token, "installer-secret")
 
     def test_non_object_root_falls_through(self):
         self.settings.write_text("[]", encoding="utf-8")
@@ -263,9 +254,9 @@ class ValidationLadderTests(TempCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.rung, rc.VALIDATE_RUNG_STDLIB)
 
-    def test_rung_two_rejects_jsonc_comments_and_trailing_commas(self):
+    def test_rung_two_rejects_comments_and_trailing_commas(self):
         result = rc.validate_settings_text(
-            '{ // not valid here\n "a": 1,\n}',
+            '{ // not valid JSON\n "a": 1,\n}',
             python_bin=self.tmp / "gone",
             src_dir=self.tmp,
         )
@@ -280,25 +271,6 @@ class ValidationLadderTests(TempCase):
         )
         self.assertEqual(result.rung, rc.VALIDATE_RUNG_STDLIB)
         self.assertTrue(result.ok)
-
-    def test_rung_three_fails_open_and_labels_the_write(self):
-        # The rung that only fires when everything else is already broken.
-        result = rc.validate_settings_text(
-            "total garbage {{{", python_bin=self.tmp / "gone", src_dir=self.tmp,
-            stdlib_loader=None,
-        )
-        self.assertTrue(result.ok, "rung 3 must fail OPEN")
-        self.assertEqual(result.rung, rc.VALIDATE_RUNG_NONE)
-        self.assertFalse(result.validated)
-        self.assertIn("UNVALIDATED", result.message)
-
-    def test_rung_three_never_refuses_even_valid_looking_input(self):
-        result = rc.validate_settings_text(
-            '{"a": 1}', python_bin=self.tmp / "gone", src_dir=self.tmp,
-            stdlib_loader=None,
-        )
-        self.assertTrue(result.ok)
-        self.assertFalse(result.validated)
 
 
 # ---------------------------------------------------------------------------
@@ -474,46 +446,6 @@ class ConfirmOrRevertTests(TempCase):
         self.assertEqual(rc.pending_remaining(reread, now=lambda: 700.0), 100)
 
 
-
-class MutationAuthTests(unittest.TestCase):
-    def handler(self, token, headers=None):
-        h = rc.RecoveryHandler.__new__(rc.RecoveryHandler)
-        h.config = rc.ConsoleConfig(
-            enabled=True,
-            port=8080,
-            token=token,
-            allow_config_txt=False,
-            config_confirm_timeout_s=300,
-            rung=rc.CONFIG_RUNG_DEFAULTS,
-            reason="test",
-        )
-        h.headers = headers or {}
-        return h
-
-    def test_blank_configured_token_disables_mutations(self):
-        h = self.handler("")
-        self.assertFalse(h._authorised({}, {}))
-
-    def test_correct_form_token_authorises_mutation(self):
-        h = self.handler("secret")
-        self.assertTrue(h._authorised({"token": "secret"}, {}))
-
-    def test_wrong_token_is_rejected(self):
-        h = self.handler("secret")
-        self.assertFalse(h._authorised({"token": "wrong"}, {}))
-
-    def test_header_token_is_supported(self):
-        h = self.handler("secret", {"X-Auth-Token": "secret"})
-        self.assertTrue(h._authorised({}, {}))
-
-    def test_query_token_is_supported(self):
-        h = self.handler("secret")
-        self.assertTrue(h._authorised({}, {"token": ["secret"]}))
-
-    def test_token_field_warns_when_writes_are_disabled(self):
-        cfg = self.handler("").config
-        self.assertIn("Write actions are disabled", rc.token_field(cfg))
-
 # ---------------------------------------------------------------------------
 # Section 5 service allowlist
 # ---------------------------------------------------------------------------
@@ -679,6 +611,51 @@ class SystemFactTests(TempCase):
         self.assertEqual(rc.read_disk_free(str(self.tmp / "nope")), "unknown")
 
 
+class AuthenticationTests(unittest.TestCase):
+    def handler(self, token):
+        h = rc.RecoveryHandler.__new__(rc.RecoveryHandler)
+        h.config = rc._merge(
+            {"enabled": True, "port": 8080, "token": token},
+            rc.CONFIG_RUNG_CONF,
+            "test",
+        )
+        h.headers = {}
+        return h
+
+    def test_blank_configured_token_locks_mutations(self):
+        h = self.handler("")
+        self.assertFalse(h._authorised({}, {}))
+        self.assertFalse(h._authorised({"token": "anything"}, {}))
+
+    def test_missing_supplied_token_is_denied(self):
+        h = self.handler("secret")
+        self.assertFalse(h._authorised({}, {}))
+
+    def test_wrong_form_token_is_denied(self):
+        h = self.handler("secret")
+        self.assertFalse(h._authorised({"token": "wrong"}, {}))
+
+    def test_correct_form_token_is_accepted(self):
+        h = self.handler("secret")
+        self.assertTrue(h._authorised({"token": "secret"}, {}))
+
+    def test_correct_query_token_is_accepted(self):
+        h = self.handler("secret")
+        self.assertTrue(h._authorised({}, {"token": ["secret"]}))
+
+    def test_correct_header_token_is_accepted(self):
+        h = self.handler("secret")
+        h.headers = {"X-Auth-Token": "secret"}
+        self.assertTrue(h._authorised({}, {}))
+
+    def test_blank_token_field_warns_that_actions_are_locked(self):
+        cfg = rc._merge({}, rc.CONFIG_RUNG_DEFAULTS, "test")
+        html = rc.token_field(cfg)
+        self.assertIn("Mutating actions locked", html)
+        self.assertNotIn("type='password'", html)
+
+
+
 # ---------------------------------------------------------------------------
 # The one rule
 # ---------------------------------------------------------------------------
@@ -686,8 +663,8 @@ class SystemFactTests(TempCase):
 class StdlibOnlyTests(unittest.TestCase):
     """The single most important constraint in the plan."""
 
-    #: Everything the console is allowed to import. Stdlib, plus the vendored
-    #: sibling. Adding to this list is a design decision, not a formality:
+    #: Everything the console is allowed to import. Standard library only.
+    #: Adding to this list is a design decision, not a formality:
     #: every entry is another way for the console to fail to start.
     ALLOWED = {
         "argparse", "hmac", "html", "http", "json", "logging", "os", "re",
