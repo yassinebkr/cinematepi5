@@ -46,6 +46,8 @@ welcome_image is the reference semantic widget. Its Upload image control accepts
 
 Only files inside that managed asset directory can be previewed through the editor API. Existing external image paths remain valid settings but are not exposed through the preview endpoint.
 
+After validating the image widget, the same semantic metadata layer was extended across the current settings file. Primitive preset arrays use structured list editors; hardware button/switch/encoder arrays use repeatable object cards; controller actions have method/argument controls; ADC channels, policies and fixed choices use selects; server-side resource locations use explicit path controls; and advanced free-form objects such as custom sensor modes retain a deliberate JSON-object editor. Every current settings path has semantic metadata, while unknown future keys still fall back to the generic renderer.
+
 ## What the page shows
 
 After authentication, the current strict JSON document is rendered as nested sections:

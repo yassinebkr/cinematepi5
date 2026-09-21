@@ -138,6 +138,13 @@ def _load_editor_ui_metadata(path: Path | None = None) -> dict:
         return {}
 
     result = {}
+    root_map = schema.get("x-cinemate-ui-map")
+    if isinstance(root_map, dict):
+        result.update(
+            (str(path), dict(meta))
+            for path, meta in root_map.items()
+            if isinstance(meta, dict)
+        )
 
     def walk(node, parts):
         if not isinstance(node, dict):

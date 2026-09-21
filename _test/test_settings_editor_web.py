@@ -7,6 +7,8 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
+ROOT = Path(__file__).resolve().parents[1]
+
 from flask import Flask
 
 from module.redis_controller import ParameterKey
@@ -117,6 +119,24 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.assertIn('/settings-editor/api/assets/image?path=', html)
         self.assertIn('!(options.body instanceof FormData)', html)
 
+    def test_template_supports_full_semantic_widget_set(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            "function makeSelectControl(",
+            "function makeOptionalNumberControl(",
+            "function makePrimitiveListField(",
+            "function makeObjectListField(",
+            "function makeActionField(",
+            "function makeJsonObjectField(",
+            'meta.widget === "action"',
+            'meta.widget === "object-list"',
+            'meta.widget === "json-object"',
+        ):
+            self.assertIn(marker, html)
+        self.assertIn('return uiMetadata[wildcard] || null;', html)
+
     def test_template_uses_hybrid_desktop_grid_and_mobile_collapse(self):
         html = (
             Path(__file__).resolve().parents[1]
@@ -128,7 +148,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
         )
         self.assertIn(".field--wide{grid-column:1/-1}", html)
         self.assertIn('row.classList.add("metadata-field", "field--wide")', html)
-        self.assertIn("field field--wide field--array", html)
+        self.assertIn("function makePrimitiveListField(", html)
         self.assertIn("@media(max-width:900px)", html)
         self.assertIn("#settings-root,.inside{grid-template-columns:1fr", html)
 
@@ -173,6 +193,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
         )
         self.assertEqual(preview.status_code, 200)
         self.assertEqual(preview.mimetype, "image/png")
+        preview.close()
 
     def test_image_upload_rejects_invalid_image(self):
         import io
@@ -206,6 +227,68 @@ class SettingsEditorRouteTests(unittest.TestCase):
         )
         self.assertEqual(res.status_code, 409)
         self.assertEqual(list(self.asset_dir.glob("*")), [])
+
+    def test_ui_metadata_covers_every_current_setting_path(self):
+        current = json.loads(
+            (ROOT / "src/settings.json").read_text(encoding="utf-8")
+        )
+        schema = json.loads(
+            (ROOT / "src/settings.schema.json").read_text(encoding="utf-8")
+        )
+        ui = schema["x-cinemate-ui-map"]
+
+        def covered(parts):
+            exact = ".".join(parts)
+            if exact in ui:
+                return True
+            wildcard = ".".join(
+                "*" if str(part).strip("[]").isdigit() else str(part)
+                for part in parts
+            )
+            return wildcard in ui
+
+        missing = []
+
+        def walk(value, parts):
+            if parts and not isinstance(value, dict) and not covered(parts):
+                missing.append(".".join(parts))
+            if isinstance(value, dict):
+                if parts and not covered(parts):
+                    missing.append(".".join(parts))
+                for key, child in value.items():
+                    walk(child, parts + [str(key)])
+            elif isinstance(value, list):
+                if parts and not covered(parts):
+                    missing.append(".".join(parts))
+                for index, child in enumerate(value):
+                    if isinstance(child, (dict, list)):
+                        walk(child, parts + [f"[{index}]"])
+
+        walk(current, [])
+        self.assertEqual(missing, [])
+
+    def test_semantic_registry_has_expected_high_value_widgets(self):
+        schema = json.loads(
+            (ROOT / "src/settings.schema.json").read_text(encoding="utf-8")
+        )
+        ui = schema["x-cinemate-ui-map"]
+        expected = {
+            "analog_controls.iso_pot": "select",
+            "arrays.fps_steps": "number-list",
+            "resolutions.custom_modes": "json-object",
+            "buttons": "object-list",
+            "buttons.*.press_action": "action",
+            "two_way_switches.*.state_on_action": "action",
+            "rotary_encoders": "object-list",
+            "quad_rotary_controller.encoders.*.setting_name": "select",
+            "dynamic_resolution.policy": "select",
+            "sensors.database_file": "path",
+            "camera.cam1.tuning_file_override.path": "path",
+            "i2c_oled.values": "string-list",
+        }
+        for path, widget in expected.items():
+            with self.subTest(path=path):
+                self.assertEqual(ui[path]["widget"], widget)
 
     def test_api_requires_token(self):
         self.assertEqual(self.client.get("/settings-editor/api/settings").status_code, 403)

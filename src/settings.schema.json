@@ -224,5 +224,1851 @@
       "additionalProperties": true
     }
   },
-  "additionalProperties": true
+  "additionalProperties": true,
+  "x-cinemate-ui-map": {
+    "$schema": {
+      "label": "Schema",
+      "widget": "read-only",
+      "help": "Editor metadata reference; not a runtime setting."
+    },
+    "analog_controls": {
+      "label": "Analog controls",
+      "widget": "group"
+    },
+    "analog_controls.fps_pot": {
+      "label": "FPS potentiometer",
+      "widget": "select",
+      "options": [
+        {
+          "value": null,
+          "label": "Disabled"
+        },
+        {
+          "value": 0,
+          "label": "A0"
+        },
+        {
+          "value": 1,
+          "label": "A1"
+        },
+        {
+          "value": 2,
+          "label": "A2"
+        },
+        {
+          "value": 3,
+          "label": "A3"
+        },
+        {
+          "value": 4,
+          "label": "A4"
+        },
+        {
+          "value": 5,
+          "label": "A5"
+        },
+        {
+          "value": 6,
+          "label": "A6"
+        },
+        {
+          "value": 7,
+          "label": "A7"
+        }
+      ],
+      "equivalent_none": [
+        "None",
+        null,
+        ""
+      ]
+    },
+    "analog_controls.iso_pot": {
+      "label": "ISO potentiometer",
+      "widget": "select",
+      "options": [
+        {
+          "value": null,
+          "label": "Disabled"
+        },
+        {
+          "value": 0,
+          "label": "A0"
+        },
+        {
+          "value": 1,
+          "label": "A1"
+        },
+        {
+          "value": 2,
+          "label": "A2"
+        },
+        {
+          "value": 3,
+          "label": "A3"
+        },
+        {
+          "value": 4,
+          "label": "A4"
+        },
+        {
+          "value": 5,
+          "label": "A5"
+        },
+        {
+          "value": 6,
+          "label": "A6"
+        },
+        {
+          "value": 7,
+          "label": "A7"
+        }
+      ],
+      "equivalent_none": [
+        "None",
+        null,
+        ""
+      ]
+    },
+    "analog_controls.shutter_a_pot": {
+      "label": "Shutter-angle potentiometer",
+      "widget": "select",
+      "options": [
+        {
+          "value": null,
+          "label": "Disabled"
+        },
+        {
+          "value": 0,
+          "label": "A0"
+        },
+        {
+          "value": 1,
+          "label": "A1"
+        },
+        {
+          "value": 2,
+          "label": "A2"
+        },
+        {
+          "value": 3,
+          "label": "A3"
+        },
+        {
+          "value": 4,
+          "label": "A4"
+        },
+        {
+          "value": 5,
+          "label": "A5"
+        },
+        {
+          "value": 6,
+          "label": "A6"
+        },
+        {
+          "value": 7,
+          "label": "A7"
+        }
+      ],
+      "equivalent_none": [
+        "None",
+        null,
+        ""
+      ]
+    },
+    "analog_controls.wb_pot": {
+      "label": "White-balance potentiometer",
+      "widget": "select",
+      "options": [
+        {
+          "value": null,
+          "label": "Disabled"
+        },
+        {
+          "value": 0,
+          "label": "A0"
+        },
+        {
+          "value": 1,
+          "label": "A1"
+        },
+        {
+          "value": 2,
+          "label": "A2"
+        },
+        {
+          "value": 3,
+          "label": "A3"
+        },
+        {
+          "value": 4,
+          "label": "A4"
+        },
+        {
+          "value": 5,
+          "label": "A5"
+        },
+        {
+          "value": 6,
+          "label": "A6"
+        },
+        {
+          "value": 7,
+          "label": "A7"
+        }
+      ],
+      "equivalent_none": [
+        "None",
+        null,
+        ""
+      ]
+    },
+    "anamorphic_preview": {
+      "label": "Anamorphic preview",
+      "widget": "group"
+    },
+    "anamorphic_preview.anamorphic_steps": {
+      "label": "Anamorphic factors",
+      "widget": "number-list",
+      "step": 0.01,
+      "min": 0.1,
+      "unit": "×"
+    },
+    "anamorphic_preview.default_anamorphic_factor": {
+      "label": "Default anamorphic factor",
+      "widget": "number",
+      "step": 0.01,
+      "min": 0.1,
+      "unit": "×"
+    },
+    "arrays": {
+      "label": "Arrays",
+      "widget": "group"
+    },
+    "arrays.fps_steps": {
+      "label": "FPS steps",
+      "widget": "number-list",
+      "step": 1,
+      "min": 1,
+      "unit": "fps"
+    },
+    "arrays.iso_steps": {
+      "label": "ISO steps",
+      "widget": "number-list",
+      "step": 1,
+      "min": 1,
+      "unit": "ISO"
+    },
+    "arrays.shutter_a_steps": {
+      "label": "Shutter-angle steps",
+      "widget": "number-list",
+      "step": 0.1,
+      "min": 1,
+      "unit": "°"
+    },
+    "arrays.wb_steps": {
+      "label": "White-balance steps",
+      "widget": "number-list",
+      "step": 100,
+      "min": 1,
+      "unit": "K"
+    },
+    "audio": {
+      "label": "Audio",
+      "widget": "group"
+    },
+    "audio.16bit": {
+      "label": "16bit",
+      "widget": "group"
+    },
+    "audio.16bit.capture_gain_db": {
+      "label": "16bit capture gain",
+      "widget": "number",
+      "step": 0.5,
+      "unit": "dB"
+    },
+    "audio.16bit.timecode_offset_frames": {
+      "label": "16bit timecode offset",
+      "widget": "number",
+      "step": 1,
+      "unit": "frames"
+    },
+    "audio.24bit": {
+      "label": "24bit",
+      "widget": "group"
+    },
+    "audio.24bit.capture_gain_db": {
+      "label": "24bit capture gain",
+      "widget": "number",
+      "step": 0.5,
+      "unit": "dB"
+    },
+    "audio.24bit.timecode_offset_frames": {
+      "label": "24bit timecode offset",
+      "widget": "number",
+      "step": 1,
+      "unit": "frames"
+    },
+    "buttons": {
+      "label": "GPIO buttons",
+      "widget": "object-list",
+      "item_label": "Button",
+      "item_template": {
+        "pin": 0,
+        "pull_up": true,
+        "debounce_time": 0.1,
+        "press_action": "None"
+      }
+    },
+    "buttons.*": {
+      "label": "*",
+      "widget": "group"
+    },
+    "buttons.*.debounce_time": {
+      "label": "Debounce time",
+      "widget": "optional-number",
+      "unset_values": [
+        "None",
+        null,
+        ""
+      ],
+      "unset_value": "None",
+      "default": 0.1,
+      "min": 0,
+      "step": 0.01,
+      "unit": "s"
+    },
+    "buttons.*.double_click_action": {
+      "label": "Double click action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "buttons.*.double_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "buttons.*.hold_action": {
+      "label": "Hold action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "buttons.*.hold_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "buttons.*.pin": {
+      "label": "BCM pin",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "max": 27
+    },
+    "buttons.*.press_action": {
+      "label": "Press action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "buttons.*.press_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "buttons.*.pull_up": {
+      "label": "Input pull",
+      "widget": "select",
+      "options": [
+        {
+          "value": "None",
+          "label": "Default"
+        },
+        {
+          "value": true,
+          "label": "Pull-up / active low"
+        },
+        {
+          "value": false,
+          "label": "Pull-down / active high"
+        }
+      ]
+    },
+    "buttons.*.single_click_action": {
+      "label": "Single click action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "buttons.*.single_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "buttons.*.triple_click_action": {
+      "label": "Triple click action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "buttons.*.triple_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "camera": {
+      "label": "Camera",
+      "widget": "group"
+    },
+    "camera.cam0": {
+      "label": "Cam0",
+      "widget": "group"
+    },
+    "camera.cam0.camera_name": {
+      "label": "Camera name",
+      "widget": "text"
+    },
+    "camera.cam0.geometry": {
+      "label": "Geometry",
+      "widget": "group"
+    },
+    "camera.cam0.geometry.horizontal_flip": {
+      "label": "Horizontal flip",
+      "widget": "toggle"
+    },
+    "camera.cam0.geometry.rotate_180": {
+      "label": "Rotate 180°",
+      "widget": "toggle"
+    },
+    "camera.cam0.geometry.vertical_flip": {
+      "label": "Vertical flip",
+      "widget": "toggle"
+    },
+    "camera.cam0.output": {
+      "label": "Output",
+      "widget": "group"
+    },
+    "camera.cam0.output.hdmi_port": {
+      "label": "HDMI output port",
+      "widget": "select",
+      "step": 1,
+      "options": [
+        0,
+        1
+      ]
+    },
+    "camera.cam0.override_camera_name": {
+      "label": "Override camera name",
+      "widget": "toggle"
+    },
+    "camera.cam0.phase_lock": {
+      "label": "Phase lock",
+      "widget": "toggle"
+    },
+    "camera.cam0.tuning_file_override": {
+      "label": "Tuning file override",
+      "widget": "group"
+    },
+    "camera.cam0.tuning_file_override.enabled": {
+      "label": "Tuning-file override",
+      "widget": "toggle"
+    },
+    "camera.cam0.tuning_file_override.path": {
+      "label": "Tuning file path",
+      "widget": "path"
+    },
+    "camera.cam1": {
+      "label": "Cam1",
+      "widget": "group"
+    },
+    "camera.cam1.camera_name": {
+      "label": "Camera name",
+      "widget": "text"
+    },
+    "camera.cam1.geometry": {
+      "label": "Geometry",
+      "widget": "group"
+    },
+    "camera.cam1.geometry.horizontal_flip": {
+      "label": "Horizontal flip",
+      "widget": "toggle"
+    },
+    "camera.cam1.geometry.rotate_180": {
+      "label": "Rotate 180°",
+      "widget": "toggle"
+    },
+    "camera.cam1.geometry.vertical_flip": {
+      "label": "Vertical flip",
+      "widget": "toggle"
+    },
+    "camera.cam1.output": {
+      "label": "Output",
+      "widget": "group"
+    },
+    "camera.cam1.output.hdmi_port": {
+      "label": "HDMI output port",
+      "widget": "select",
+      "step": 1,
+      "options": [
+        0,
+        1
+      ]
+    },
+    "camera.cam1.override_camera_name": {
+      "label": "Override camera name",
+      "widget": "toggle"
+    },
+    "camera.cam1.phase_lock": {
+      "label": "Phase lock",
+      "widget": "toggle"
+    },
+    "camera.cam1.tuning_file_override": {
+      "label": "Tuning file override",
+      "widget": "group"
+    },
+    "camera.cam1.tuning_file_override.enabled": {
+      "label": "Tuning-file override",
+      "widget": "toggle"
+    },
+    "camera.cam1.tuning_file_override.path": {
+      "label": "Tuning file path",
+      "widget": "path"
+    },
+    "camera.raw_buffer_count": {
+      "label": "RAW buffer count",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "frames"
+    },
+    "combined_actions": {
+      "widget": "object-list",
+      "label": "Combined button actions",
+      "item_label": "Combined action",
+      "item_template": {
+        "hold_button_pin": 0,
+        "action_button_pin": 1,
+        "action_type": "press",
+        "action": {
+          "method": "rec"
+        }
+      }
+    },
+    "dynamic_resolution": {
+      "label": "Dynamic resolution",
+      "widget": "group"
+    },
+    "dynamic_resolution.enabled": {
+      "label": "Dynamic resolution enabled",
+      "widget": "toggle"
+    },
+    "dynamic_resolution.match_tolerance_px": {
+      "label": "Mode match tolerance",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "px"
+    },
+    "dynamic_resolution.policy": {
+      "label": "Resolution selection policy",
+      "widget": "select",
+      "options": [
+        "highest_sustainable_resolution"
+      ]
+    },
+    "dynamic_resolution.profile": {
+      "label": "Dynamic-resolution profile",
+      "widget": "combobox",
+      "suggestions": [
+        "default"
+      ]
+    },
+    "dynamic_resolution.profiles_file": {
+      "label": "Dynamic-resolution profiles file",
+      "widget": "path"
+    },
+    "dynamic_resolution.safety_margin_fps": {
+      "label": "Safety margin",
+      "widget": "number",
+      "step": 0.1,
+      "min": 0,
+      "unit": "fps"
+    },
+    "free_mode": {
+      "label": "Free mode",
+      "widget": "group"
+    },
+    "free_mode.fps_free": {
+      "label": "FPS free mode",
+      "widget": "toggle"
+    },
+    "free_mode.iso_free": {
+      "label": "ISO free mode",
+      "widget": "toggle"
+    },
+    "free_mode.shutter_a_free": {
+      "label": "Shutter-angle free mode",
+      "widget": "toggle"
+    },
+    "free_mode.wb_free": {
+      "label": "White-balance free mode",
+      "widget": "toggle"
+    },
+    "gpio_output": {
+      "label": "GPIO output",
+      "widget": "group"
+    },
+    "gpio_output.pwm_pin": {
+      "label": "PWM GPIO pin",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "max": 27
+    },
+    "gpio_output.rec_out_pin": {
+      "label": "Recording output GPIO pins",
+      "widget": "number-list",
+      "step": 1,
+      "min": 0,
+      "max": 27
+    },
+    "gpio_output.rec_tone_duty_cycle": {
+      "label": "Recording tone duty cycle",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "max": 100,
+      "unit": "%"
+    },
+    "gpio_output.rec_tone_frequency_hz": {
+      "label": "Recording tone frequency",
+      "widget": "number",
+      "step": 1,
+      "min": 1,
+      "unit": "Hz"
+    },
+    "gpio_output.rec_tone_pin": {
+      "label": "Recording tone GPIO pins",
+      "widget": "number-list",
+      "step": 1,
+      "min": 0,
+      "max": 27
+    },
+    "gpio_output.rec_tone_relay_drop_frames": {
+      "label": "Mute tone on drop-frame pulse",
+      "widget": "toggle"
+    },
+    "hdmi_display": {
+      "label": "HDMI display",
+      "widget": "group"
+    },
+    "hdmi_display.height": {
+      "label": "HDMI height",
+      "widget": "number",
+      "step": 1,
+      "min": 240,
+      "max": 4320,
+      "unit": "px"
+    },
+    "hdmi_display.width": {
+      "label": "HDMI width",
+      "widget": "number",
+      "step": 1,
+      "min": 320,
+      "max": 7680,
+      "unit": "px"
+    },
+    "hdmi_gui": {
+      "label": "HDMI GUI",
+      "widget": "group"
+    },
+    "hdmi_gui.buffer_vu_meter": {
+      "label": "Buffer vu meter",
+      "widget": "toggle"
+    },
+    "hdmi_gui.vu_meter_hatch_lines": {
+      "label": "Vu meter hatch lines",
+      "widget": "toggle"
+    },
+    "i2c_oled": {
+      "label": "I2C OLED",
+      "widget": "group"
+    },
+    "i2c_oled.enabled": {
+      "label": "OLED enabled",
+      "widget": "toggle"
+    },
+    "i2c_oled.font_size": {
+      "label": "OLED font size",
+      "widget": "number",
+      "step": 1,
+      "min": 1,
+      "unit": "px"
+    },
+    "i2c_oled.height": {
+      "label": "OLED height",
+      "widget": "number",
+      "step": 1,
+      "min": 1,
+      "unit": "px"
+    },
+    "i2c_oled.values": {
+      "label": "OLED values",
+      "widget": "string-list",
+      "suggestions": [
+        "iso",
+        "fps",
+        "shutter_a",
+        "wb_user",
+        "space_left",
+        "write_speed_to_drive",
+        "resolution",
+        "is_recording",
+        "cpu_load",
+        "cpu_temp",
+        "memory_usage",
+        "tc_cam0",
+        "RECORDING_TC"
+      ]
+    },
+    "i2c_oled.width": {
+      "label": "OLED width",
+      "widget": "number",
+      "step": 1,
+      "min": 1,
+      "unit": "px"
+    },
+    "preview": {
+      "label": "Preview",
+      "widget": "group"
+    },
+    "preview.default_zoom": {
+      "label": "Default preview zoom",
+      "widget": "number",
+      "step": 0.1,
+      "min": 0.1,
+      "unit": "×"
+    },
+    "preview.zoom_steps": {
+      "label": "Preview zoom steps",
+      "widget": "number-list",
+      "step": 0.1,
+      "min": 0.1,
+      "unit": "×"
+    },
+    "quad_rotary_controller": {
+      "label": "Quad rotary controller",
+      "widget": "group"
+    },
+    "quad_rotary_controller.enabled": {
+      "label": "Quad rotary controller enabled",
+      "widget": "toggle"
+    },
+    "quad_rotary_controller.encoders": {
+      "label": "Encoders",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.*.button.double_click_action": {
+      "widget": "action",
+      "label": "Double click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "quad_rotary_controller.encoders.*.button.hold_action": {
+      "widget": "action",
+      "label": "Hold action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "quad_rotary_controller.encoders.*.button.press_action": {
+      "widget": "action",
+      "label": "Press action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "quad_rotary_controller.encoders.*.button.single_click_action": {
+      "widget": "action",
+      "label": "Single click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "quad_rotary_controller.encoders.*.button.triple_click_action": {
+      "widget": "action",
+      "label": "Triple click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "quad_rotary_controller.encoders.*.setting_name": {
+      "widget": "select",
+      "label": "Controlled setting",
+      "options": [
+        "iso",
+        "shutter_a",
+        "fps",
+        "wb"
+      ]
+    },
+    "quad_rotary_controller.encoders.0": {
+      "label": "0",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button": {
+      "label": "Button",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button.double_click_action": {
+      "label": "Double click action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button.double_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.0.button.hold_action": {
+      "label": "Hold action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button.hold_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.0.button.press_action": {
+      "label": "Press action",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.0.button.single_click_action": {
+      "label": "Single click action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button.single_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.0.button.triple_click_action": {
+      "label": "Triple click action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.0.button.triple_click_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.0.setting_name": {
+      "label": "Setting name",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.1": {
+      "label": "1",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.1.button": {
+      "label": "Button",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.1.button.press_action": {
+      "label": "Press action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.1.button.press_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.1.setting_name": {
+      "label": "Setting name",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.2": {
+      "label": "2",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.2.button": {
+      "label": "Button",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.2.button.press_action": {
+      "label": "Press action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.2.button.press_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.2.setting_name": {
+      "label": "Setting name",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.3": {
+      "label": "3",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.3.button": {
+      "label": "Button",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.3.button.hold_action": {
+      "label": "Hold action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.3.button.hold_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.3.button.press_action": {
+      "label": "Press action",
+      "widget": "group"
+    },
+    "quad_rotary_controller.encoders.3.button.press_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "quad_rotary_controller.encoders.3.setting_name": {
+      "label": "Setting name",
+      "widget": "text"
+    },
+    "resolutions": {
+      "label": "Resolutions",
+      "widget": "group"
+    },
+    "resolutions.bit_depths": {
+      "label": "Exposed bit depths",
+      "widget": "number-list",
+      "step": 1,
+      "min": 1,
+      "unit": "bit"
+    },
+    "resolutions.custom_modes": {
+      "label": "Custom sensor modes",
+      "widget": "json-object",
+      "help": "Advanced per-sensor custom mode definitions."
+    },
+    "resolutions.k_steps": {
+      "label": "Exposed K-resolution groups",
+      "widget": "number-list",
+      "step": 0.5,
+      "min": 0.5,
+      "unit": "K"
+    },
+    "rotary_encoders": {
+      "label": "GPIO rotary encoders",
+      "widget": "object-list",
+      "item_label": "Encoder",
+      "item_template": {
+        "enabled": true,
+        "clk_pin": 0,
+        "dt_pin": 1,
+        "button_pin": "None",
+        "pull_up": true,
+        "debounce_time": 0.05,
+        "button_actions": {
+          "press_action": "None",
+          "hold_action": "None"
+        },
+        "encoder_actions": {
+          "rotate_clockwise": {
+            "method": "inc_iso"
+          },
+          "rotate_counterclockwise": {
+            "method": "dec_iso"
+          }
+        }
+      }
+    },
+    "rotary_encoders.*.button_actions.double_click_action": {
+      "widget": "action",
+      "label": "Double click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.button_actions.hold_action": {
+      "widget": "action",
+      "label": "Hold action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.button_actions.press_action": {
+      "widget": "action",
+      "label": "Press action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.button_actions.single_click_action": {
+      "widget": "action",
+      "label": "Single click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.button_actions.triple_click_action": {
+      "widget": "action",
+      "label": "Triple click action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.button_pin": {
+      "widget": "optional-number",
+      "label": "Button BCM pin",
+      "unset_values": [
+        "None",
+        null,
+        ""
+      ],
+      "unset_value": "None",
+      "default": 0,
+      "min": 0,
+      "max": 27,
+      "step": 1
+    },
+    "rotary_encoders.*.clk_pin": {
+      "widget": "number",
+      "label": "CLK BCM pin",
+      "min": 0,
+      "max": 27,
+      "step": 1
+    },
+    "rotary_encoders.*.debounce_time": {
+      "widget": "number",
+      "label": "Button debounce",
+      "min": 0,
+      "step": 0.01,
+      "unit": "s"
+    },
+    "rotary_encoders.*.dt_pin": {
+      "widget": "number",
+      "label": "DT BCM pin",
+      "min": 0,
+      "max": 27,
+      "step": 1
+    },
+    "rotary_encoders.*.enabled": {
+      "widget": "toggle",
+      "label": "Enabled"
+    },
+    "rotary_encoders.*.encoder_actions.rotate_clockwise": {
+      "widget": "action",
+      "label": "Rotate clockwise",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.encoder_actions.rotate_counterclockwise": {
+      "widget": "action",
+      "label": "Rotate counter-clockwise",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "rotary_encoders.*.pull_up": {
+      "widget": "select",
+      "label": "Button input pull",
+      "options": [
+        {
+          "value": "None",
+          "label": "Default"
+        },
+        {
+          "value": true,
+          "label": "Pull-up / active low"
+        },
+        {
+          "value": false,
+          "label": "Pull-down / active high"
+        }
+      ]
+    },
+    "sensors": {
+      "label": "Sensors",
+      "widget": "group"
+    },
+    "sensors.database_file": {
+      "label": "Sensor database file",
+      "widget": "path",
+      "help": "Server-side JSON path; this is not a browser upload."
+    },
+    "settings": {
+      "label": "Settings",
+      "widget": "group"
+    },
+    "settings.auto_storage_preroll": {
+      "label": "Automatic storage pre-roll",
+      "widget": "toggle"
+    },
+    "settings.conform_frame_rate": {
+      "label": "Conform frame rate",
+      "widget": "number",
+      "step": 0.001,
+      "min": 1,
+      "unit": "fps"
+    },
+    "settings.final_sync_analysis_tolerance_frames": {
+      "label": "Final sync analysis tolerance",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "frames"
+    },
+    "settings.light_hz": {
+      "label": "Mains frequencies",
+      "widget": "number-list",
+      "step": 1,
+      "min": 1,
+      "suggestions": [
+        50,
+        60
+      ],
+      "unit": "Hz"
+    },
+    "settings.live_sync_startup_guard_frames": {
+      "label": "Live sync startup guard",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "frames"
+    },
+    "settings.live_sync_warning_tolerance_frames": {
+      "label": "Live sync warning tolerance",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "frames"
+    },
+    "settings.tc_drop_jitter_tolerance_frames": {
+      "label": "Timecode drop-jitter tolerance",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "unit": "frames"
+    },
+    "show_startup_message": {
+      "label": "Legacy startup-message fallback",
+      "widget": "toggle",
+      "help": "Legacy compatibility flag used only when show_welcome_message is absent."
+    },
+    "show_welcome_message": {
+      "label": "Show welcome splash",
+      "widget": "toggle",
+      "help": "Show the configured startup message/image during CineMate startup."
+    },
+    "system": {
+      "label": "System",
+      "widget": "group"
+    },
+    "system.wifi_hotspot": {
+      "label": "Wifi hotspot",
+      "widget": "group"
+    },
+    "system.wifi_hotspot.enabled": {
+      "label": "Wi-Fi hotspot enabled",
+      "widget": "toggle"
+    },
+    "system.wifi_hotspot.name": {
+      "label": "Wi-Fi hotspot name",
+      "widget": "text"
+    },
+    "system.wifi_hotspot.password": {
+      "label": "Wi-Fi hotspot password",
+      "widget": "password"
+    },
+    "three_way_switches": {
+      "widget": "object-list",
+      "label": "Three-way switches",
+      "item_label": "Switch",
+      "item_template": {
+        "pins": [
+          0,
+          1,
+          2
+        ],
+        "state_0_action": {
+          "method": "set_fps",
+          "args": [
+            24
+          ]
+        },
+        "state_1_action": {
+          "method": "set_fps",
+          "args": [
+            25
+          ]
+        },
+        "state_2_action": {
+          "method": "set_fps",
+          "args": [
+            50
+          ]
+        }
+      }
+    },
+    "two_way_switches": {
+      "label": "Two-way switches",
+      "widget": "object-list",
+      "item_label": "Switch",
+      "item_template": {
+        "pin": 0,
+        "state_on_action": {
+          "method": "set_all_lock",
+          "args": [
+            1
+          ]
+        },
+        "state_off_action": {
+          "method": "set_all_lock",
+          "args": [
+            0
+          ]
+        }
+      }
+    },
+    "two_way_switches.*": {
+      "label": "*",
+      "widget": "group"
+    },
+    "two_way_switches.*.pin": {
+      "label": "BCM pin",
+      "widget": "number",
+      "step": 1,
+      "min": 0,
+      "max": 27
+    },
+    "two_way_switches.*.state_off_action": {
+      "label": "State off action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "two_way_switches.*.state_off_action.args": {
+      "label": "Args",
+      "widget": "number-list",
+      "step": "any"
+    },
+    "two_way_switches.*.state_off_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "two_way_switches.*.state_on_action": {
+      "label": "State on action",
+      "widget": "action",
+      "suggestions": [
+        "rec",
+        "set_resolution",
+        "restart_cinemate",
+        "reboot",
+        "toggle_mount",
+        "mount",
+        "unmount",
+        "safe_shutdown",
+        "set_zoom",
+        "inc_zoom",
+        "dec_zoom",
+        "set_shutter_a_sync_mode",
+        "set_all_lock",
+        "set_fps",
+        "set_iso",
+        "set_shutter_a",
+        "set_shutter_a_nom",
+        "set_fps_double",
+        "set_iso_lock",
+        "set_shutter_a_nom_lock",
+        "set_fps_lock",
+        "inc_iso",
+        "dec_iso",
+        "inc_shutter_a",
+        "dec_shutter_a",
+        "inc_fps",
+        "dec_fps",
+        "inc_wb",
+        "dec_wb",
+        "set_wb",
+        "set_anamorphic_factor",
+        "restart_camera"
+      ]
+    },
+    "two_way_switches.*.state_on_action.args": {
+      "label": "Args",
+      "widget": "number-list",
+      "step": "any"
+    },
+    "two_way_switches.*.state_on_action.method": {
+      "label": "Method",
+      "widget": "text"
+    },
+    "welcome_image": {
+      "label": "Welcome image",
+      "widget": "image-upload",
+      "accept": "image/*"
+    },
+    "welcome_message": {
+      "label": "Welcome message",
+      "widget": "text",
+      "help": "Text shown when no welcome image is configured."
+    }
+  }
 }

@@ -30,7 +30,7 @@
     .field textarea{width:100%;min-height:5.5rem;resize:vertical;font-family:ui-monospace,SFMono-Regular,monospace}.field--array textarea{min-height:6rem}.field input[type="text"],.field input[type="number"],.field input[type="password"]{width:100%}
     .bool{display:flex;align-items:center;gap:.55rem}.bool input{width:1.15rem;height:1.15rem}
     .secret-wrap{display:flex;gap:.4rem}.secret-wrap input{flex:1}
-    .semantic-field{gap:.55rem}.semantic-title{font-weight:650}.semantic-help{font-size:.82rem;color:var(--muted);margin-top:-.15rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
+    .semantic-field{gap:.55rem}.semantic-title{font-weight:650}.semantic-help{font-size:.82rem;color:var(--muted);margin-top:-.15rem}.semantic-control{display:flex;gap:.45rem;align-items:center;min-width:0}.semantic-control>input,.semantic-control>select{flex:1;min-width:0}.unit{color:var(--muted);font-size:.82rem;white-space:nowrap}.path-control{font-family:ui-monospace,SFMono-Regular,monospace}.list-editor{display:flex;flex-direction:column;gap:.45rem}.list-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.4rem;align-items:center}.list-item input,.list-item select{width:100%}.list-add{align-self:flex-start}.object-list{display:flex;flex-direction:column;gap:.75rem}.object-card{border:1px solid var(--line);border-radius:8px;background:#0f1318;padding:.7rem}.object-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}.object-card-title{font-weight:650;margin-right:auto}.action-widget{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(10rem,1fr);gap:.55rem}.action-args{display:flex;flex-direction:column;gap:.35rem}.action-arg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem}.action-buttons{display:flex;gap:.4rem;flex-wrap:wrap}.optional-number{display:flex;gap:.55rem;align-items:center}.optional-number input[type=number]{flex:1}.json-object-area{min-height:10rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
     .hidden-by-search{display:none!important}
     dialog{width:min(90vw,70rem);max-height:85vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
     dialog textarea{width:100%;height:60vh;font-family:ui-monospace,SFMono-Regular,monospace}
@@ -146,7 +146,179 @@
   }
 
   function semanticMeta(path){
-    return uiMetadata[pathText(path)] || null;
+    var exact = pathText(path);
+    if (uiMetadata[exact]) return uiMetadata[exact];
+    var wildcard = path.map(function(part){
+      return (/^\[?\d+\]?$/.test(String(part))) ? "*" : part;
+    }).join(".");
+    return uiMetadata[wildcard] || null;
+  }
+
+  function appendSemanticHeader(row, path, meta){
+    if (meta && meta.label) {
+      var title = document.createElement("div");
+      title.className = "semantic-title";
+      title.textContent = meta.label;
+      row.appendChild(title);
+    }
+    var pathLabel = document.createElement("div");
+    pathLabel.className = "path";
+    pathLabel.textContent = pathText(path);
+    row.appendChild(pathLabel);
+    if (meta && meta.help) {
+      var help = document.createElement("div");
+      help.className = "semantic-help";
+      help.textContent = meta.help;
+      row.appendChild(help);
+    }
+  }
+
+  function semanticEqual(a, b, meta){
+    if (meta && Array.isArray(meta.equivalent_none)) {
+      var none = meta.equivalent_none;
+      if (none.some(function(v){ return v === a; }) &&
+          none.some(function(v){ return v === b; })) return true;
+    }
+    return JSON.stringify(a) === JSON.stringify(b);
+  }
+
+  function optionRecord(option){
+    if (option && typeof option === "object" && !Array.isArray(option) &&
+        Object.prototype.hasOwnProperty.call(option, "value")) {
+      return {value: option.value, label: option.label || String(option.value)};
+    }
+    return {value: option, label: String(option)};
+  }
+
+  function makeSelectControl(parent, key, value, meta){
+    var select = document.createElement("select");
+    var records = (meta.options || []).map(optionRecord);
+    var selected = records.findIndex(function(r){
+      return semanticEqual(r.value, value, meta);
+    });
+    if (selected < 0) {
+      records.unshift({value: value, label: "Current: " + String(value)});
+      selected = 0;
+    }
+    records.forEach(function(record, index){
+      var opt = document.createElement("option");
+      opt.value = String(index);
+      opt.textContent = record.label;
+      if (index === selected) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener("change", function(){
+      parent[key] = deepClone(records[Number(select.value)].value);
+      updateDirty();
+    });
+    return select;
+  }
+
+  function makeTextControl(parent, key, value, meta){
+    var wrap = document.createElement("div");
+    wrap.className = "semantic-control";
+    var input = document.createElement("input");
+    input.type = meta.widget === "password" ? "password" : "text";
+    input.value = value == null ? "" : String(value);
+    if (meta.widget === "path") input.classList.add("path-control");
+    if (meta.widget === "read-only") input.readOnly = true;
+    if (Array.isArray(meta.suggestions) && meta.suggestions.length) {
+      var list = document.createElement("datalist");
+      list.id = "choices-" + Math.random().toString(36).slice(2);
+      meta.suggestions.forEach(function(choice){
+        var option = document.createElement("option");
+        option.value = String(choice);
+        list.appendChild(option);
+      });
+      input.setAttribute("list", list.id);
+      wrap.appendChild(list);
+    }
+    if (meta.widget !== "read-only") {
+      input.addEventListener("input", function(){
+        parent[key] = input.value;
+        updateDirty();
+      });
+    }
+    wrap.insertBefore(input, wrap.firstChild);
+    if (meta.widget === "password") {
+      var reveal = document.createElement("button");
+      reveal.type = "button";
+      reveal.textContent = "Show";
+      reveal.addEventListener("click", function(){
+        var showing = input.type === "text";
+        input.type = showing ? "password" : "text";
+        reveal.textContent = showing ? "Show" : "Hide";
+      });
+      wrap.appendChild(reveal);
+    }
+    return wrap;
+  }
+
+  function makeNumberControl(parent, key, value, meta){
+    var wrap = document.createElement("div");
+    wrap.className = "semantic-control";
+    var input = document.createElement("input");
+    input.type = "number";
+    input.value = String(value);
+    input.step = meta.step == null ? "any" : String(meta.step);
+    if (meta.min != null) input.min = String(meta.min);
+    if (meta.max != null) input.max = String(meta.max);
+    input.addEventListener("input", function(){
+      var n = Number(input.value);
+      if (Number.isFinite(n)) parent[key] = n;
+      updateDirty();
+    });
+    wrap.appendChild(input);
+    if (meta.unit) {
+      var unit = document.createElement("span");
+      unit.className = "unit";
+      unit.textContent = meta.unit;
+      wrap.appendChild(unit);
+    }
+    return wrap;
+  }
+
+  function isUnsetValue(value, meta){
+    return (meta.unset_values || [null, "None", ""]).some(function(v){
+      return JSON.stringify(v) === JSON.stringify(value);
+    });
+  }
+
+  function makeOptionalNumberControl(parent, key, value, meta){
+    var wrap = document.createElement("div");
+    wrap.className = "optional-number";
+    var use = document.createElement("input");
+    use.type = "checkbox";
+    use.checked = !isUnsetValue(value, meta);
+    var caption = document.createElement("span");
+    caption.textContent = "Set value";
+    var input = document.createElement("input");
+    input.type = "number";
+    input.step = meta.step == null ? "any" : String(meta.step);
+    if (meta.min != null) input.min = String(meta.min);
+    if (meta.max != null) input.max = String(meta.max);
+    input.disabled = !use.checked;
+    input.value = use.checked ? String(value) : String(meta.default == null ? 0 : meta.default);
+    use.addEventListener("change", function(){
+      input.disabled = !use.checked;
+      parent[key] = use.checked ? Number(input.value) : deepClone(meta.unset_value);
+      updateDirty();
+    });
+    input.addEventListener("input", function(){
+      var n = Number(input.value);
+      if (use.checked && Number.isFinite(n)) parent[key] = n;
+      updateDirty();
+    });
+    wrap.appendChild(use);
+    wrap.appendChild(caption);
+    wrap.appendChild(input);
+    if (meta.unit) {
+      var unit = document.createElement("span");
+      unit.className = "unit";
+      unit.textContent = meta.unit;
+      wrap.appendChild(unit);
+    }
+    return wrap;
   }
 
   function setManagedImagePreview(img, pathValue){
@@ -272,9 +444,254 @@
     return row;
   }
 
+  function makePrimitiveListField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = pathText(path).toLowerCase();
+    appendSemanticHeader(row, path, meta);
+
+    var list = document.createElement("div");
+    list.className = "list-editor";
+    var numeric = meta.widget === "number-list" ||
+      (value.length && value.every(function(v){ return typeof v === "number"; }));
+    value.forEach(function(item, index){
+      var line = document.createElement("div");
+      line.className = "list-item";
+      var input = document.createElement("input");
+      input.type = numeric ? "number" : "text";
+      input.value = String(item);
+      if (numeric) {
+        input.step = meta.step == null ? "any" : String(meta.step);
+        if (meta.min != null) input.min = String(meta.min);
+        if (meta.max != null) input.max = String(meta.max);
+      }
+      if (!numeric && Array.isArray(meta.suggestions)) {
+        var dataList = document.createElement("datalist");
+        dataList.id = "list-" + Math.random().toString(36).slice(2);
+        meta.suggestions.forEach(function(choice){
+          var option = document.createElement("option");
+          option.value = String(choice);
+          dataList.appendChild(option);
+        });
+        input.setAttribute("list", dataList.id);
+        line.appendChild(dataList);
+      }
+      input.addEventListener("input", function(){
+        if (numeric) {
+          var n = Number(input.value);
+          if (Number.isFinite(n)) value[index] = n;
+        } else {
+          value[index] = input.value;
+        }
+        updateDirty();
+      });
+      var remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", function(){
+        value.splice(index, 1);
+        render();
+      });
+      line.insertBefore(input, line.firstChild);
+      line.appendChild(remove);
+      list.appendChild(line);
+    });
+    var add = document.createElement("button");
+    add.type = "button";
+    add.className = "list-add";
+    add.textContent = "Add value";
+    add.addEventListener("click", function(){
+      value.push(numeric ? (meta.default_item == null ? 0 : meta.default_item) : "");
+      render();
+    });
+    list.appendChild(add);
+    row.appendChild(list);
+    return row;
+  }
+
+  function makeJsonObjectField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = pathText(path).toLowerCase();
+    appendSemanticHeader(row, path, meta);
+    var area = document.createElement("textarea");
+    area.className = "json-object-area";
+    area.value = JSON.stringify(value, null, 2);
+    area.addEventListener("change", function(){
+      try {
+        var parsed = JSON.parse(area.value);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          throw new Error("must remain a JSON object");
+        }
+        parent[key] = parsed;
+        area.setCustomValidity("");
+      } catch(e) {
+        area.setCustomValidity("Invalid JSON object");
+        setMessage("Invalid object in " + pathText(path) + ": " + e.message, "bad");
+      }
+      updateDirty();
+    });
+    row.appendChild(area);
+    return row;
+  }
+
+  function makeObjectListField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = pathText(path).toLowerCase();
+    appendSemanticHeader(row, path, meta);
+    var list = document.createElement("div");
+    list.className = "object-list";
+
+    value.forEach(function(item, index){
+      var card = document.createElement("div");
+      card.className = "object-card";
+      var head = document.createElement("div");
+      head.className = "object-card-head";
+      var title = document.createElement("div");
+      title.className = "object-card-title";
+      title.textContent = (meta.item_label || "Item") + " " + (index + 1);
+      var remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "Remove";
+      remove.addEventListener("click", function(){
+        value.splice(index, 1);
+        render();
+      });
+      head.appendChild(title);
+      head.appendChild(remove);
+      card.appendChild(head);
+      var inside = document.createElement("div");
+      inside.className = "inside";
+      if (item && typeof item === "object" && !Array.isArray(item)) {
+        renderObject(inside, item, path.concat(["[" + index + "]"]), false);
+      } else {
+        var note = document.createElement("div");
+        note.className = "semantic-help";
+        note.textContent = "This item is not an object; use View JSON to repair it.";
+        inside.appendChild(note);
+      }
+      card.appendChild(inside);
+      list.appendChild(card);
+    });
+
+    var add = document.createElement("button");
+    add.type = "button";
+    add.className = "list-add";
+    add.textContent = "Add " + (meta.item_label || "item").toLowerCase();
+    add.addEventListener("click", function(){
+      value.push(deepClone(meta.item_template || {}));
+      render();
+    });
+    list.appendChild(add);
+    row.appendChild(list);
+    return row;
+  }
+
+  function makeActionField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = pathText(path).toLowerCase();
+    appendSemanticHeader(row, path, meta);
+
+    var action = (value && typeof value === "object" && !Array.isArray(value))
+      ? value : null;
+    var methodValue = action ? String(action.method || "") :
+      ((typeof value === "string" && value !== "None") ? value : "");
+    var args = action && Array.isArray(action.args) ? action.args : [];
+
+    var widget = document.createElement("div");
+    widget.className = "action-widget";
+    var methodWrap = document.createElement("div");
+    var method = document.createElement("input");
+    method.type = "text";
+    method.placeholder = "None / method name";
+    method.value = methodValue;
+    if (Array.isArray(meta.suggestions) && meta.suggestions.length) {
+      var dataList = document.createElement("datalist");
+      dataList.id = "actions-" + Math.random().toString(36).slice(2);
+      meta.suggestions.forEach(function(choice){
+        var option = document.createElement("option");
+        option.value = choice;
+        dataList.appendChild(option);
+      });
+      method.setAttribute("list", dataList.id);
+      methodWrap.appendChild(dataList);
+    }
+    method.addEventListener("change", function(){
+      var name = method.value.trim();
+      if (!name || name.toLowerCase() === "none") {
+        parent[key] = "None";
+      } else {
+        var existingArgs = (parent[key] && typeof parent[key] === "object" &&
+          Array.isArray(parent[key].args)) ? parent[key].args : [];
+        parent[key] = {method: name};
+        if (existingArgs.length) parent[key].args = existingArgs;
+      }
+      render();
+    });
+    methodWrap.insertBefore(method, methodWrap.firstChild);
+
+    var argsWrap = document.createElement("div");
+    argsWrap.className = "action-args";
+    args.forEach(function(arg, index){
+      var line = document.createElement("div");
+      line.className = "action-arg";
+      var input = document.createElement("input");
+      input.type = typeof arg === "number" ? "number" : "text";
+      input.step = "any";
+      input.value = String(arg);
+      input.addEventListener("input", function(){
+        if (!parent[key] || typeof parent[key] !== "object") return;
+        if (!Array.isArray(parent[key].args)) parent[key].args = [];
+        if (input.type === "number") {
+          var n = Number(input.value);
+          if (Number.isFinite(n)) parent[key].args[index] = n;
+        } else {
+          parent[key].args[index] = input.value;
+        }
+        updateDirty();
+      });
+      var remove = document.createElement("button");
+      remove.type = "button";
+      remove.textContent = "− arg";
+      remove.addEventListener("click", function(){
+        if (parent[key] && typeof parent[key] === "object" &&
+            Array.isArray(parent[key].args)) {
+          parent[key].args.splice(index, 1);
+          if (!parent[key].args.length) delete parent[key].args;
+        }
+        render();
+      });
+      line.appendChild(input);
+      line.appendChild(remove);
+      argsWrap.appendChild(line);
+    });
+    var add = document.createElement("button");
+    add.type = "button";
+    add.textContent = "+ argument";
+    add.disabled = !methodValue;
+    add.addEventListener("click", function(){
+      if (!parent[key] || typeof parent[key] !== "object") {
+        var name = method.value.trim();
+        if (!name) return;
+        parent[key] = {method: name, args: []};
+      }
+      if (!Array.isArray(parent[key].args)) parent[key].args = [];
+      parent[key].args.push(0);
+      render();
+    });
+    argsWrap.appendChild(add);
+
+    widget.appendChild(methodWrap);
+    widget.appendChild(argsWrap);
+    row.appendChild(widget);
+    return row;
+  }
+
   function makeScalarField(parent, key, value, path){
-    var meta = semanticMeta(path);
-    if (meta && meta.widget === "image-upload") {
+    var meta = semanticMeta(path) || {};
+    if (meta.widget === "image-upload") {
       return makeImageUploadField(parent, key, value, path, meta);
     }
 
@@ -284,75 +701,42 @@
     if (path.length === 1 && key === "$schema") {
       row.classList.add("metadata-field", "field--wide");
     }
-    if (value === null || (
-      typeof value === "string" &&
-      (value.length > 48 || isSecretPath(path))
-    )) {
+    if (value === null || meta.widget === "path" || meta.widget === "password" ||
+        (typeof value === "string" && value.length > 48)) {
       row.classList.add("field--wide");
     }
 
-    var label = document.createElement("div");
-    label.className = "path";
-    label.textContent = pathText(path);
-    row.appendChild(label);
+    appendSemanticHeader(row, path, meta);
 
     var control;
-    if (typeof value === "boolean") {
+    if (meta.widget === "select") {
+      control = makeSelectControl(parent, key, value, meta);
+    } else if (meta.widget === "optional-number") {
+      control = makeOptionalNumberControl(parent, key, value, meta);
+    } else if (meta.widget === "number") {
+      control = makeNumberControl(parent, key, value, meta);
+    } else if (["text", "password", "path", "read-only", "combobox"].indexOf(meta.widget) >= 0) {
+      control = makeTextControl(parent, key, value, meta);
+    } else if (typeof value === "boolean" || meta.widget === "toggle") {
       control = document.createElement("label");
       control.className = "bool";
       var checkbox = document.createElement("input");
       checkbox.type = "checkbox";
-      checkbox.checked = value;
+      checkbox.checked = !!value;
+      var stateText = document.createTextNode(checkbox.checked ? "enabled" : "disabled");
       checkbox.addEventListener("change", function(){
         parent[key] = checkbox.checked;
+        stateText.nodeValue = checkbox.checked ? "enabled" : "disabled";
         updateDirty();
       });
       control.appendChild(checkbox);
-      control.appendChild(document.createTextNode(value ? "enabled" : "disabled"));
-      checkbox.addEventListener("change", function(){
-        control.lastChild.nodeValue = checkbox.checked ? "enabled" : "disabled";
-      });
+      control.appendChild(stateText);
     } else if (typeof value === "number") {
-      control = document.createElement("input");
-      control.type = "number";
-      control.step = "any";
-      control.value = String(value);
-      control.addEventListener("input", function(){
-        var n = Number(control.value);
-        if (Number.isFinite(n)) parent[key] = n;
-        updateDirty();
-      });
+      control = makeNumberControl(parent, key, value, {step:"any"});
     } else if (typeof value === "string") {
-      if (isSecretPath(path)) {
-        control = document.createElement("div");
-        control.className = "secret-wrap";
-        var secret = document.createElement("input");
-        secret.type = "password";
-        secret.value = value;
-        secret.autocomplete = "new-password";
-        secret.addEventListener("input", function(){
-          parent[key] = secret.value;
-          updateDirty();
-        });
-        var reveal = document.createElement("button");
-        reveal.type = "button";
-        reveal.textContent = "Show";
-        reveal.addEventListener("click", function(){
-          var showing = secret.type === "text";
-          secret.type = showing ? "password" : "text";
-          reveal.textContent = showing ? "Show" : "Hide";
-        });
-        control.appendChild(secret);
-        control.appendChild(reveal);
-      } else {
-        control = document.createElement("input");
-        control.type = "text";
-        control.value = value;
-        control.addEventListener("input", function(){
-          parent[key] = control.value;
-          updateDirty();
-        });
-      }
+      control = makeTextControl(parent, key, value, {
+        widget: isSecretPath(path) ? "password" : "text"
+      });
     } else {
       control = document.createElement("textarea");
       control.value = JSON.stringify(value, null, 2);
@@ -360,7 +744,6 @@
         try {
           parent[key] = JSON.parse(control.value);
           control.setCustomValidity("");
-          setMessage("Value parsed.", "good");
         } catch(e) {
           control.setCustomValidity("Invalid JSON value");
           setMessage("Invalid JSON in " + pathText(path) + ": " + e.message, "bad");
@@ -376,44 +759,43 @@
     Object.keys(obj).forEach(function(key){
       var value = obj[key];
       var next = path.concat([key]);
-      if (value && typeof value === "object" && !Array.isArray(value)) {
-        var details = document.createElement("details");
-        details.open = topLevel;
-        details.className = topLevel ? "group" : "nested";
-        details.dataset.search = pathText(next).toLowerCase();
-        var summary = document.createElement("summary");
-        summary.textContent = key;
-        details.appendChild(summary);
-        var inside = document.createElement("div");
-        inside.className = "inside";
-        renderObject(inside, value, next, false);
-        details.appendChild(inside);
-        container.appendChild(details);
+      var meta = semanticMeta(next) || {};
+
+      if (meta.widget === "action") {
+        container.appendChild(makeActionField(obj, key, value, next, meta));
       } else if (Array.isArray(value)) {
-        var row = document.createElement("div");
-        row.className = "field field--wide field--array";
-        row.dataset.search = pathText(next).toLowerCase();
-        var label = document.createElement("div");
-        label.className = "path";
-        label.textContent = pathText(next);
-        var area = document.createElement("textarea");
-        area.value = JSON.stringify(value, null, 2);
-        area.addEventListener("change", function(){
-          try {
-            var parsed = JSON.parse(area.value);
-            if (!Array.isArray(parsed)) throw new Error("must remain a JSON array");
-            obj[key] = parsed;
-            area.setCustomValidity("");
-            setMessage("Array parsed.", "good");
-          } catch(e) {
-            area.setCustomValidity("Invalid JSON array");
-            setMessage("Invalid array in " + pathText(next) + ": " + e.message, "bad");
+        if (meta.widget === "object-list" ||
+            (value.length && value.every(function(v){
+              return v && typeof v === "object" && !Array.isArray(v);
+            }))) {
+          container.appendChild(makeObjectListField(obj, key, value, next, meta));
+        } else {
+          container.appendChild(makePrimitiveListField(obj, key, value, next, meta));
+        }
+      } else if (value && typeof value === "object") {
+        if (meta.widget === "json-object") {
+          container.appendChild(makeJsonObjectField(obj, key, value, next, meta));
+        } else {
+          var details = document.createElement("details");
+          details.open = topLevel;
+          details.className = topLevel ? "group" : "nested";
+          details.dataset.search = pathText(next).toLowerCase();
+          var summary = document.createElement("summary");
+          summary.textContent = meta.label || key;
+          details.appendChild(summary);
+          if (meta.help) {
+            var help = document.createElement("div");
+            help.className = "semantic-help";
+            help.style.padding = "0 1rem .5rem";
+            help.textContent = meta.help;
+            details.appendChild(help);
           }
-          updateDirty();
-        });
-        row.appendChild(label);
-        row.appendChild(area);
-        container.appendChild(row);
+          var inside = document.createElement("div");
+          inside.className = "inside";
+          renderObject(inside, value, next, false);
+          details.appendChild(inside);
+          container.appendChild(details);
+        }
       } else {
         container.appendChild(makeScalarField(obj, key, value, next));
       }
