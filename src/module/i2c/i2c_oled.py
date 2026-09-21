@@ -46,7 +46,7 @@ class I2cOled(threading.Thread):
     def _load_font(self):
         """Return an ImageFont; always succeeds."""
         candidates = [
-            Path(__file__).parent / "../../resources/fonts/Arial.ttf",
+            Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
             Path("/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf"),
         ]
         for path in candidates:

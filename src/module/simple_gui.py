@@ -417,9 +417,13 @@ class SimpleGUI(threading.Thread):
 
     def setup_resources(self):
         self.current_directory = os.path.dirname(os.path.abspath(__file__))
-        self.regular_font_path = os.path.join(self.current_directory, '../../resources/fonts/DIN2014-Regular.ttf')
-        self.bold_font_path = os.path.join(self.current_directory, '../../resources/fonts/DIN2014-Bold.ttf')  # Add bold font path
-        self.font_path = os.path.join(self.current_directory, '../../resources/fonts/DIN2014-Bold.ttf')
+        bundled_regular = os.path.join(self.current_directory, '../../resources/fonts/DIN2014-Regular.ttf')
+        bundled_bold = os.path.join(self.current_directory, '../../resources/fonts/DIN2014-Bold.ttf')
+        system_regular = '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf'
+        system_bold = '/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf'
+        self.regular_font_path = bundled_regular if os.path.isfile(bundled_regular) else system_regular
+        self.bold_font_path = bundled_bold if os.path.isfile(bundled_bold) else system_bold
+        self.font_path = self.bold_font_path
 
         # Define layout directly as a dict (not nested in another dict)
         self.layout = {

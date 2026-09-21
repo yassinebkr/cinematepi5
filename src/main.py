@@ -487,7 +487,7 @@ def graphic_splash(text="THIS IS A COOL MACHINE", image_path=None):
             logging.error(f"Failed to load splash image: {e}")
     else:
         font = ImageFont.truetype(
-            "/home/pi/cinemate/resources/fonts/DIN2014-Regular.ttf",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
             size=100,
         )
         draw = ImageDraw.Draw(img)

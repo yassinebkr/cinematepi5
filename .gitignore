@@ -26,6 +26,7 @@ share/python-wheeler/
 .installed.cfg
 *.egg
 MANIFEST
+.venv/
 
 # PyInstaller
 # Usually these files are written by a python script from a template
@@ -130,6 +131,12 @@ ENV/
 # mkdocs documentation
 /site
 
+# Generated docs output
+docs/renders/*.pdf
+
+# Local dynamic-resolution learning output
+src/dynamic_resolution_observed_profiles.json
+
 # VS Code
 .vscode
 
@@ -140,7 +147,7 @@ ENV/
 *.sqlite
 
 # Django
-*.log
+#*.log
 *.pot
 *.db
 
@@ -163,6 +170,12 @@ $RECYCLE.BIN/
 .AppleDouble
 .LSOverride
 
+# Frontend dependencies and generated app assets
+src/module/app/node_modules/
+src/module/app/dist/
+src/module/app/build/
+src/module/app/.vite/
+
 # Directories
 __pycache__/
 
@@ -171,7 +184,7 @@ __pycache__/
 *.pyo
 *.egg-info/
 *.egg
-*.log
+#*.log
 
 # Windows image file caches
 Thumbs.db
@@ -191,10 +204,18 @@ $RECYCLE.BIN/
 # Directories
 __pycache__/
 tests/
+src/logs/*.log
 
-# Files
+# Cinemate settings file
+settings.json
+
+# Runtime/generated local state
+**/__pycache__/
 *.pyc
-*.pyo
-*.egg-info/
-*.egg
-*.log
+src/logs/
+src/settings.json.bak-*
+luts/third_party_dev/
+
+# Fonts are expected from the host OS unless explicitly redistributable.
+resources/fonts/DIN2014-*.ttf
+src/module/app/static/DIN2014-*.ttf
