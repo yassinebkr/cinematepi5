@@ -62,6 +62,42 @@ class ConfigLoaderTests(unittest.TestCase):
                 load_settings(p)
         self.assertIn('JSON',cm.exception.summary)
 
+    def test_known_object_section_rejects_wrong_type_with_path(self):
+        with tempfile.TemporaryDirectory() as td:
+            p = self.write(Path(td), {"preview": "broken"})
+            with self.assertRaises(SettingsLoadError) as cm:
+                load_settings(p)
+        self.assertIn("invalid structure", cm.exception.summary)
+        self.assertIn("preview", cm.exception.detail)
+        self.assertIn("object", cm.exception.detail)
+
+    def test_nested_camera_object_rejects_wrong_type_with_path(self):
+        data = {"camera": {"cam0": {"geometry": []}}}
+        with tempfile.TemporaryDirectory() as td:
+            p = self.write(Path(td), data)
+            with self.assertRaises(SettingsLoadError) as cm:
+                load_settings(p)
+        self.assertIn("camera.cam0.geometry", cm.exception.detail)
+
+    def test_numeric_step_table_rejects_non_numeric_member(self):
+        data = {"arrays": {"fps_steps": [24, "twenty-five", 30]}}
+        with tempfile.TemporaryDirectory() as td:
+            p = self.write(Path(td), data)
+            with self.assertRaises(SettingsLoadError) as cm:
+                load_settings(p)
+        self.assertIn("arrays.fps_steps[1]", cm.exception.detail)
+
+    def test_unknown_top_level_key_remains_allowed(self):
+        with tempfile.TemporaryDirectory() as td:
+            cfg = load_settings(self.write(Path(td), {"future_feature": {"x": 1}}))
+        self.assertEqual(cfg["future_feature"], {"x": 1})
+
+    def test_current_repository_settings_pass_structural_validation(self):
+        current = Path(__file__).resolve().parents[1] / "src" / "settings.json"
+        cfg = load_settings(current)
+        self.assertIn("camera", cfg)
+
+
     def test_non_utf8_raises_actionable_error(self):
         with tempfile.TemporaryDirectory() as td:
             p=Path(td)/'settings.json'

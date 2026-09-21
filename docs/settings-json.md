@@ -1,6 +1,8 @@
 # Settings.json file
 
-This file controls how the camera behaves and how your buttons, switches and displays are mapped. It lives in `~/cinemate/src/settings.json`. You can edit it with any text editor; the settings take effect the next time you start Cinemate.
+This file controls how the camera behaves and how your buttons, switches and displays are mapped. It lives in ~/cinemate/src/settings.json. CineMate deliberately uses strict JSON: comments and trailing commas are not accepted. Settings take effect the next time you start CineMate.
+
+For terminal editing, use editsettings rather than opening the live file directly. The helper edits a temporary copy, validates it with CineMate's real configuration loader, detects concurrent changes, creates a private backup, and only then atomically replaces the live file. Invalid edits never touch settings.json.
 
 !!! note ""
     The prebuilt image works out of the box. You do **not** need to edit `settings.json` to start shooting. This page is a reference for when you want to customise hardware controls and behaviour.
@@ -8,9 +10,11 @@ This file controls how the camera behaves and how your buttons, switches and dis
 The image ships with a stock `settings.json` that already holds working defaults for every section below — button and switch mappings, preview, and audio (for example, a 2-frame audio timecode offset on both microphone paths). Edit it only to change a mapping or tune behaviour.
 
 !!! tip ""
-    For easy editing of settings on the preinstalled image file, type `editsettings` anywhere in Raspberry Pi terminal.
+    Type editsettings anywhere in a Raspberry Pi terminal. It opens the configured VISUAL/EDITOR (or nano), then validates and safely commits the edit. Backups are stored under ~/.local/state/cinemate/settings-backups/.
 
 The configuration is structured as JSON. Each top‑level key describes a feature area of the system. Below is a tour of every section and what the options do.
+
+The current settings.schema.json is useful as editor/tooling metadata but is not yet the complete runtime contract. CineMate's config_loader is the authoritative validator during this hardening phase; unknown keys remain allowed for compatibility while known runtime sections are type-checked.
 
 ## welcome message
 

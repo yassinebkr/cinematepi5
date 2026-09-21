@@ -263,6 +263,42 @@ class ValidationLadderTests(TempCase):
         self.assertFalse(result.ok)
         self.assertEqual(result.rung, rc.VALIDATE_RUNG_STDLIB)
 
+    def test_candidate_specific_validator_crash_is_rejected_not_fallen_open(self):
+        calls = []
+
+        def runner(cmd, **kw):
+            calls.append(list(cmd))
+            if len(calls) == 1:
+                return subprocess.CompletedProcess(
+                    cmd, 3, "AttributeError: candidate broke loader", ""
+                )
+            return subprocess.CompletedProcess(cmd, 0, "", "")
+
+        result = rc.validate_settings_text(
+            '{"preview": "broken"}',
+            python_bin=Path(sys.executable),
+            src_dir=ROOT / "src",
+            runner=runner,
+        )
+
+        self.assertFalse(result.ok)
+        self.assertEqual(result.rung, rc.VALIDATE_RUNG_INTERPRETER)
+        self.assertTrue(result.validated)
+        self.assertIn("AttributeError", result.message)
+        self.assertEqual(len(calls), 2)
+
+    def test_real_structural_error_is_rejected_by_cinemate_validator(self):
+        result = rc.validate_settings_text(
+            '{"preview": "broken"}',
+            python_bin=Path(sys.executable),
+            src_dir=ROOT / "src",
+        )
+        self.assertFalse(result.ok)
+        self.assertEqual(result.rung, rc.VALIDATE_RUNG_INTERPRETER)
+        self.assertIn("preview", result.message)
+        self.assertIn("object", result.message)
+
+
     def test_falls_to_rung_two_when_the_interpreter_validator_itself_breaks(self):
         runner = fake_run(returncode=3, stdout="ImportError: no module")
         result = rc.validate_settings_text(

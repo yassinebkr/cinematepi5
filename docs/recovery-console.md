@@ -96,14 +96,15 @@ The recovery editor works on the configuration actually used by this branch:
 
     /home/pi/cinemate/src/settings.json
 
-A save follows a two-rung validation path:
+A save uses a fail-closed validation ladder:
 
-1. use the system Python interpreter with CineMate's own module.config_loader
-2. if that validator cannot run, use Python's standard-library JSON parser and require a top-level object
+1. run CineMate's own config_loader against the candidate; syntax, UTF-8, root shape and known runtime structure must pass
+2. if that validator exits unexpectedly, run the same validator against a known-good empty object
+3. only when the known-good self-test also fails is the CineMate validator considered unavailable, allowing fallback to Python's strict standard-library JSON parser
 
-A malformed file is never written. The fallback validator is part of Python's standard library, so recovery does not need the CineMate virtual environment merely to reject broken JSON.
+A candidate-specific loader failure is therefore rejected rather than silently downgraded to syntax-only validation. The fallback remains available when CineMate's interpreter/import path is genuinely broken, which preserves the recovery console's independence.
 
-This branch uses strict JSON. Comments and trailing commas are rejected by the recovery editor for the same reason they are rejected by the main runtime.
+This branch uses strict JSON everywhere. Comments and trailing commas are rejected by normal startup, the recovery editor and the terminal editsettings helper.
 
 ## Atomic writes and backups
 

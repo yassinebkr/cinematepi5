@@ -406,7 +406,7 @@ for dir in /usr/local/share/libcamera/ipa/rpi/pisp; do
 done
 ```
 
-Every mode a sensor supports is listed in `resources/sensors.json`, so all of them stay available to the system. Cinemate's stock `settings.json` then exposes only the practical ones in the UI — for the IMX283 that is the ≥25 fps 2.7K and 4K crops (`k_steps: [3, 4]`). Add `5.5` to also show the IMX283 5K modes, or set `k_steps` to your sensor's sizes (for example `[1.5, 2, 4]` for IMX477). To check or edit the list, type `editsettings` in the Pi terminal, or edit `/home/pi/cinemate/src/settings.json` directly:
+Every mode a sensor supports is listed in `resources/sensors.json`, so all of them stay available to the system. Cinemate's stock `settings.json` then exposes only the practical ones in the UI — for the IMX283 that is the ≥25 fps 2.7K and 4K crops (`k_steps: [3, 4]`). Add `5.5` to also show the IMX283 5K modes, or set `k_steps` to your sensor's sizes (for example `[1.5, 2, 4]` for IMX477). To check or edit the list, type editsettings in the Pi terminal. The helper validates a temporary copy before replacing the live settings file:
 
 ```json
 "resolutions": {
@@ -416,7 +416,9 @@ Every mode a sensor supports is listed in `resources/sensors.json`, so all of th
 }
 ```
 
-Restart Cinemate after changing `settings.json`.
+Restart CineMate after changing settings.json.
+
+editsettings is the recommended write path. It validates strict JSON and known runtime structure, creates a backup, detects concurrent edits, and commits with an atomic replace. Directly editing the live file with sudo nano bypasses those protections and is not recommended.
 
 #### IR filter switch script
 
@@ -739,7 +741,7 @@ alias cinemate-env='source /home/pi/.cinemate-env/bin/activate'
 alias cinemate='/home/pi/run_cinemate.sh'
 alias editboot='sudo nano /boot/firmware/config.txt'
 alias editcmdline='sudo nano /boot/firmware/cmdline.txt'
-alias editsettings='sudo nano /home/pi/cinemate/src/settings.json'
+alias editsettings='/home/pi/cinemate/tools/cinemate-edit-settings.py'
 ```
 
 Exit with Ctrl+x. System will ask you to save the file. Press "y" and then enter.

@@ -30,6 +30,8 @@ all: help
 # Install / update the service file
 # -------------------------------------------------------------------
 install:
+	chmod 755 tools/cinemate-edit-settings.py tools/install-editsettings-alias.sh
+	./tools/install-editsettings-alias.sh "$(CURDIR)"
 	sudo install -m 755 $(LOCAL_SCRIPT_FILE) $(SCRIPT_PATH)
 	sudo install -m 755 $(LOCAL_FAILURE_DISPLAY_SCRIPT) $(FAILURE_DISPLAY_SCRIPT_PATH)
 	sudo install -m 755 $(LOCAL_CONSOLE_HANDOFF_SCRIPT) $(CONSOLE_HANDOFF_SCRIPT_PATH)

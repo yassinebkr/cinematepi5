@@ -119,10 +119,10 @@ The recovery console is therefore no longer part of the pending upstream-feature
 
 | Feature family | Assessment |
 | --- | --- |
-| Settings editor | High value; large subsystem. Integrate after configuration format is finalized. |
-| settings.jsonc preservation | High value for human-edited settings; requires migration design from current JSON runtime. |
+| Settings editor | In progress: strict-JSON structural validation, fail-closed recovery validation and safe terminal editsettings are integrated; structured UI remains to evaluate. |
+| settings.jsonc preservation | Deferred. This hardening phase keeps one strict-JSON contract across runtime, recovery and terminal editing; JSONC requires a separate migration design. |
 | Web API, SSE and UDP control | Useful external-control surface; command authorization and destructive actions need review. |
-| No-camera startup follow-up | Continue testing the remaining degraded-state paths before moving on. |
+| No-camera startup follow-up | Integrated: degraded startup/state, camera-control locking, truthful local/web UI and fresh-Redis paths are covered by dedicated regression tests. |
 | DNG thumbnails | Useful for RAW inspection and playback; must coexist with current proxy Clips workflow. |
 | Playback pane | Reconcile with the existing proxy-based Clips interface rather than replacing it. |
 | CineMate Log | Relevant to IMX283 but requires dedicated CinemaDNG and Resolve validation. |

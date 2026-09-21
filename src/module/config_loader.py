@@ -119,6 +119,267 @@ def _format_error_context(path: Path, line: int, column: int, radius: int = 1) -
     return "\n".join(snippet)
 
 
+def _json_type_name(value) -> str:
+    if isinstance(value, dict):
+        return "object"
+    if isinstance(value, list):
+        return "array"
+    if isinstance(value, bool):
+        return "boolean"
+    if isinstance(value, str):
+        return "string"
+    if isinstance(value, (int, float)):
+        return "number"
+    if value is None:
+        return "null"
+    return type(value).__name__
+
+
+def _structure_error(
+    filename: Path,
+    path: str,
+    expected: str,
+    value,
+) -> SettingsLoadError:
+    found = _json_type_name(value)
+    return SettingsLoadError(
+        filename,
+        "settings.json has invalid structure",
+        f"{path} must be a JSON {expected}, but found {found}.",
+        f"Change {path} to a JSON {expected}. Unknown keys are allowed, "
+        "but known CineMate sections must keep the expected container type.",
+    )
+
+
+def _require_object(parent: dict, key: str, path: str, filename: Path):
+    if key not in parent:
+        return None
+    value = parent[key]
+    if not isinstance(value, dict):
+        raise _structure_error(filename, path, "object", value)
+    return value
+
+
+def _require_array(parent: dict, key: str, path: str, filename: Path):
+    if key not in parent:
+        return None
+    value = parent[key]
+    if not isinstance(value, list):
+        raise _structure_error(filename, path, "array", value)
+    return value
+
+
+def _require_number(
+    parent: dict,
+    key: str,
+    path: str,
+    filename: Path,
+    *,
+    positive: bool = False,
+    nonnegative: bool = False,
+):
+    if key not in parent:
+        return None
+    value = parent[key]
+    if isinstance(value, bool) or not isinstance(value, (int, float)):
+        raise _structure_error(filename, path, "number", value)
+    if positive and value <= 0:
+        raise SettingsLoadError(
+            filename,
+            "settings.json has invalid value",
+            f"{path} must be greater than 0, but found {value!r}.",
+            f"Set {path} to a positive number.",
+        )
+    if nonnegative and value < 0:
+        raise SettingsLoadError(
+            filename,
+            "settings.json has invalid value",
+            f"{path} must be 0 or greater, but found {value!r}.",
+            f"Set {path} to a non-negative number.",
+        )
+    return value
+
+
+def _require_numeric_array(parent: dict, key: str, path: str, filename: Path):
+    values = _require_array(parent, key, path, filename)
+    if values is None:
+        return None
+    for index, value in enumerate(values):
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise _structure_error(
+                filename, f"{path}[{index}]", "number", value
+            )
+    return values
+
+
+def _validate_settings_structure(settings: dict, filename: Path) -> None:
+    """Validate only shapes the runtime directly dereferences.
+
+    This is intentionally conservative rather than pretending the current
+    settings.schema.json is complete. Unknown keys remain allowed for
+    compatibility; known containers and numeric tables must have usable types.
+    """
+    object_sections = (
+        "gpio_output",
+        "arrays",
+        "settings",
+        "system",
+        "analog_controls",
+        "free_mode",
+        "quad_rotary_controller",
+        "preview",
+        "audio",
+        "anamorphic_preview",
+        "resolutions",
+        "camera",
+        "sensors",
+        "dynamic_resolution",
+        "hdmi_display",
+        "hdmi_gui",
+        "i2c_oled",
+        "geometry",   # legacy, migrated below
+        "output",     # legacy, migrated below
+    )
+    objects = {}
+    for key in object_sections:
+        value = _require_object(settings, key, key, filename)
+        if value is not None:
+            objects[key] = value
+
+    for key in ("buttons", "two_way_switches", "rotary_encoders"):
+        _require_array(settings, key, key, filename)
+
+    gpio = objects.get("gpio_output")
+    if gpio is not None:
+        _require_array(gpio, "rec_out_pin", "gpio_output.rec_out_pin", filename)
+        _require_array(gpio, "rec_tone_pin", "gpio_output.rec_tone_pin", filename)
+
+    settings_cfg = objects.get("settings")
+    if settings_cfg is not None:
+        _require_numeric_array(settings_cfg, "light_hz", "settings.light_hz", filename)
+        _require_number(
+            settings_cfg, "conform_frame_rate", "settings.conform_frame_rate",
+            filename, positive=True,
+        )
+        for key in (
+            "live_sync_warning_tolerance_frames",
+            "live_sync_startup_guard_frames",
+            "final_sync_analysis_tolerance_frames",
+            "tc_drop_jitter_tolerance_frames",
+        ):
+            _require_number(
+                settings_cfg, key, f"settings.{key}", filename, nonnegative=True
+            )
+
+    system = objects.get("system")
+    if system is not None:
+        _require_object(system, "wifi_hotspot", "system.wifi_hotspot", filename)
+        _require_object(system, "recovery", "system.recovery", filename)
+
+    free_mode = objects.get("free_mode")
+    if free_mode is not None:
+        # Values are intentionally left coercible/backward compatible; the
+        # important runtime assumption here is the containing object.
+        pass
+
+    quad = objects.get("quad_rotary_controller")
+    if quad is not None:
+        _require_object(
+            quad, "encoders", "quad_rotary_controller.encoders", filename
+        )
+
+    preview = objects.get("preview")
+    if preview is not None:
+        _require_numeric_array(preview, "zoom_steps", "preview.zoom_steps", filename)
+        _require_number(
+            preview, "default_zoom", "preview.default_zoom", filename, positive=True
+        )
+
+    audio = objects.get("audio")
+    if audio is not None:
+        for key in ("24bit", "16bit"):
+            block = _require_object(audio, key, f"audio.{key}", filename)
+            if block is None:
+                continue
+            _require_number(
+                block, "capture_gain_db", f"audio.{key}.capture_gain_db", filename
+            )
+            _require_number(
+                block, "timecode_offset_frames",
+                f"audio.{key}.timecode_offset_frames", filename
+            )
+
+    anamorphic = objects.get("anamorphic_preview")
+    if anamorphic is not None:
+        _require_numeric_array(
+            anamorphic, "anamorphic_steps",
+            "anamorphic_preview.anamorphic_steps", filename,
+        )
+        _require_number(
+            anamorphic, "default_anamorphic_factor",
+            "anamorphic_preview.default_anamorphic_factor",
+            filename, positive=True,
+        )
+
+    arrays = objects.get("arrays")
+    if arrays is not None:
+        for key in ("iso_steps", "shutter_a_steps", "fps_steps", "wb_steps"):
+            _require_numeric_array(arrays, key, f"arrays.{key}", filename)
+
+    resolutions = objects.get("resolutions")
+    if resolutions is not None:
+        _require_numeric_array(
+            resolutions, "k_steps", "resolutions.k_steps", filename
+        )
+        _require_numeric_array(
+            resolutions, "bit_depths", "resolutions.bit_depths", filename
+        )
+        _require_object(
+            resolutions, "custom_modes", "resolutions.custom_modes", filename
+        )
+
+    camera = objects.get("camera")
+    if camera is not None:
+        _require_number(
+            camera, "raw_buffer_count", "camera.raw_buffer_count",
+            filename, nonnegative=True,
+        )
+        for port in ("cam0", "cam1"):
+            cam = _require_object(camera, port, f"camera.{port}", filename)
+            if cam is None:
+                continue
+            _require_object(cam, "geometry", f"camera.{port}.geometry", filename)
+            output = _require_object(cam, "output", f"camera.{port}.output", filename)
+            if output is not None:
+                _require_number(
+                    output, "hdmi_port", f"camera.{port}.output.hdmi_port",
+                    filename, nonnegative=True,
+                )
+            _require_object(
+                cam, "tuning_file_override",
+                f"camera.{port}.tuning_file_override", filename,
+            )
+
+    for legacy_key in ("geometry", "output"):
+        legacy = objects.get(legacy_key)
+        if legacy is not None:
+            for port in ("cam0", "cam1"):
+                _require_object(
+                    legacy, port, f"{legacy_key}.{port}", filename
+                )
+
+    dynamic = objects.get("dynamic_resolution")
+    if dynamic is not None:
+        _require_number(
+            dynamic, "safety_margin_fps",
+            "dynamic_resolution.safety_margin_fps", filename, nonnegative=True,
+        )
+        _require_number(
+            dynamic, "match_tolerance_px",
+            "dynamic_resolution.match_tolerance_px", filename, nonnegative=True,
+        )
+
+
 def _coerce_bool_setting(value, default: bool) -> bool:
     if isinstance(value, bool):
         return value
@@ -376,4 +637,5 @@ def load_settings(filename: str | Path) -> dict:
             "Wrap the settings in { ... } and keep the top level as key/value pairs.",
         )
 
+    _validate_settings_structure(settings, filename)
     return _apply_settings_defaults(settings)

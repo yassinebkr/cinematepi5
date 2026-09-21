@@ -380,6 +380,32 @@ sys.exit(0)
 """
 
 
+def _run_interpreter_settings_validator(
+    text: str,
+    *,
+    python_bin: Path,
+    src_dir: Path,
+    runner: Callable,
+):
+    tmp_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            "w", suffix=".json", delete=False, encoding="utf-8"
+        ) as tmp:
+            tmp.write(text)
+            tmp_path = tmp.name
+        return runner(
+            [str(python_bin), "-c", _INTERPRETER_VALIDATOR, str(src_dir), tmp_path],
+            capture_output=True, text=True, timeout=20, check=False,
+        )
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            try:
+                os.unlink(tmp_path)
+            except OSError:
+                pass
+
+
 def validate_settings_text(
     text: str,
     *,
@@ -399,16 +425,12 @@ def validate_settings_text(
     because the main runtime is unavailable.
     """
     if Path(python_bin).exists() and Path(src_dir).exists():
-        tmp_path = None
         try:
-            with tempfile.NamedTemporaryFile(
-                "w", suffix=".json", delete=False, encoding="utf-8"
-            ) as tmp:
-                tmp.write(text)
-                tmp_path = tmp.name
-            proc = runner(
-                [str(python_bin), "-c", _INTERPRETER_VALIDATOR, str(src_dir), tmp_path],
-                capture_output=True, text=True, timeout=20, check=False,
+            proc = _run_interpreter_settings_validator(
+                text,
+                python_bin=Path(python_bin),
+                src_dir=Path(src_dir),
+                runner=runner,
             )
             if proc.returncode == 0:
                 return Validation(True, VALIDATE_RUNG_INTERPRETER, "Valid.", True)
@@ -419,19 +441,43 @@ def validate_settings_text(
                     proc.stdout.strip() or "Invalid.",
                     True,
                 )
+
+            # An unexpected validator failure is ambiguous: it may mean the
+            # CineMate interpreter/import path is broken, or this particular
+            # candidate triggered an unhandled runtime exception. Validate a
+            # known-good empty object to distinguish those cases. A healthy
+            # validator + failing candidate is a hard rejection, never a
+            # reason to fall open to syntax-only stdlib validation.
             log.warning(
-                "interpreter validator unusable (rc=%s): %s",
+                "candidate interpreter validator failed unexpectedly (rc=%s): %s",
                 proc.returncode,
                 (proc.stderr or proc.stdout)[:400],
             )
+            self_test = _run_interpreter_settings_validator(
+                "{}",
+                python_bin=Path(python_bin),
+                src_dir=Path(src_dir),
+                runner=runner,
+            )
+            if self_test.returncode == 0:
+                detail = (proc.stdout or proc.stderr or "").strip()
+                return Validation(
+                    False,
+                    VALIDATE_RUNG_INTERPRETER,
+                    detail
+                    or (
+                        "CineMate's validator rejected this candidate with "
+                        f"unexpected exit code {proc.returncode}."
+                    ),
+                    True,
+                )
+            log.warning(
+                "interpreter validator self-test also failed (rc=%s); "
+                "falling back to strict stdlib JSON validation",
+                self_test.returncode,
+            )
         except Exception as exc:
             log.warning("interpreter validation rung unavailable: %s", exc)
-        finally:
-            if tmp_path and os.path.exists(tmp_path):
-                try:
-                    os.unlink(tmp_path)
-                except OSError:
-                    pass
 
     try:
         data = json.loads(text)

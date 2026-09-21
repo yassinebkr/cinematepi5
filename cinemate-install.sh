@@ -1447,7 +1447,7 @@ alias cinemate-env='source "$VENV_DIR/bin/activate"'
 alias cinemate='$PI_HOME/run_cinemate.sh'
 alias editboot='sudo nano /boot/firmware/config.txt'
 alias editcmdline='sudo nano /boot/firmware/cmdline.txt'
-alias editsettings='sudo nano $CINEMATE_DIR/src/settings.json'
+alias editsettings='$CINEMATE_DIR/tools/cinemate-edit-settings.py'
 $MANAGED_END
 EOF
 
