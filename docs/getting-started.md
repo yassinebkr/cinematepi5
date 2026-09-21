@@ -1,0 +1,33 @@
+# Quick start
+
+## Hardware requirements
+- Raspberry Pi 4 or 5. The 2GB RAM version works with the prebuilt image, but 4GB is recommended if you plan to compile `cinepi-raw` on the Pi.
+- Official HQ or Global Shutter camera
+- HDMI monitor or a phone/tablet for monitoring
+
+## Installation
+
+Burn the latest [Cinemate image](https://github.com/Tiramisioux/cinemate/releases/latest) to an SD card.
+
+Connect the Pi and the camera sensor board, connect power and boot the Pi. Cinemate autostarts on boot.
+
+!!! danger ""
+
+    Ensure the Pi is powered off before attaching the camera ribbon cable. Hot-swapping may damage the hardware.
+
+## Preview
+- Plug in an HDMI monitor **or** 
+- Connect your phone/tablet to the Wi‑Fi network `CinePi` (password `11111111`).
+Open a browser and go to `cinepi.local:5000` to see the interface. A clean video feed without the GUI is available at `cinepi.local:8000/stream`.
+
+
+## Recording
+- Attach a high‑speed drive: an **SSD** (Samsung T7 recommended), an **NVMe drive**, or the **[CFE Hat](https://www.tindie.com/products/will123321/cfe-hat-for-raspberry-pi-5/)**. Make sure storage media is formatted as `exFAT` and labeled `RAW`.
+
+- Connect a button between **GPIO7** and **GND** — physical pins 26 and 25, right next to each other, so you can also briefly short them with a paper clip. When using the phone preview, you can also start/stop recording by tapping the preview. More buttons and dials can be added later — see [Additional hardware](hardware-controls.md).
+
+That's it—your bare‑bones Cinemate build is ready!
+
+!!! danger ""
+
+    Remember to power everything down before disconnecting hardware!
