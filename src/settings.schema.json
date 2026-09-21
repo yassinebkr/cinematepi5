@@ -470,8 +470,9 @@
       "label": "White-balance steps",
       "widget": "number-list",
       "step": 100,
-      "min": 1,
-      "unit": "K"
+      "min": 2800,
+      "unit": "K",
+      "max": 6500
     },
     "audio": {
       "label": "Audio",

@@ -267,6 +267,44 @@ class SettingsEditorRouteTests(unittest.TestCase):
         walk(current, [])
         self.assertEqual(missing, [])
 
+    def test_semantic_number_constraints_accept_current_settings(self):
+        current = json.loads((ROOT / "src/settings.json").read_text(encoding="utf-8"))
+        schema = json.loads((ROOT / "src/settings.schema.json").read_text(encoding="utf-8"))
+        ui = schema["x-cinemate-ui-map"]
+        failures = []
+
+        def check_value(path, value, meta):
+            if not isinstance(value, (int, float)) or isinstance(value, bool):
+                return
+            minimum = meta.get("min")
+            maximum = meta.get("max")
+            step = meta.get("step")
+            if minimum is not None and value < minimum:
+                failures.append((path, value, "min", minimum))
+            if maximum is not None and value > maximum:
+                failures.append((path, value, "max", maximum))
+            if isinstance(step, (int, float)) and step > 0:
+                base = minimum if minimum is not None else 0
+                ratio = (value - base) / step
+                if abs(ratio - round(ratio)) > 1e-9:
+                    failures.append((path, value, "step", step, "base", base))
+
+        def walk(value, parts):
+            path = ".".join(parts)
+            meta = ui.get(path, {})
+            if isinstance(value, dict):
+                for key, child in value.items():
+                    walk(child, parts + [str(key)])
+            elif isinstance(value, list):
+                if meta.get("widget") == "number-list":
+                    for item in value:
+                        check_value(path, item, meta)
+            elif meta.get("widget") in {"number", "optional-number"}:
+                check_value(path, value, meta)
+
+        walk(current, [])
+        self.assertEqual(failures, [])
+
     def test_semantic_registry_has_expected_high_value_widgets(self):
         schema = json.loads(
             (ROOT / "src/settings.schema.json").read_text(encoding="utf-8")
