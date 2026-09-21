@@ -46,6 +46,7 @@ ENABLE_SUPPORT_SERVICES="${ENABLE_SUPPORT_SERVICES:-1}"
 ENABLE_STORAGE_AUTOMOUNT_SERVICE="${ENABLE_STORAGE_AUTOMOUNT_SERVICE:-1}"
 ENABLE_WIFI_HOTSPOT_SERVICE="${ENABLE_WIFI_HOTSPOT_SERVICE:-1}"
 ENABLE_REDIS_LOG_MAINTENANCE_SERVICE="${ENABLE_REDIS_LOG_MAINTENANCE_SERVICE:-1}"
+ENABLE_RECOVERY_CONSOLE_SERVICE="${ENABLE_RECOVERY_CONSOLE_SERVICE:-1}"
 ENABLE_AUTOSTART="${ENABLE_AUTOSTART:-1}"
 START_AUTOSTART_NOW="${START_AUTOSTART_NOW:-0}"
 RUN_REBOOT="${RUN_REBOOT:-0}"
@@ -316,7 +317,7 @@ print_configuration_summary() {
     detail "Libcamera: $LIBCAMERA_REPO_URL @ $LIBCAMERA_REPO_REF"
     detail "Hotspot: $HOTSPOT_NAME (enabled=$HOTSPOT_ENABLED)"
     detail "Optional features: lgpio=$INSTALL_ALT_GPIO_BACKEND console_font=$INSTALL_CONSOLE_FONT console_autologin=$ENABLE_CONSOLE_AUTOLOGIN pishrink=$INSTALL_PISHRINK plymouth=$INSTALL_PLYMOUTH imx283_driver=$INSTALL_IMX283_DRIVER imx585_driver=$INSTALL_IMX585_DRIVER ir_filter=$INSTALL_IR_FILTER_HELPER"
-    detail "Services: support=$ENABLE_SUPPORT_SERVICES storage=$ENABLE_STORAGE_AUTOMOUNT_SERVICE wifi=$ENABLE_WIFI_HOTSPOT_SERVICE redis_log=$ENABLE_REDIS_LOG_MAINTENANCE_SERVICE autostart=$ENABLE_AUTOSTART start_now=$START_AUTOSTART_NOW"
+    detail "Services: support=$ENABLE_SUPPORT_SERVICES storage=$ENABLE_STORAGE_AUTOMOUNT_SERVICE wifi=$ENABLE_WIFI_HOTSPOT_SERVICE redis_log=$ENABLE_REDIS_LOG_MAINTENANCE_SERVICE recovery=$ENABLE_RECOVERY_CONSOLE_SERVICE autostart=$ENABLE_AUTOSTART start_now=$START_AUTOSTART_NOW"
 }
 
 is_commitish_ref() {
@@ -1527,6 +1528,46 @@ seed_redis_defaults() {
     run_as_pi redis-cli PUBLISH cp_controls cg_rb >/dev/null || true
 }
 
+write_recovery_conf() {
+    local conf_path="/etc/cinemate-recovery.conf"
+    local existing_token=""
+    local recovery_token=""
+    local temp
+
+    if sudo test -f "$conf_path"; then
+        existing_token="$(sudo awk -F= '$1 == "token" {sub(/^token=/, ""); print; exit}' "$conf_path" || true)"
+    fi
+
+    if [[ -n "$existing_token" ]]; then
+        recovery_token="$existing_token"
+        detail "Preserving existing recovery-console token"
+    else
+        recovery_token="$(python3 - <<'PY_TOKEN'
+import secrets
+print(secrets.token_urlsafe(24))
+PY_TOKEN
+)"
+        [[ -n "$recovery_token" ]] || die "Could not generate recovery-console token"
+        detail "Generated a new recovery-console token"
+    fi
+
+    backup_file "$conf_path"
+    temp="$(mktemp)"
+    cat >"$temp" <<EOF_RECOVERY
+# Written by cinemate-install.sh.
+# Fallback configuration used when src/settings.json is absent or invalid,
+# or when it has no system.recovery block.
+enabled=true
+port=8080
+token=$recovery_token
+allow_config_txt=false
+config_confirm_timeout_s=300
+EOF_RECOVERY
+    sudo install -o root -g root -m 600 "$temp" "$conf_path"
+    rm -f "$temp"
+    detail "Recovery token stored in $conf_path (root-readable only)"
+}
+
 configure_media_permissions() {
     log "Ensuring /media permissions"
     sudo mkdir -p /media
@@ -1558,6 +1599,14 @@ install_cinemate_services() {
             sudo make -C "$CINEMATE_SOURCE_DIR/services" start-redis-log-maintenance
         else
             detail "Skipping redis-log-maintenance.timer"
+        fi
+
+        if is_true "$ENABLE_RECOVERY_CONSOLE_SERVICE"; then
+            log "Installing and enabling cinemate-recovery.service"
+            write_recovery_conf
+            sudo make -C "$CINEMATE_SOURCE_DIR/services" enable-cinemate-recovery
+        else
+            detail "Skipping cinemate-recovery.service"
         fi
     else
         detail "Skipping support services"
