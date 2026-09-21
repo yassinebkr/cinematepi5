@@ -5,12 +5,28 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-sys.modules.setdefault("flask_socketio", types.SimpleNamespace(SocketIO=object))
-sys.modules.setdefault("gpiozero", types.SimpleNamespace(CPUTemperature=object))
-sys.modules.setdefault("redis", types.SimpleNamespace(StrictRedis=object))
-sys.modules.setdefault("sugarpie", types.SimpleNamespace(pisugar=types.SimpleNamespace()))
 
-from module.simple_gui import _calculate_preview_guide_rect
+# Import SimpleGUI with lightweight dependency stubs, but restore sys.modules
+# immediately afterwards so this test cannot poison later tests in discovery
+# order.
+_MISSING = object()
+_STUBS = {
+    "flask_socketio": types.SimpleNamespace(SocketIO=object),
+    "gpiozero": types.SimpleNamespace(CPUTemperature=object),
+    "redis": types.SimpleNamespace(StrictRedis=object),
+    "sugarpie": types.SimpleNamespace(pisugar=types.SimpleNamespace()),
+}
+_saved_modules = {name: sys.modules.get(name, _MISSING) for name in _STUBS}
+try:
+    sys.modules.update(_STUBS)
+    from module.simple_gui import _calculate_preview_guide_rect
+finally:
+    for name, previous in _saved_modules.items():
+        if previous is _MISSING:
+            sys.modules.pop(name, None)
+        else:
+            sys.modules[name] = previous
+    sys.modules.pop("module.simple_gui", None)
 
 
 class PreviewGuideGeometryTests(unittest.TestCase):
