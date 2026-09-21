@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CinePi Clips</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CinePi">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="/static/css/cinemate-responsive.css?v=20260920p">
+    <script src="/static/js/cube-lut-engine.js?v=20260921a"></script>
+    <script defer src="/static/js/cinemate-app.js?v=20260920p"></script>
+
+<style>
+ html,body{height:100%}
+ body{background:#111;color:#ddd;font-family:sans-serif;margin:0;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+ #hdr{display:flex;align-items:center;gap:14px;flex:0 0 auto;margin-bottom:8px}
+ #hdr h2{margin:0;font-size:20px}
+ #hdr .spacer{flex:1}
+ a{color:#8cf}
+ select,button.hbtn{background:#222;color:#ddd;border:1px solid #444;padding:4px 10px;border-radius:4px;font-size:13px;cursor:pointer}
+ #vwrap{height:48vh;flex:0 0 auto;background:#000;border-radius:6px;position:relative;overflow:hidden}
+#clip-look-control{position:absolute;left:8px;top:8px;z-index:11;background:rgba(15,15,15,.82);border:1px solid #555;border-radius:6px;padding:3px;backdrop-filter:blur(3px)}
+#clip-look-control[hidden]{display:none!important}
+#clip-look-control select{max-width:150px;min-height:30px;background:#222;color:#ddd;border:0;border-radius:4px;padding:3px 7px;font-size:12px}
+#clip-lut-controls{position:absolute;left:50%;bottom:8px;transform:translateX(-50%);z-index:12;display:flex;align-items:center;gap:8px;width:min(620px,calc(100% - 24px));padding:6px 8px;box-sizing:border-box;background:rgba(10,10,10,.78);border:1px solid #444;border-radius:7px;backdrop-filter:blur(3px)}
+#clip-lut-controls[hidden]{display:none!important}
+#clip-lut-play{position:relative;flex:0 0 auto;width:40px;height:34px;min-width:40px;min-height:34px;background:#222;color:#eee;border:1px solid #555;border-radius:5px;padding:0}
+#clip-lut-play .play-glyph{display:block;width:0;height:0;border-top:8px solid transparent;border-bottom:8px solid transparent;border-left:13px solid #eee;margin:auto}
+#clip-lut-play .pause-glyph{display:none;width:12px;height:16px;margin:auto;border-left:4px solid #eee;border-right:4px solid #eee;box-sizing:border-box}
+#clip-lut-play.is-playing .play-glyph{display:none}
+#clip-lut-play.is-playing .pause-glyph{display:block}
+#clip-lut-seek{flex:1 1 auto;min-width:80px}
+#clip-lut-time{flex:0 0 auto;font:12px monospace;color:#ddd;white-space:nowrap}
+ video{width:100%;height:100%;object-fit:contain;display:block}
+ ul{list-style:none;padding:0;margin:10px 0 0;flex:1 1 auto;overflow-y:auto;min-height:0}
+ li{padding:8px 12px;border-bottom:1px solid #2a2a2a;cursor:pointer;display:flex;justify-content:space-between;align-items:center}
+li{position:relative}
+.clip-progress{position:absolute;left:12px;right:12px;bottom:2px;height:4px;background:#292929;border-radius:999px;overflow:hidden;pointer-events:none}
+.clip-progress[hidden]{display:none!important}
+.clip-progress-fill{height:100%;width:0%;background:#777;transition:width .22s linear}
+li.proxy-busy{padding-bottom:13px}
+li.proxy-busy .nobadge,li.proxy-busy .badge{white-space:nowrap}
+ li:hover{background:#1c1c1c}
+ li.sel{background:#234}
+ .badge{color:#6d6}
+ .shot{color:#fc6;margin-left:8px;font-size:12px}
+ .nobadge{color:#777}
+
+.pdelbtn{margin-left:7px;min-height:30px;padding:3px 8px;border:1px solid #704848;border-radius:5px;background:#2a1717;color:#e3a0a0;cursor:pointer;font-size:12px}
+.pdelbtn:hover{background:#3b1d1d}
+.pdelbtn[hidden]{display:none!important}
+ .del{background:none;border:1px solid #644;color:#c66;border-radius:4px;padding:2px 9px;margin-left:10px;cursor:pointer;font-size:13px}
+ .del:hover{background:#411}
+ .th{width:96px;height:54px;object-fit:cover;border-radius:4px;margin-right:10px;background:#000;flex:0 0 auto}
+ .lft{display:flex;align-items:center;min-width:0}
+ .lft .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ #tmodal{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:100;align-items:center;justify-content:center}
+ #tbox{background:#1a1a1a;border:1px solid #333;border-radius:8px;max-width:640px;width:92%;max-height:80vh;display:flex;flex-direction:column;padding:14px}
+ #tlist{flex:1;overflow-y:auto;margin:10px 0;min-height:60px}
+ #tlist label{display:flex;gap:10px;padding:6px 4px;border-bottom:1px solid #292929;cursor:pointer}
+ #tlist label:hover{background:#1c1c1c}
+ #tbtns{display:flex;gap:10px;justify-content:flex-end}
+ .danger{background:#511;border:1px solid #a44;color:#fbb}
+</style>
+</head>
+<body class="page-clips">
+<div id="hdr">
+  <h2>Clips</h2>
+  <div id="rec-indicator" class="rec-indicator" hidden aria-live="polite">
+    <span class="rec-dot"></span>
+    <strong>REC</strong>
+    <span id="rec-time">0:00</span>
+  </div>
+  <select id="sortsel">
+    <option value="date_desc">date, newest first</option>
+    <option value="date_asc">date, oldest first</option>
+    <option value="frames_desc">longest first</option>
+    <option value="proxy_first">proxy-ready first</option><option value="rating_desc">&#9733; best first</option>
+  </select>
+  <select id="fproj"><option value="">all projects</option></select><select id="fscene"><option value="">all scenes</option></select><select id="frate"><option value="0">any &#9733;</option><option value="3">3&#9733;+</option><option value="4">4&#9733;+</option><option value="5">5&#9733;</option></select>
+  <label style="font-size:13px;color:#aaa"><input type="checkbox" id="csall"> all</label>
+  <button class="hbtn" id="cdel" style="border-color:#644;color:#c66;display:none">&#128465; Delete selected</button>
+  <button class="hbtn" id="trashbtn">Trash bin</button><button class="hbtn" id="darkcalbtn">Dark cal</button>
+  <a href="/backup" style="font-size:13px">Offload</a>
+  <button class="hbtn" id="fullscreen-btn">Fullscreen</button>
+  <span class="spacer"></span>
+  <a href="/">&larr; camera</a>
+</div>
+<div id="vwrap">
+  <div id="clip-look-control" hidden>
+    <select id="clip-lutsel" aria-label="Clip playback look"><option value="">LOOK: none</option></select>
+  </div>
+  <video id="player" playsinline preload="metadata"></video>
+  <div id="clip-lut-controls" hidden>
+    <button id="clip-lut-play" type="button" aria-label="Play or pause"><span class="play-glyph" aria-hidden="true"></span><span class="pause-glyph" aria-hidden="true"></span></button>
+    <input id="clip-lut-seek" type="range" min="0" max="1000" value="0" step="1" aria-label="Clip position">
+    <span id="clip-lut-time">0:00 / 0:00</span>
+  </div>
+</div>
+<ul id="list">
+{% for c in clips %}
+ <li data-name="{{c.name}}" data-proxy="{{1 if c.proxy else 0}}" data-frames="{{c.frames}}" data-project="{{(c.shot.get('project','') if c.shot else '')|e}}" data-scene="{{(c.shot.get('scene','') if c.shot else '')|e}}" data-rating="{{c.shot.get('rating',0) if c.shot else 0}}">
+   <input type="checkbox" class="cchk" style="margin-right:10px;flex:0 0 auto">
+   <span class="lft">{% if c.thumb %}<img class="th" loading="lazy" src="/clips/{{c.name}}/thumb.jpg">{% endif %}<span class="nm">{{c.name}}</span>{% if c.shot %}<span class="shot">S{{c.shot.get('scene','?')}} T{{c.shot.get('take','?')}}{% if c.shot.get('rating') %} · {{c.shot.get('rating')}}★{% endif %}</span>{% endif %}</span>
+   <span class="clip-actions">{{c.label}} &nbsp;
+     {% if c.proxy %}<span class="badge">proxy ready</span>
+     {% else %}<span class="nobadge">no proxy</span>{% endif %}<button class="pdelbtn" type="button" title="Delete proxy only; RAW/DNG files are preserved" {% if not c.proxy %}hidden{% endif %}>proxy ✕</button><button class="mbtn" title="shot metadata" style="margin-left:8px;background:#333;color:#ddd;border:1px solid #555;border-radius:4px;cursor:pointer">✎</button>
+   </span>
+   <div class="clip-progress" hidden aria-hidden="true"><div class="clip-progress-fill"></div></div>
+ </li>
+{% endfor %}
+</ul>
+<div id="tmodal">
+ <div id="tbox">
+  <div style="display:flex;align-items:center">
+    <b>Trash</b>&nbsp; <span id="tcount" style="color:#888"></span>
+    <span class="spacer" style="flex:1"></span>
+    <label style="font-size:13px;color:#aaa"><input type="checkbox" id="tall"> select all</label>
+  </div>
+  <div id="tlist"></div>
+  <div id="tbtns">
+    <button class="hbtn" id="tclose">Close</button>
+    <button class="hbtn danger" id="tdel">Delete selected permanently</button>
+  </div>
+ </div>
+</div>
+<script>
+const player=document.getElementById('player');
+const clipLutSel=document.getElementById('clip-lutsel');
+const clipLookControl=document.getElementById('clip-look-control');
+const clipLutControls=document.getElementById('clip-lut-controls');
+const clipLutPlay=document.getElementById('clip-lut-play');
+const clipLutSeek=document.getElementById('clip-lut-seek');
+const clipLutTime=document.getElementById('clip-lut-time');
+const clipWrap=document.getElementById('vwrap');
+let currentClipName='';
+let clipLutPrefs={};
+let clipCubeCatalog=[];
+let clipCubeRenderer=null;
+
+try{
+  clipLutPrefs=JSON.parse(localStorage.getItem('clipLuts')||'{}')||{};
+}catch(_){
+  clipLutPrefs={};
+}
+
+function fmtMediaTime(v){
+  if(!Number.isFinite(v)||v<0) return '0:00';
+  const n=Math.floor(v);
+  return String(Math.floor(n/60))+':'+String(n%60).padStart(2,'0');
+}
+
+function updateClipLutControls(){
+  clipLutPlay.classList.toggle('is-playing',!player.paused);
+  clipLutPlay.setAttribute('aria-label',player.paused?'Play':'Pause');
+  const dur=Number.isFinite(player.duration)?player.duration:0;
+  if(dur>0 && !clipLutSeek.matches(':active')){
+    clipLutSeek.value=String(Math.round((player.currentTime/dur)*1000));
+  }
+  clipLutTime.textContent=fmtMediaTime(player.currentTime)+' / '+fmtMediaTime(dur);
+}
+
+function setClipPlayerVisible(active){
+  clipLutControls.hidden=!active;
+  if(!active) player.style.opacity='';
+  updateClipLutControls();
+}
+
+async function applyClipLut(){
+  const name=clipLutSel.value||'';
+  if(!clipCubeRenderer && window.CinePiCubeLUT){
+    clipCubeRenderer=new CinePiCubeLUT.Renderer(player,clipWrap,{zIndex:4});
+  }
+  if(!name){
+    if(clipCubeRenderer) clipCubeRenderer.disable();
+    clipLutSel.title='No clip display LUT';
+    return;
+  }
+  const entry=clipCubeCatalog.find(x=>x.name===name);
+  if(!entry){
+    if(clipCubeRenderer) clipCubeRenderer.disable();
+    clipLutSel.value='';
+    return;
+  }
+  try{
+    await clipCubeRenderer.setLut(entry);
+    const io=[entry.input_space,entry.output_space].filter(Boolean).join(' -> ');
+    clipLutSel.title=(entry.display_name||name)+(io?' | '+io:'')+
+      ' | '+entry.interpolation+(entry.verified?' | verified source':' | source unverified');
+    clipLutSel.style.borderColor=entry.verified?'#397b52':'#8a6d3b';
+  }catch(err){
+    if(clipCubeRenderer) clipCubeRenderer.disable();
+    clipLutSel.style.borderColor='#a44';
+    clipLutSel.title='3D LUT unavailable: '+(err&&err.message?err.message:String(err));
+  }
+}
+
+async function selectClipLook(name){
+  currentClipName=name||'';
+  const pref=(currentClipName && clipLutPrefs[currentClipName]) || '';
+  clipLutSel.value=clipCubeCatalog.some(x=>x.name===pref)?pref:'';
+  clipLookControl.hidden=!currentClipName;
+  await applyClipLut();
+}
+
+async function initClipCubeLuts(){
+  try{
+    clipCubeCatalog=await CinePiCubeLUT.populateSelect(clipLutSel,'CLIP LOOK');
+  }catch(err){
+    clipLutSel.innerHTML='<option value="">CLIP LOOK unavailable</option>';
+    clipLutSel.disabled=true;
+    clipLutSel.title=err&&err.message?err.message:String(err);
+  }
+}
+
+clipLutSel.addEventListener('change',async()=>{
+  if(!currentClipName) return;
+  clipLutPrefs[currentClipName]=clipLutSel.value||'';
+  try{ localStorage.setItem('clipLuts',JSON.stringify(clipLutPrefs)); }catch(_){}
+  await applyClipLut();
+});
+
+clipLutPlay.addEventListener('click',()=>{
+  if(player.paused) player.play().catch(()=>{});
+  else player.pause();
+});
+clipLutSeek.addEventListener('input',()=>{
+  if(Number.isFinite(player.duration) && player.duration>0){
+    player.currentTime=(Number(clipLutSeek.value)/1000)*player.duration;
+  }
+});
+['play','pause','timeupdate','durationchange','loadedmetadata','seeked'].forEach(ev=>{
+  player.addEventListener(ev,updateClipLutControls);
+});
+player.addEventListener('cinepi-lut-error',e=>{
+  clipLutSel.style.borderColor='#a44';
+  clipLutSel.title=(e.detail&&e.detail.message)||'3D LUT rendering error';
+});
+initClipCubeLuts();
+
+function clearRowProgress(li){
+  if(!li) return;
+  li.classList.remove('proxy-busy');
+  const box=li.querySelector('.clip-progress');
+  const fill=li.querySelector('.clip-progress-fill');
+  if(box) box.hidden=true;
+  if(fill) fill.style.width='0%';
+}
+
+function showRowProgress(name,st){
+  const li=document.querySelector('#list li[data-name="'+name+'"]');
+  if(!li) return;
+  const box=li.querySelector('.clip-progress');
+  const fill=li.querySelector('.clip-progress-fill');
+  const badge=li.querySelector('.clip-actions .badge, .clip-actions .nobadge');
+  if(!box||!fill||!badge) return;
+
+  const state=(st&&st.state)||'queued';
+  const pct=Math.max(0,Math.min(100,Number((st&&st.percent)||0)));
+  if(state==='disabled'){
+    clearRowProgress(li);
+    badge.textContent='proxy deleted · tap clip to regenerate';
+    badge.className='nobadge';
+    const del=li.querySelector('.pdelbtn');
+    if(del) del.hidden=true;
+    return;
+  }
+  li.classList.add('proxy-busy');
+  box.hidden=false;
+  fill.style.width=(state==='verifying'?100:pct)+'%';
+
+  if(state==='encoding'){
+    badge.textContent='rendering '+Math.round(pct)+'%';
+  }else if(state==='paused'){
+    badge.textContent='paused '+Math.round(pct)+'%';
+  }else if(state==='verifying'){
+    badge.textContent='verifying…';
+  }else if(state==='error'){
+    badge.textContent='proxy error — tap to retry';
+  }else if(state==='queued' && st && st.queue_position>1){
+    badge.textContent='queued · '+(st.queue_position-1)+' ahead';
+  }else{
+    badge.textContent='queued…';
+  }
+
+  if(state==='error'){
+    fill.style.width='100%';
+    fill.style.opacity='.35';
+  }else{
+    fill.style.opacity='1';
+  }
+}
+
+/* REC monitor: no SSD scan while recording. When REC falls, wait for all
+   writer/buffer flags to clear before refreshing the server-rendered list. */
+const recIndicator=document.getElementById('rec-indicator');
+const recTime=document.getElementById('rec-time');
+let recWasActive=null;
+let waitingForFinalize=false;
+let recPollBusy=false;
+let lastDisplayedRecSecond=-1;
+
+/* Per-take UI latch.
+   recording_time intentionally keeps the previous take duration until the
+   first-frame timer of the next take resets it. Never expose that stale value
+   on a false -> true recording edge. */
+let recAwaitingFreshTimer=false;
+let recPreviousTakeSeconds=0;
+let recFreshTimerSeen=false;
+
+function formatRecordingDuration(st){
+  let seconds=Number.parseFloat(st.recording_time);
+  if(!Number.isFinite(seconds) || seconds < 0){
+    const tc=String(st.timecode || '').split(':').map(Number);
+    if(tc.length >= 3 && tc.slice(0,3).every(Number.isFinite)){
+      seconds=(tc[0]*3600)+(tc[1]*60)+tc[2];
+    }else{
+      seconds=0;
+    }
+  }
+
+  const whole=Math.max(0,Math.floor(seconds));
+  const minutes=Math.floor(whole/60);
+  const secs=whole%60;
+  return {
+    whole,
+    text:String(minutes)+':'+String(secs).padStart(2,'0')
+  };
+}
+
+function updateRecIndicator(st){
+  const active=!!st.recording;
+  const rawSeconds=Math.max(
+    0,
+    Number.parseFloat(st.recording_time) || 0
+  );
+
+  /* Page already open: a rising REC edge must begin visually at 0:00 even
+     though Redis may still contain the previous take's final duration. */
+  if(recWasActive===false && active){
+    recAwaitingFreshTimer=true;
+    recFreshTimerSeen=false;
+    recPreviousTakeSeconds=rawSeconds;
+    lastDisplayedRecSecond=0;
+    recTime.textContent='0:00';
+  }
+
+  /* Page opened in the middle of an existing take: there was no observed
+     rising edge, so the current recording_time is already the useful value. */
+  if(recWasActive===null && active){
+    recAwaitingFreshTimer=false;
+    recFreshTimerSeen=true;
+  }
+
+  recIndicator.hidden=!active;
+
+  if(active){
+    if(recAwaitingFreshTimer){
+      /* A genuine new timer is identified by its reset near zero, or by a
+         clear decrease from the previous take's retained duration. */
+      const resetObserved =
+        rawSeconds <= 0.75 ||
+        (
+          recPreviousTakeSeconds > 1.0 &&
+          rawSeconds < recPreviousTakeSeconds - 0.75
+        );
+
+      if(resetObserved){
+        recAwaitingFreshTimer=false;
+        recFreshTimerSeen=true;
+      }else{
+        recTime.textContent='0:00';
+        lastDisplayedRecSecond=0;
+      }
+    }
+
+    if(recFreshTimerSeen && !recAwaitingFreshTimer){
+      const duration=formatRecordingDuration(st);
+      /* Monotonic visual timer: once a second has been displayed for the
+         current take, transient stale/backward values cannot reset it. */
+      if(duration.whole >= lastDisplayedRecSecond &&
+         duration.whole !== lastDisplayedRecSecond){
+        recTime.textContent=duration.text;
+        lastDisplayedRecSecond=duration.whole;
+      }
+    }
+
+    document.body.classList.add('recording-active');
+  }else{
+    lastDisplayedRecSecond=-1;
+    recAwaitingFreshTimer=false;
+    recFreshTimerSeen=false;
+    recPreviousTakeSeconds=rawSeconds;
+    recTime.textContent='0:00';
+    document.body.classList.remove('recording-active');
+  }
+}
+
+async function pollRecordingState(){
+  if(recPollBusy) return;
+  recPollBusy=true;
+  try{
+    const r=await fetch('/recording-state?t='+Date.now(),{cache:'no-store'});
+    if(!r.ok) throw new Error('HTTP '+r.status);
+    const st=await r.json();
+    updateRecIndicator(st);
+
+    if(recWasActive===true && !st.recording){
+      waitingForFinalize=true;
+    }
+
+    if(waitingForFinalize && st.finalized){
+      waitingForFinalize=false;
+      setTimeout(()=>window.location.reload(),700);
+      return;
+    }
+
+    recWasActive=!!st.recording;
+  }catch(e){
+    /* retain last known state and retry */
+  }finally{
+    recPollBusy=false;
+  }
+}
+pollRecordingState();
+setInterval(pollRecordingState,500);
+function play(name){
+  document.querySelectorAll('#list li').forEach(x=>x.classList.remove('sel'));
+  const li=document.querySelector('#list li[data-name="'+name+'"]');
+  if(li) li.classList.add('sel');
+  currentClipName=name||'';
+  clipLookControl.hidden=!currentClipName;
+  setClipPlayerVisible(!!currentClipName);
+  player.src='/clips/'+name+'/proxy.mp4?v='+Date.now();
+  player.play().catch(()=>{});
+  player.addEventListener('loadeddata',function onClipLoaded(){
+    player.removeEventListener('loadeddata',onClipLoaded);
+    selectClipLook(name);
+  });
+}
+function poll(name,li,badge){
+  if(!li.isConnected) return;
+  fetch('/clips/'+name+'/status?t='+Date.now(),{cache:'no-store'})
+    .then(r=>r.json()).then(st=>{
+      if(!li.isConnected) return;
+      showRowProgress(name,st);
+      if(st.ready){
+        li.dataset.proxy='1';
+        badge.textContent='proxy ready';
+        badge.className='badge';
+        const del=li.querySelector('.pdelbtn');
+        if(del) del.hidden=false;
+        clearRowProgress(li);
+        return;
+      }
+      if(st.state==='error'){
+        badge.textContent='proxy error — tap to retry';
+        badge.className='nobadge';
+        li.classList.add('proxy-busy');
+        return;
+      }
+      if(st.state==='paused') badge.textContent='paused — recording';
+      else if(st.state==='encoding') badge.textContent='rendering '+Math.round(st.percent||0)+'%';
+      else if(st.state==='verifying') badge.textContent='verifying…';
+      else badge.textContent='queued…';
+      setTimeout(()=>poll(name,li,badge),700);
+    }).catch(()=>setTimeout(()=>poll(name,li,badge),1500));
+}
+function deleteClip(name,li){
+  return fetch('/clips/'+name+'/delete',{method:'POST'}).then(r=>r.json()).then(j=>{
+    if(j.ok){
+      if(player.src.includes(name)){
+        player.pause();
+        player.removeAttribute('src');
+        player.load();
+        currentClipName='';
+        clipLookControl.hidden=true;
+        player.style.filter='';
+      }
+      li.remove();
+    } else alert('Delete refused ('+name+'): '+(j.error||'unknown'));
+  });
+}
+document.getElementById('cdel').addEventListener('click',()=>{
+  const sel=[...document.querySelectorAll('.cchk:checked')].map(c=>c.closest('li'));
+  if(!sel.length){ alert('Nothing selected'); return; }
+  if(!confirm('Delete '+sel.length+' clip(s) (moved to trash)?')) return;
+  (async ()=>{ for(const li of sel) await deleteClip(li.dataset.name,li); updateDelBtn(); })();
+});
+function updateDelBtn(){
+  const any=document.querySelectorAll('.cchk:checked').length>0;
+  document.getElementById('cdel').style.display = any ? '' : 'none';
+}
+document.getElementById('csall').addEventListener('change',e=>{
+  document.querySelectorAll('.cchk').forEach(c=>c.checked=e.target.checked);
+  updateDelBtn();
+});
+document.querySelectorAll('.cchk').forEach(c=>c.addEventListener('change',updateDelBtn));
+document.querySelectorAll('#list li').forEach(li=>{
+  li.querySelector('.cchk').addEventListener('click',ev=>ev.stopPropagation());
+  li.addEventListener('click',()=>{
+    const name=li.dataset.name;
+    if(li.dataset.proxy==='1'){ play(name); return; }
+    const badge=li.querySelector('.clip-actions .badge, .clip-actions .nobadge');
+    const pdel=li.querySelector('.pdelbtn');
+    if(pdel) pdel.hidden=true;
+    showRowProgress(name,{state:'queued',percent:0,frame:0,total:+li.dataset.frames||0});
+    fetch('/clips/'+name+'/render',{method:'POST'})
+      .then(()=>poll(name,li,badge))
+      .catch(()=>{
+        showRowProgress(name,{state:'error',percent:0,message:'request failed'});
+      });
+  });
+});
+const sortsel=document.getElementById('sortsel');
+function applySort(){
+  const list=document.getElementById('list');
+  const items=Array.from(list.children);
+  const mode=sortsel.value;
+  items.sort((a,b)=>{
+    if(mode==='date_desc') return b.dataset.name.localeCompare(a.dataset.name);
+    if(mode==='date_asc') return a.dataset.name.localeCompare(b.dataset.name);
+    if(mode==='frames_desc') return (+b.dataset.frames)-(+a.dataset.frames);
+    if(mode==='rating_desc'){
+      const d=(+b.dataset.rating)-(+a.dataset.rating);
+      return d!==0?d:b.dataset.name.localeCompare(a.dataset.name);
+    }
+    if(mode==='proxy_first'){
+      const d=(+b.dataset.proxy)-(+a.dataset.proxy);
+      return d!==0?d:b.dataset.name.localeCompare(a.dataset.name);
+    }
+    return 0;
+  });
+  items.forEach(i=>list.appendChild(i));
+}
+sortsel.addEventListener('change',applySort);
+applySort();
+/* ---- trash modal ---- */
+const tmodal=document.getElementById('tmodal'), tlist=document.getElementById('tlist');
+function loadTrash(){
+  fetch('/trash').then(r=>r.json()).then(items=>{
+    document.getElementById('tcount').textContent='('+items.length+' clips)';
+    tlist.innerHTML = items.length ? '' : '<div style="color:#777;padding:8px">trash is empty</div>';
+    items.forEach(it=>{
+      const lab=document.createElement('label');
+      lab.innerHTML='<input type="checkbox" class="tchk" value="'+it.name+'"> <span>'+it.name+'</span><span style="color:#777;margin-left:auto">'+it.files+' files</span>';
+      tlist.appendChild(lab);
+    });
+    document.getElementById('tall').checked=false;
+  });
+}
+document.getElementById('trashbtn').addEventListener('click',()=>{ tmodal.style.display='flex'; loadTrash(); });
+document.getElementById('tclose').addEventListener('click',()=>{ tmodal.style.display='none'; });
+document.getElementById('tall').addEventListener('change',(e)=>{
+  document.querySelectorAll('.tchk').forEach(c=>c.checked=e.target.checked);
+});
+document.getElementById('tdel').addEventListener('click',()=>{
+  const names=[...document.querySelectorAll('.tchk:checked')].map(c=>c.value);
+  if(!names.length){ alert('Nothing selected'); return; }
+  if(!confirm('PERMANENTLY delete '+names.length+' clip(s) from trash? This cannot be undone.')) return;
+  fetch('/trash/delete',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({names})})
+    .then(r=>r.json()).then(j=>{
+      if(j.ok) loadTrash();
+      else alert('Refused: '+(j.error||'unknown'));
+    }).catch(()=>alert('Failed'));
+});
+</script>
+
+<script>
+(function(){
+ const ME=document.createElement('div');
+ ME.style.cssText='display:none;position:fixed;top:18%;left:50%;transform:translateX(-50%);background:#1d1d1d;border:1px solid #555;border-radius:8px;padding:16px;z-index:60;min-width:300px;color:#ddd;font-size:14px';
+ ME.innerHTML='<div id="me-name" style="margin-bottom:10px;font-size:12px;color:#999"></div>'
+  +'<label>Scene <input id="me-scene" style="width:80px;background:#333;color:#eee;border:1px solid #555"></label> '
+  +'<label>Take <input id="me-take" type="number" min="0" style="width:64px;background:#333;color:#eee;border:1px solid #555"></label><br><br>'
+  +'<label>Note <input id="me-note" style="width:260px;background:#333;color:#eee;border:1px solid #555"></label><br><br>'
+  +'<label>Rating <select id="me-rate" style="background:#333;color:#eee;border:1px solid #555"><option>0</option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></label> '
+  +'<button id="me-save" style="margin-left:14px;background:#2a7d4f;color:#fff;border:0;border-radius:4px;padding:4px 14px;cursor:pointer">Save</button> '
+  +'<button id="me-x" style="background:#444;color:#ddd;border:0;border-radius:4px;padding:4px 10px;cursor:pointer">Cancel</button>';
+ document.body.appendChild(ME);
+ function openEd(name){
+   fetch('/clips/'+name+'/meta').then(r=>r.json()).then(j=>{
+     ME.dataset.name=name;
+     document.getElementById('me-name').textContent=name;
+     document.getElementById('me-scene').value=j.scene||'';
+     document.getElementById('me-take').value=j.take||0;
+     document.getElementById('me-note').value=j.note||'';
+     document.getElementById('me-rate').value=j.rating||0;
+     ME.style.display='';
+   });
+ }
+ document.getElementById('me-x').onclick=()=>{ME.style.display='none';};
+ document.getElementById('me-save').onclick=()=>{
+   const name=ME.dataset.name;
+   const body={scene:document.getElementById('me-scene').value,
+               take:+document.getElementById('me-take').value,
+               note:document.getElementById('me-note').value,
+               rating:+document.getElementById('me-rate').value};
+   fetch('/clips/'+name+'/meta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)})
+     .then(()=>{ME.style.display='none';location.reload();});
+ };
+ document.querySelectorAll('.pdelbtn').forEach(b=>b.addEventListener('click',ev=>{
+   ev.preventDefault();
+   ev.stopPropagation();
+   const li=b.closest('li');
+   const name=li.dataset.name;
+   if(!confirm('Delete only the proxy for '+name+'? RAW/DNG files will be preserved.')) return;
+   b.disabled=true;
+   fetch('/clips/'+name+'/proxy/delete',{method:'POST'})
+     .then(async r=>{
+       const j=await r.json().catch(()=>({}));
+       if(!r.ok || !j.ok) throw new Error(j.error||('HTTP '+r.status));
+       li.dataset.proxy='0';
+       const badge=li.querySelector('.clip-actions .badge, .clip-actions .nobadge');
+       badge.textContent='proxy deleted · tap clip to regenerate';
+       badge.className='nobadge';
+       clearRowProgress(li);
+       b.hidden=true;
+       if(currentClipName===name){
+         player.pause();
+         player.removeAttribute('src');
+         player.load();
+         currentClipName='';
+         clipLookControl.hidden=true;
+         if(clipCubeRenderer) clipCubeRenderer.disable();
+         setClipPlayerVisible(false);
+       }
+     })
+     .catch(err=>alert('Proxy delete refused: '+err.message))
+     .finally(()=>{b.disabled=false;});
+ }));
+ document.querySelectorAll('.mbtn').forEach(b=>b.addEventListener('click',ev=>{
+   ev.stopPropagation(); openEd(b.closest('li').dataset.name);
+ }));
+})();
+</script>
+
+<script>
+(function(){
+ const lis=()=>Array.from(document.querySelectorAll('#list li'));
+ const fp=document.getElementById('fproj'), fsn=document.getElementById('fscene'), fr=document.getElementById('frate');
+ const projs=new Set(), scenes=new Set();
+ lis().forEach(li=>{if(li.dataset.project)projs.add(li.dataset.project); if(li.dataset.scene)scenes.add(li.dataset.scene);});
+ [...projs].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent=v;fp.appendChild(o);});
+ [...scenes].sort().forEach(v=>{const o=document.createElement('option');o.value=v;o.textContent='S'+v;fsn.appendChild(o);});
+ function applyFilter(){
+   const pv=fp.value, sv=fsn.value, rv=+fr.value;
+   lis().forEach(li=>{
+     const ok=(!pv||li.dataset.project===pv)&&(!sv||li.dataset.scene===sv)&&((+li.dataset.rating||0)>=rv);
+     li.style.display=ok?'':'none';
+   });
+ }
+ [fp,fsn,fr].forEach(el=>el.addEventListener('change',applyFilter));
+})();
+</script>
+<script>
+(function(){
+ const b=document.getElementById('darkcalbtn');
+ let armed=false,tmr=null;
+b.addEventListener('click',()=>{
+if(b.disabled)return;
+if(!armed){armed=true;b.style.background='#a80';b.textContent='lens capped? click again';
+clearTimeout(tmr);tmr=setTimeout(()=>{armed=false;b.style.background='';b.textContent='Dark cal';},8000);return;}
+armed=false;clearTimeout(tmr);b.style.background='';
+b.disabled=true;b.textContent='analyzing...';
+fetch('/darkcal',{method:'POST'}).then(r=>r.json()).then(j=>{
+b.disabled=false;
+b.textContent=j.ok?(j.count+' hot px / blk '+j.black):('failed: '+String(j.error).slice(0,60));
+b.style.background=j.ok?'#274':'#833';
+clearTimeout(tmr);tmr=setTimeout(()=>{b.textContent='Dark cal';b.style.background='';},20000);
+}).catch(err=>{b.disabled=false;b.textContent='error: '+err;b.style.background='#833';
+clearTimeout(tmr);tmr=setTimeout(()=>{b.textContent='Dark cal';b.style.background='';},10000);});
+});
+})();
+</script>
+</body>
+</html>

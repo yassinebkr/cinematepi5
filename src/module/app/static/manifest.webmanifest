@@ -1,0 +1,17 @@
+{
+  "id": "/",
+  "name": "CinePi Camera",
+  "short_name": "CinePi",
+  "description": "CinePi camera control, live preview, clips and offload",
+  "start_url": "/",
+  "scope": "/",
+  "display": "fullscreen",
+  "display_override": ["fullscreen", "standalone", "minimal-ui"],
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "any",
+  "icons": [
+    {"src": "/static/icons/cinepi-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+    {"src": "/static/icons/cinepi-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"}
+  ]
+}

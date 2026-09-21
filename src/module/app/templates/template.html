@@ -1,0 +1,960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>CinePi Camera</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CinePi">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="/static/css/cinemate-responsive.css?v=20260920q">
+    <script src="/static/js/cube-lut-engine.js?v=20260921a"></script>
+<script defer src="/static/js/cinemate-app.js?v=20260920q"></script>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Arial', sans-serif;
+            background-color: {{ background_color }};
+        }
+        .top-bar, .bottom-bar {
+            background-color: black;
+            font-size: 16px;
+            color: #fff;
+            padding: 10px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: center;
+            gap: 10px;
+        }
+        .bottom-bar > div {
+            flex: 1;
+            text-align: center;
+        }
+        .bottom-bar button {
+            flex: 0 0 auto;
+        }
+        .top-bar select, .bottom-bar select {
+            margin-left: 10px;
+            padding: 8px;
+            font-size: 16px;
+            border: none;
+            background-color: #111;
+            color: #fff;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .top-bar select:focus, .bottom-bar select:focus {
+            outline: none;
+        }
+        #resolution-select.resolution-switching {
+            color: #aaa;
+        }
+        #resolution-select.resolution-switching option {
+            color: #fff;
+        }
+        #stream-container {
+            background-color: black;
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding-bottom: 46.25%;
+            overflow: hidden;
+            margin: 0;
+        }
+        #stream {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            background-color: black;
+        }
+    </style>
+</head>
+<body class="page-live">
+    <div class="top-bar">
+        <div>FPS:
+            <select id="fps-select">
+                {% for fps_value in fps_values %}
+                    <option value="{{ fps_value }}" {% if fps_value == current_fps %}selected{% endif %}>{{ fps_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>Shutter Angle:
+            <select id="shutter-speed-select">
+                {% for shutter_speed_value in shutter_speed_values %}
+                    <option value="{{ shutter_speed_value }}" {% if shutter_speed_value == current_shutter_a %}selected{% endif %}>{{ shutter_speed_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>Exposure: <span id="exposure-time"></span></div>
+        <div>ISO:
+            <select id="iso-select">
+                {% for iso_value in iso_values %}
+                    <option value="{{ iso_value }}" {% if iso_value == current_iso %}selected{% endif %}>{{ iso_value }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>WB:
+            <select id="wb-select">
+                {% for wb_value in wb_steps %}
+                    <option value="{{ wb_value }}" {% if wb_value == current_wb %}selected{% endif %}>{{ wb_value }}K</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div>Resolution:
+            <select id="resolution-select">
+                {% for resolution in resolution_values %}
+                    <option value="{{ resolution.mode }}">{{ resolution.width }}x{{ resolution.height }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="mobile-look-slot" aria-label="Look selection"></div>
+        <a id="clips-link" href="/clips" style="background:#234;color:#8cf;padding:6px 14px;border-radius:6px;text-decoration:none;font-family:sans-serif;font-size:14px">Clips</a>
+    </div>
+    <button id="ui-toggle" type="button" aria-label="Show or hide camera controls">☰</button>
+  <div id="stream-container">
+        <div id="live-rec-indicator" class="live-rec-indicator" hidden aria-label="Recording"></div>
+        <div id="tool-side" style="display:flex;flex-direction:column;padding:6px;box-sizing:border-box;background:#000;z-index:5"><div id="expo-tools" style="display:flex;flex-direction:column;align-items:flex-start;gap:4px"><select id="lutsel" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 6px;margin-right:4px;cursor:pointer;max-width:118px"><option value="">LOOK: none</option></select><button id="btn-hist" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;margin-right:4px;cursor:pointer">HIST</button><button id="btn-wave" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;cursor:pointer">WAVE</button><button id="btn-vect" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;cursor:pointer">VECT</button><button id="btn-zebra" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;margin-right:4px;cursor:pointer">ZEBRA</button><button id="btn-peak" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;cursor:pointer">PEAK</button><button id="btn-level" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;cursor:pointer">LEVEL</button><span id="pwr-lbl" style="font:600 11px sans-serif;color:#9c9;background:rgba(0,0,0,.4);padding:2px 6px;border-radius:4px"></span></div><button id="btn-tag" style="font:600 11px sans-serif;color:#eee;background:#333;border:1px solid #555;border-radius:4px;padding:3px 8px;cursor:pointer;margin-top:4px">TAG</button><div id="tag-panel" style="display:none;background:#181818;border:1px solid #444;border-radius:6px;padding:6px;font:11px sans-serif;color:#ddd;margin-top:4px;width:118px;box-sizing:border-box"><label><input type="checkbox" id="tg-auto"> auto-tag</label><br>proj<input id="tg-proj" style="width:100%;background:#333;color:#eee;border:1px solid #555;box-sizing:border-box">scene<input id="tg-scene" style="width:100%;background:#333;color:#eee;border:1px solid #555;box-sizing:border-box"><select id="tg-pre" style="width:100%;background:#333;color:#eee;margin-top:3px"><option value="">presets…</option></select><div style="margin-top:4px"><button id="tg-add" style="background:#444;color:#eee;border:0;border-radius:3px;cursor:pointer">+pre</button> <button id="tg-apply" style="background:#2a7d4f;color:#fff;border:0;border-radius:3px;cursor:pointer">Apply</button></div></div><div id="scopes" style="margin-top:auto;display:flex;flex-direction:column;gap:4px"><canvas id="wave-ov" width="160" height="100" style="width:122px;image-rendering:pixelated;pointer-events:none;display:none"></canvas><canvas id="vect-ov" width="128" height="128" style="width:122px;image-rendering:pixelated;pointer-events:none;display:none"></canvas><canvas id="hist-ov" width="256" height="80" style="width:122px;height:80px;pointer-events:none;display:none"></canvas></div></div><img id="stream" alt="Stream" data-stream-port="8000" crossorigin="anonymous">
+        
+        <canvas id="level-ov" width="300" height="300" style="position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);pointer-events:none;display:none;z-index:6"></canvas><canvas id="zebra-ov" style="position:absolute;image-rendering:pixelated;pointer-events:none;display:none;z-index:7"></canvas>
+        
+    </div>
+    <div class="bottom-bar">
+        <button id="shutdown-btn" style="background:#5a2222;color:#eee;border:1px solid #855;border-radius:4px;padding:4px 10px;cursor:pointer;margin-right:6px">SHUTDOWN</button><button id="unmount-btn">Unmount</button>
+        <div><span id="disk-space"></span></div>
+        <div>WRITE: <span id="write-speed"></span></div>
+        <div>FRAMES BUFFERED: <span id="buffer-used"></span></div>
+        <div>BUFFER SIZE: <span id="buffer-size"></span></div>
+        <div>CPU: <span id="cpu-load"></span></div>
+        <div>RAM: <span id="ram-load"></span></div>
+        <div>TEMP: <span id="cpu-temp"></span></div>
+        <button id="fullscreen-btn" style="margin-left:auto;">Enter Fullscreen</button>
+    </div>
+    <script src="{{ url_for('static', filename='js/socket.io.min.js') }}"></script>
+    <script>
+        const socket = io();
+
+        function updateShutterSpeedOptions(shutter_a_steps, current_shutter_a) {
+            const shutterSpeedSelect = document.getElementById('shutter-speed-select');
+            shutterSpeedSelect.innerHTML = '';
+            shutter_a_steps.forEach(angle => {
+                const option = document.createElement('option');
+                option.value = angle;
+                option.textContent = angle;
+                if (angle == current_shutter_a) {
+                    option.selected = true;
+                }
+                shutterSpeedSelect.appendChild(option);
+            });
+        }
+
+        function updateFpsOptions(fps_steps, current_fps) {
+            const fpsSelect = document.getElementById('fps-select');
+            fpsSelect.innerHTML = '';
+            fps_steps.forEach(fps => {
+                const option = document.createElement('option');
+                option.value = fps;
+                option.textContent = fps;
+                if (fps == current_fps) {
+                    option.selected = true;
+                }
+                fpsSelect.appendChild(option);
+            });
+        }
+
+        function updateWBOptions(wb_steps, current_wb) {
+            const wbSelect = document.getElementById('wb-select');
+            wbSelect.innerHTML = '';
+            wb_steps.forEach(wb => {
+                const option = document.createElement('option');
+                option.value = wb;
+                option.textContent = `${wb}K`;
+                if (wb == current_wb) {
+                    option.selected = true;
+                }
+                wbSelect.appendChild(option);
+            });
+        }
+
+        function isSwitching(value) {
+            const normalized = String(value).trim().toLowerCase();
+            return value === true || normalized === '1' || normalized === 'true';
+        }
+
+        function updateResolutionSelection(mode, switching) {
+            const resolutionSelect = document.getElementById('resolution-select');
+            if (!resolutionSelect) {
+                return;
+            }
+            if (mode !== undefined && mode !== null) {
+                resolutionSelect.value = mode;
+            }
+            resolutionSelect.classList.toggle('resolution-switching', isSwitching(switching));
+        }
+
+        socket.on('initial_values', data => {
+            document.getElementById('iso-select').value = data.iso;
+            updateShutterSpeedOptions(data.shutter_a_steps, data.shutter_a);
+            updateFpsOptions(data.fps_steps, data.fps);
+            updateWBOptions(data.wb_steps, data.wb);
+
+            updateLiveRecordingState(!!data.recording);
+            document.getElementById('disk-space').innerText = data.disk_space;
+            document.getElementById('write-speed').innerText = data.write_speed;
+            document.getElementById('buffer-used').innerText = data.buffer_used;
+            document.getElementById('buffer-size').innerText = data.buffer_size;
+            document.getElementById('cpu-load').innerText = data.cpu_load;
+            document.getElementById('ram-load').innerText = data.ram_load;
+            document.getElementById('cpu-temp').innerText = data.cpu_temp;
+            document.getElementById('exposure-time').innerText = data.exposure_time;
+            const resolutionSelect = document.getElementById('resolution-select');
+            resolutionSelect.innerHTML = '';
+            data.sensor_resolutions.forEach(res => {
+                const option = document.createElement('option');
+                option.value = res.mode;
+                option.textContent = res.resolution;
+                resolutionSelect.appendChild(option);
+            });
+            updateResolutionSelection(data.selected_resolution_mode, data.resolution_switching);
+        });
+
+        socket.on('parameter_change', data => {
+            if (data.iso !== undefined) {
+                document.getElementById('iso-select').value = data.iso;
+            }
+            if (data.shutter_a !== undefined) {
+                const currentShutter = data.shutter_a;
+                document.getElementById('shutter-speed-select').value = currentShutter;
+                socket.emit('request_shutter_a_steps', {}, (response) => {
+                    updateShutterSpeedOptions(response.shutter_a_steps, currentShutter);
+                });
+            }
+            if (data.fps !== undefined) {
+                document.getElementById('fps-select').value = data.fps;
+            }
+            if (data.wb !== undefined) {
+                document.getElementById('wb-select').value = data.wb;
+            }
+            if (data.selected_resolution_mode !== undefined) {
+                updateResolutionSelection(data.selected_resolution_mode, data.resolution_switching);
+            }
+            if (data.sensor_mode !== undefined) {
+                updateResolutionSelection(data.sensor_mode, data.resolution_switching);
+            }
+            if (data.resolution_switching !== undefined) {
+                updateResolutionSelection(data.selected_resolution_mode, data.resolution_switching);
+            }
+            if (data.buffer !== undefined) {
+                document.getElementById('buffer-used').innerText = data.buffer;
+            }
+        });
+
+        socket.on('resolution_change', data => {
+            if (data.sensor_mode !== undefined) {
+                updateResolutionSelection(data.sensor_mode, data.resolution_switching);
+            }
+        });
+
+        socket.on('shutter_a_update', data => {
+            updateShutterSpeedOptions(data.shutter_a_steps, data.current_shutter_a);
+        });
+
+        socket.on('fps_update', data => {
+            updateFpsOptions(data.fps_steps, data.fps_actual);
+        });
+
+        socket.on('gui_data_change', data => {
+            if (data.disk_space !== undefined) {
+                document.getElementById('disk-space').innerText = data.disk_space;
+            }
+            if (data.write_speed !== undefined) {
+                document.getElementById('write-speed').innerText = data.write_speed;
+            }
+            if (data.buffer_used !== undefined) {
+                document.getElementById('buffer-used').innerText = data.buffer_used;
+            }
+            if (data.buffer_size !== undefined) {
+                document.getElementById('buffer-size').innerText = data.buffer_size;
+            }
+            if (data.cpu_load !== undefined) {
+                document.getElementById('cpu-load').innerText = data.cpu_load;
+            }
+            if (data.ram_load !== undefined) {
+                document.getElementById('ram-load').innerText = data.ram_load;
+            }
+            if (data.cpu_temp !== undefined) {
+                document.getElementById('cpu-temp').innerText = data.cpu_temp;
+            }
+            if (data.exposure_time !== undefined) {
+                document.getElementById('exposure-time').innerText = data.exposure_time;
+            }
+        });
+
+        function updateLiveRecordingState(active) {
+            const dot = document.getElementById('live-rec-indicator');
+            if (!dot) return;
+            dot.hidden = !active;
+            document.body.classList.toggle('recording-active', !!active);
+            if (window.CinePiPositionRecIndicator) {
+                window.CinePiPositionRecIndicator();
+            }
+        }
+
+        socket.on('recording_state', data => {
+            updateLiveRecordingState(!!data.recording);
+        });
+
+        let recordingStatePollBusy = false;
+        async function pollLiveRecordingState() {
+            if (recordingStatePollBusy) return;
+            recordingStatePollBusy = true;
+            try {
+                const response = await fetch(
+                    '/recording-state?t=' + Date.now(),
+                    {cache: 'no-store'}
+                );
+                if (response.ok) {
+                    const state = await response.json();
+                    updateLiveRecordingState(!!state.recording);
+                }
+            } catch (_) {
+                /* Socket.IO is primary; retry on the next poll. */
+            } finally {
+                recordingStatePollBusy = false;
+            }
+        }
+        pollLiveRecordingState();
+        setInterval(pollLiveRecordingState, 1000);
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden) pollLiveRecordingState();
+        });
+
+        socket.on('background_color_change', data => {
+            /* Recording no longer recolours the whole camera UI. */
+        });
+
+        document.getElementById('iso-select').addEventListener('change', function() {
+            const iso = this.value;
+            socket.emit('change_iso', { iso });
+        });
+
+        document.getElementById('shutter-speed-select').addEventListener('change', function() {
+            const shutterAngle = this.value;
+            socket.emit('change_shutter_a', { shutter_a: shutterAngle });
+        });
+
+        document.getElementById('fps-select').addEventListener('change', function() {
+            const fps = this.value;
+            socket.emit('change_fps', { fps });
+        });
+
+        document.getElementById('wb-select').addEventListener('change', function() {
+            const wb = this.value;
+            socket.emit('change_wb', { wb });
+        });
+
+        document.getElementById('resolution-select').addEventListener('change', function() {
+            const resolutionMode = this.value;
+            socket.emit('change_resolution', { mode: resolutionMode });
+        });
+
+        document.getElementById('shutdown-btn').addEventListener('click',function(e){e.stopPropagation();if(confirm('Shut down the camera safely?')){fetch('/shutdown',{method:'POST'});document.body.innerHTML='<h2 style=\'color:#ccc;font-family:sans-serif;text-align:center;margin-top:20%\'>Shutting down… safe to unplug in ~15 s</h2>';}});
+document.getElementById('unmount-btn').addEventListener('click', function() {
+            socket.emit('unmount');
+        });
+
+        document.getElementById('stream-container').addEventListener('click', function() {
+            socket.emit('container_tap');
+        });
+
+        socket.on('reload_stream', () => {
+            reloadStream();
+        });
+
+        let streamRetryTimer = null;
+    let streamLive = false;
+
+    function scheduleStreamRetry(delay) {
+      if (streamRetryTimer) return;
+      streamRetryTimer = setTimeout(() => {
+        streamRetryTimer = null;
+        tryStream();
+      }, delay || 1500);
+    }
+
+    function tryStream() {
+      const el = document.getElementById('stream');
+      if (!el || streamLive) return;
+      const baseSrc = el.dataset.streamBase || el.src.split('?')[0];
+      if (!baseSrc) return;
+      el.dataset.streamBase = baseSrc;
+      /* probe the streamer first; only (re)connect the img when it answers */
+      fetch(baseSrc, { mode: 'no-cors', cache: 'no-store' }).then(() => {
+        if (streamLive) return;
+        el.src = '';
+        setTimeout(() => { el.src = baseSrc; }, 50);
+        /* verify a frame actually arrived; if not, try again */
+        setTimeout(() => { if (!streamLive) scheduleStreamRetry(500); }, 5000);
+      }).catch(() => {
+        scheduleStreamRetry();
+      });
+    }
+
+    function reloadStream() {
+      streamLive = false;
+      scheduleStreamRetry(1000);
+    }
+
+    (function attachStreamGuards() {
+      const el = document.getElementById('stream');
+      if (!el) return;
+      el.dataset.streamBase = el.src.split('?')[0];
+      el.addEventListener('load', () => {
+        streamLive = true;
+        if (streamRetryTimer) { clearTimeout(streamRetryTimer); streamRetryTimer = null; }
+      });
+      el.addEventListener('error', () => {
+        if (el.src === '' || el.src === window.location.href) return; /* our own clear */
+        streamLive = false;
+        scheduleStreamRetry();
+      });
+      if (!(el.naturalWidth > 0)) scheduleStreamRetry(2000);
+    })();
+
+        socket.on('reload_browser', () => {
+            window.location.reload();
+        });
+
+    </script>
+
+<script>
+(function(){
+  const cont=document.getElementById('stream-container'); if(cont) cont.style.position='relative';
+  const img=new Image();
+  const work=document.createElement('canvas'); const W=480,H=270; work.width=W; work.height=H;
+  const wctx=work.getContext('2d',{willReadFrequently:true});
+  const zc=document.getElementById('zebra-ov'), zctx=zc.getContext('2d');
+  const hc=document.getElementById('hist-ov'), hctx=hc.getContext('2d');
+  const bh=document.getElementById('btn-hist'), bz=document.getElementById('btn-zebra');
+  const bp=document.getElementById('btn-peak');
+  const bw=document.getElementById('btn-wave'), bv=document.getElementById('btn-vect');
+  const wfc=document.getElementById('wave-ov'), wfctx=wfc.getContext('2d');
+  const vsc=document.getElementById('vect-ov'), vsctx=vsc.getContext('2d');
+  let hist=localStorage.eh==='1', zeb=localStorage.ez==='1', pk=localStorage.ep==='1', busy=false;
+  let wv=localStorage.ew==='1', vsn=localStorage.ev==='1';
+  let zebraIRE=Number(localStorage.getItem('cinepiZebraIRE')||90);
+  if(![70,80,85,90,95,100].includes(zebraIRE)) zebraIRE=90;
+  const zebraClipCode=250;
+  let zebraMenu=null,zebraHoldTimer=null,zebraLongPress=false;
+  bz.style.userSelect='none';
+  bz.style.webkitUserSelect='none';
+  bz.style.webkitTouchCallout='none';
+  bz.style.touchAction='manipulation';
+  bz.addEventListener('selectstart',e=>e.preventDefault());
+  function sty(){bh.style.background=hist?'#2a7d4f':'#333';bz.style.background=zeb?'#2a7d4f':'#333';
+    hc.style.display=hist?'':'none'; zc.style.display=(zeb||pk)?'':'none';bp.style.background=pk?'#2a7d4f':'#333';bw.style.background=wv?'#2a7d4f':'#333';bv.style.background=vsn?'#2a7d4f':'#333';wfc.style.display=wv?'':'none';vsc.style.display=vsn?'':'none';
+    bz.textContent=zeb?('Z '+zebraIRE):'ZEBRA';
+    bz.title='Zebra '+zebraIRE+' IRE on source Rec.709; hold to set level; solid red = RGB near clipping >= '+zebraClipCode;
+    bp.title='Focus peaking: denoised adaptive Sobel + edge thinning; drawn over active LUT';
+    bh.title='RGB + luma histogram, full-range Rec.709 source';
+    bw.title='Luma waveform with IRE guides, full-range Rec.709 source';
+    bv.title='Rec.709 vectorscope with targets and skin-tone guide';
+    if(!zeb&&!pk&&zctx){zc.width=W;zc.height=H;}}
+  bh.onclick=e=>{e.stopPropagation();hist=!hist;localStorage.eh=hist?'1':'0';sty();};
+  function closeZebraMenu(){if(zebraMenu){zebraMenu.remove();zebraMenu=null;}}
+  function showZebraMenu(){
+    closeZebraMenu();
+    const r=bz.getBoundingClientRect(),m=document.createElement('div');
+    m.style.cssText='position:fixed;z-index:10000;background:#151515;border:1px solid #555;border-radius:6px;padding:6px;box-shadow:0 5px 22px #000b;display:flex;gap:4px;flex-wrap:wrap;max-width:188px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation';
+    m.addEventListener('selectstart',e=>e.preventDefault());
+    m.addEventListener('contextmenu',e=>e.preventDefault());
+    m.style.left=Math.max(4,Math.min(window.innerWidth-205,r.right+7))+'px';
+    m.style.top=Math.max(4,Math.min(window.innerHeight-55,r.top))+'px';
+    [70,80,85,90,95,100].forEach(v=>{
+      const b=document.createElement('button');
+      b.textContent=v+' IRE';
+      b.style.cssText='background:'+(v===zebraIRE?'#2a7d4f':'#333')+';color:#fff;border:1px solid #555;border-radius:4px;padding:6px 8px;cursor:pointer;font-size:12px;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;touch-action:manipulation';
+      b.addEventListener('selectstart',e=>e.preventDefault());
+      b.onclick=e=>{e.stopPropagation();zebraIRE=v;localStorage.setItem('cinepiZebraIRE',String(v));zeb=true;localStorage.ez='1';closeZebraMenu();sty();};
+      m.appendChild(b);
+    });
+    document.body.appendChild(m);zebraMenu=m;
+    setTimeout(()=>document.addEventListener('pointerdown',function q(e){if(zebraMenu&&!zebraMenu.contains(e.target)&&e.target!==bz)closeZebraMenu();document.removeEventListener('pointerdown',q,true);},true),0);
+  }
+  bz.onclick=e=>{e.stopPropagation();if(zebraLongPress){zebraLongPress=false;return;}zeb=!zeb;localStorage.ez=zeb?'1':'0';sty();};
+  bz.addEventListener('contextmenu',e=>e.preventDefault());
+
+  function startZebraHold(){
+    zebraLongPress=false;
+    clearTimeout(zebraHoldTimer);
+    zebraHoldTimer=setTimeout(()=>{
+      zebraLongPress=true;
+      try{const sel=window.getSelection();if(sel)sel.removeAllRanges();}catch(_){}
+      showZebraMenu();
+    },550);
+  }
+  function cancelZebraHold(){ clearTimeout(zebraHoldTimer); }
+
+  /* Desktop: use classic mouse events explicitly. Firefox/Linux has proven
+     more reliable here than relying only on Pointer Events. */
+  bz.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    e.preventDefault();
+    startZebraHold();
+  });
+  bz.addEventListener('mouseup',cancelZebraHold);
+  bz.addEventListener('mouseleave',cancelZebraHold);
+
+  /* Touch/pen path. Ignore mouse pointer events to avoid double timers after
+     mousedown. */
+  bz.addEventListener('pointerdown',e=>{
+    if(e.pointerType==='mouse')return;
+    if(e.button!==0)return;
+    startZebraHold();
+  });
+  ['pointerup','pointercancel','pointerleave'].forEach(ev=>
+    bz.addEventListener(ev,e=>{if(e.pointerType!=='mouse')cancelZebraHold();})
+  );
+  bp.onclick=e=>{e.stopPropagation();pk=!pk;localStorage.ep=pk?'1':'0';sty();};
+  bw.onclick=e=>{e.stopPropagation();wv=!wv;localStorage.ew=wv?'1':'0';sty();};
+  bv.onclick=e=>{e.stopPropagation();vsn=!vsn;localStorage.ev=vsn?'1':'0';sty();};
+  document.getElementById('expo-tools').addEventListener('click',e=>e.stopPropagation());
+  const ls=document.getElementById('lutsel');
+  const sImg=document.getElementById('stream');
+  let liveCubeCatalog=[];
+  let liveCubeRenderer=null;
+
+  async function applyCameraCubeLut(){
+    if(!liveCubeRenderer && window.CinePiCubeLUT){
+      liveCubeRenderer=new CinePiCubeLUT.Renderer(
+        sImg,cont,{zIndex:4}
+      );
+    }
+    const name=ls.value||'';
+    if(!name){
+      if(liveCubeRenderer) liveCubeRenderer.disable();
+      localStorage.removeItem('cameraCubeLut');
+      ls.title='No display LUT';
+      return;
+    }
+    const entry=liveCubeCatalog.find(x=>x.name===name);
+    if(!entry){
+      if(liveCubeRenderer) liveCubeRenderer.disable();
+      ls.value='';
+      localStorage.removeItem('cameraCubeLut');
+      return;
+    }
+    try{
+      await liveCubeRenderer.setLut(entry);
+      localStorage.setItem('cameraCubeLut',name);
+      const io=[entry.input_space,entry.output_space].filter(Boolean).join(' -> ');
+      ls.title=(entry.display_name||name)+(io?' | '+io:'')+
+        ' | '+entry.interpolation+(entry.verified?' | verified source':' | source unverified');
+      ls.style.borderColor=entry.verified?'#397b52':'#8a6d3b';
+    }catch(err){
+      if(liveCubeRenderer) liveCubeRenderer.disable();
+      ls.style.borderColor='#a44';
+      ls.title='3D LUT unavailable: '+(err&&err.message?err.message:String(err));
+    }
+  }
+
+  async function initCameraCubeLuts(){
+    try{
+      liveCubeCatalog=await CinePiCubeLUT.populateSelect(ls,'LOOK');
+      const pref=localStorage.getItem('cameraCubeLut')||'';
+      if(pref && liveCubeCatalog.some(x=>x.name===pref)) ls.value=pref;
+      else ls.value='';
+      await applyCameraCubeLut();
+    }catch(err){
+      ls.innerHTML='<option value="">LOOK unavailable</option>';
+      ls.disabled=true;
+      ls.title=err&&err.message?err.message:String(err);
+    }
+  }
+
+  ls.addEventListener('click',e=>e.stopPropagation());
+  ls.addEventListener('change',applyCameraCubeLut);
+  sImg.addEventListener('cinepi-lut-error',e=>{
+    ls.style.borderColor='#a44';
+    ls.title=(e.detail&&e.detail.message)||'3D LUT rendering error';
+  });
+  initCameraCubeLuts();
+  const pw=document.getElementById('pwr-lbl');
+  function pollPwr(){fetch('/power.json').then(r=>r.json()).then(j=>{pw.textContent=j.watts.toFixed(1)+' W';}).catch(()=>{}); setTimeout(pollPwr,5000);}
+  pollPwr();
+  const lvc=document.getElementById('level-ov'), lvx=lvc.getContext('2d'), bl=document.getElementById('btn-level');
+  let lvOn=localStorage.elv==='1';
+  function lvSty(){bl.style.background=lvOn?'#2a7d4f':'#333';lvc.style.display=lvOn?'':'none';}
+  window.etOn=localStorage.ettr==='1';
+const lp=document.createElement('div');lp.id='lvl-panel';
+lp.style.cssText='display:none;position:fixed;left:140px;top:170px;z-index:60;background:#181818;border:1px solid #444;border-radius:6px;padding:8px;font:11px sans-serif;color:#ddd;width:150px';
+lp.innerHTML='<label><input type="checkbox" id="lv-web"> web level</label><br><label><input type="checkbox" id="lv-hdmi"> HDMI level</label><br><label><input type="checkbox" id="lv-ettr"> ETTR advisor</label><br><button id="lv-zero" style="margin-top:6px;background:#444;color:#eee;border:0;border-radius:3px;cursor:pointer;padding:2px 8px">set zero</button> <span id="lv-msg"></span><hr style="border:0;border-top:1px solid #444;margin:8px 0"><button id="imu-cal-btn" style="width:100%;background:#225d70;color:#fff;border:1px solid #3b8ca5;border-radius:4px;cursor:pointer;padding:6px 5px;font-weight:700">IMU CALIBRATION</button><div id="imu-cal-web" style="display:none;margin-top:6px"><div id="imu-cal-state" style="color:#9cd7e8;margin-bottom:5px">idle</div><button id="imu-cal-confirm" style="background:#2a7d4f;color:#fff;border:0;border-radius:3px;cursor:pointer;padding:4px 7px">CONTINUE</button> <button id="imu-cal-cancel" style="background:#6b2d2d;color:#fff;border:0;border-radius:3px;cursor:pointer;padding:4px 7px">CANCEL</button></div>';
+document.body.appendChild(lp);
+const el2=document.createElement('div');el2.id='ettr-lbl';
+el2.style.cssText='position:fixed;left:142px;bottom:112px;z-index:59;font:700 12px sans-serif;color:#8f8;background:rgba(0,0,0,.55);padding:2px 6px;border-radius:4px;display:none';
+document.body.appendChild(el2);window.ettrEl=el2;
+function etSty(){el2.style.display=window.etOn?'':'none';}
+etSty();
+const lvw=lp.querySelector('#lv-web'),lvh=lp.querySelector('#lv-hdmi'),lve=lp.querySelector('#lv-ettr');
+lvw.checked=lvOn;lve.checked=window.etOn;
+fetch('/hud').then(r=>r.json()).then(j=>{lvh.checked=!!j.hdmi;}).catch(()=>{});
+bl.onclick=e=>{e.stopPropagation();lp.style.display=lp.style.display==='none'?'':'none';};
+lp.addEventListener('click',e=>e.stopPropagation());
+lvw.onchange=()=>{lvOn=lvw.checked;localStorage.elv=lvOn?'1':'0';lvSty();};
+lvh.onchange=()=>{fetch('/hud',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({hdmi:lvh.checked})}).catch(()=>{});};
+lve.onchange=()=>{window.etOn=lve.checked;localStorage.ettr=window.etOn?'1':'0';etSty();};
+
+lp.querySelector('#lv-zero').onclick=()=>{const ms=lp.querySelector('#lv-msg');ms.textContent='...';fetch('/levelcal',{method:'POST'}).then(r=>r.json()).then(j=>{ms.textContent=j.ok?'zeroed':'err';setTimeout(()=>{ms.textContent='';},3000);}).catch(()=>{ms.textContent='err';});};
+
+const icb=lp.querySelector('#imu-cal-btn'), icw=lp.querySelector('#imu-cal-web');
+const ics=lp.querySelector('#imu-cal-state'), icc=lp.querySelector('#imu-cal-confirm'), icx=lp.querySelector('#imu-cal-cancel');
+
+function imuCalLabel(st){
+  const p=(st&&st.phase)||'idle';
+  const names={
+    intro:'ready — press CONTINUE',
+    gyro:'gyro: keep camera still',
+    gyro_done:'gyro complete — CONTINUE',
+    tumble:'rotate camera through full sphere',
+    accel_done:'accelerometer complete — CONTINUE',
+    faces:'six-face alignment — position camera then CONTINUE',
+    results:'results — CONTINUE uses selected HDMI action',
+    saved:'saved',
+    cancelled:'cancelled',
+    idle:'idle'
+  };
+  let t=names[p]||p;
+  if(st&&st.progress!=null&&['gyro','tumble','faces'].includes(p)) t+=' '+Math.round(st.progress*100)+'%';
+  return t;
+}
+
+function imuCalRefresh(){
+  fetch('/imu-calibration').then(r=>r.json()).then(j=>{
+    const active=!!j.active, st=j.status||{};
+    icw.style.display=active?'block':'none';
+    icb.style.background=active?'#2a7d4f':'#225d70';
+    icb.textContent=active?'IMU CALIBRATION ACTIVE':'IMU CALIBRATION';
+    ics.textContent=imuCalLabel(st);
+    if(active) setTimeout(imuCalRefresh,500);
+  }).catch(()=>{});
+}
+
+icb.onclick=e=>{
+  e.stopPropagation();
+  fetch('/imu-calibration',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'start'})})
+    .then(r=>r.json()).then(j=>{if(!j.ok) throw new Error(j.error||'start failed');imuCalRefresh();})
+    .catch(err=>{ics.textContent='error: '+err.message;icw.style.display='block';});
+};
+icc.onclick=e=>{
+  e.stopPropagation();
+  fetch('/imu-calibration',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'confirm'})})
+    .then(r=>r.json()).then(()=>imuCalRefresh()).catch(()=>{ics.textContent='error';});
+};
+icx.onclick=e=>{
+  e.stopPropagation();
+  fetch('/imu-calibration',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'cancel'})})
+    .then(r=>r.json()).then(()=>imuCalRefresh()).catch(()=>{ics.textContent='error';});
+};
+imuCalRefresh();
+
+  lvSty();
+  let lvT={roll:0,pitch:0,shake:0},lvC={roll:0,pitch:0,shake:0};
+function lvTick(){
+if(!lvOn){setTimeout(lvTick,800);return;}
+fetch('/imu.json').then(r=>r.json()).then(j=>{lvT.roll=j.roll;lvT.pitch=j.pitch;lvT.shake=j.shake;setTimeout(lvTick,1000);}).catch(()=>setTimeout(lvTick,1500));
+}
+lvTick();
+function lvDraw(){
+requestAnimationFrame(lvDraw);
+if(!lvOn)return;
+if(!(lvDraw.k=((lvDraw.k||0)+1)%20)){var se2=document.getElementById('stream');
+if(se2&&se2.naturalWidth>0){var r2=se2.getBoundingClientRect();
+var s2=Math.min(r2.width/se2.naturalWidth,r2.height/se2.naturalHeight);
+var cw2=se2.naturalWidth*s2,ch2=se2.naturalHeight*s2;
+lvc.style.position='fixed';lvc.style.transform='none';lvc.style.zIndex=6;
+lvc.style.left=(r2.left+(r2.width-cw2)/2+cw2/2-150)+'px';
+lvc.style.top=(r2.top+(r2.height-ch2)/2+ch2/2-150)+'px';}}
+lvC.roll+=(lvT.roll-lvC.roll)*0.25; lvC.pitch+=(lvT.pitch-lvC.pitch)*0.25; lvC.shake+=(lvT.shake-lvC.shake)*0.25;
+lvx.clearRect(0,0,300,300);
+const cx=150,cy=150,a=-lvC.roll*Math.PI/180;
+const pitchPx=Math.max(-78,Math.min(78,lvC.pitch*4.0));
+const hy=cy+pitchPx;
+const level=Math.abs(lvC.roll)<0.7&&Math.abs(lvC.pitch)<0.7;
+lvx.strokeStyle=level?'#3f6':'#fff';lvx.lineWidth=2;
+lvx.beginPath();lvx.moveTo(cx-120*Math.cos(a),hy-120*Math.sin(a));lvx.lineTo(cx+120*Math.cos(a),hy+120*Math.sin(a));lvx.stroke();
+/* Fixed camera reticle + pitch reference ticks. */
+lvx.strokeStyle='rgba(255,255,255,0.5)';lvx.lineWidth=1;
+lvx.beginPath();lvx.moveTo(cx-34,cy);lvx.lineTo(cx-8,cy);lvx.moveTo(cx+8,cy);lvx.lineTo(cx+34,cy);lvx.stroke();
+lvx.beginPath();lvx.arc(cx,cy,4,0,6.2832);lvx.stroke();
+for(let deg=-15;deg<=15;deg+=5){if(deg===0)continue;const py=hy-deg*4;if(py<70||py>230)continue;lvx.beginPath();lvx.moveTo(cx-12,py);lvx.lineTo(cx+12,py);lvx.stroke();}
+lvx.font='600 13px sans-serif';
+lvx.fillStyle=level?'#3f6':'#fff';
+lvx.fillText('R '+lvC.roll.toFixed(1)+'\u00b0  P '+lvC.pitch.toFixed(1)+'\u00b0',cx+42,cy-10);
+const s=lvC.shake;
+lvx.fillStyle=s<5?'#3f6':(s<20?'#fc3':'#f44');
+lvx.fillRect(cx-60,cy+110,Math.min(120,s*4),8);
+lvx.strokeStyle='rgba(255,255,255,0.4)';lvx.strokeRect(cx-60,cy+110,120,8);
+lvx.fillText(s.toFixed(0)+' \u00b0/s',cx+68,cy+118);
+}
+lvDraw();
+try{socket.on('imu',j=>{lvT.roll=j.roll;lvT.pitch=j.pitch;lvT.shake=j.shake;});}catch(e){}
+  setInterval(function streamWatchdog(){
+var el=document.getElementById('stream');
+if(!el)return;
+if(el.naturalWidth===0){
+try{streamLive=false;}catch(e){}
+var b=el.dataset.streamBase||el.src.split('?')[0];
+if(b){el.src=b+'?r='+Date.now();}
+}
+},3000);
+  const tgP=document.getElementById('tag-panel'), tgB=document.getElementById('btn-tag');
+  function tgLoad(){fetch('/shotmeta').then(r=>r.json()).then(j=>{
+    document.getElementById('tg-auto').checked=j.auto!==false;
+    document.getElementById('tg-proj').value=j.project||'';
+    document.getElementById('tg-scene').value=j.scene||'';
+    const pre=document.getElementById('tg-pre');
+    pre.innerHTML='<option value="">presets…</option>'+(j.scenes||[]).map(s=>'<option>'+s+'</option>').join('');
+  });}
+  tgB.addEventListener('click',e=>{e.stopPropagation();const v=tgP.style.display==='none';tgP.style.display=v?'':'none';tgB.style.background=v?'#2a7d4f':'#333';if(v)tgLoad();});
+  tgP.addEventListener('click',e=>e.stopPropagation());
+  document.getElementById('tg-pre').addEventListener('change',function(){if(this.value)document.getElementById('tg-scene').value=this.value;});
+  function tgState(){const pre=document.getElementById('tg-pre');
+    return {auto:document.getElementById('tg-auto').checked,
+            project:document.getElementById('tg-proj').value,
+            scene:document.getElementById('tg-scene').value,
+            scenes:[...pre.options].slice(1).map(o=>o.value)};}
+  document.getElementById('tg-add').addEventListener('click',e=>{e.stopPropagation();
+    const s=document.getElementById('tg-scene').value.trim(); if(!s)return;
+    const pre=document.getElementById('tg-pre');
+    if(![...pre.options].some(o=>o.value===s)){const o=document.createElement('option');o.textContent=s;pre.appendChild(o);}
+    fetch('/shotmeta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(tgState())});});
+  document.getElementById('tg-apply').addEventListener('click',e=>{e.stopPropagation();
+    fetch('/shotmeta',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(tgState())}).then(()=>{tgP.style.display='none';tgB.style.background='#333';});});
+
+
+  sty();
+  function tick(){
+    if(!(hist||zeb||pk||wv||vsn||window.etOn)){setTimeout(tick,600);return;}
+    if(busy){setTimeout(tick,60);return;}
+    busy=true;
+    img.onload=()=>{try{
+      wctx.drawImage(img,0,0,W,H);
+      const d=wctx.getImageData(0,0,W,H).data;
+      /* Monitoring v2: browser-decoded RGB is already full-range. Do NOT
+         remap it as studio-range 16..235. All image-analysis tools below use
+         BT.709 luma directly in 0..255. */
+      const N=W*H;
+      const bins=new Uint32Array(128), rBins=new Uint32Array(128),
+            gBins=new Uint32Array(128), bBins=new Uint32Array(128);
+      const maxBins=window.etOn?new Uint32Array(128):null;
+      let clipped=0;
+      let zd=null,zi=null;
+      if(zeb||pk){zd=zctx.createImageData(W,H);zi=zd.data;}
+      const lum=pk?new Uint8Array(N):null;
+      const wfCount=wv?new Uint16Array(160*100):null;
+      const vsCount=vsn?new Uint32Array(128*128):null;
+      const vsR=vsn?new Uint32Array(128*128):null;
+      const vsG=vsn?new Uint32Array(128*128):null;
+      const vsB=vsn?new Uint32Array(128*128):null;
+      const zebraY=Math.round(255*zebraIRE/100);
+
+      for(let p=0,px=0;p<d.length;p+=4,px++){
+        const rr=d[p],gg=d[p+1],bb=d[p+2];
+        const y=(rr*54+gg*183+bb*19+128)>>8; /* BT.709 ~= .2126/.7152/.0722 */
+        bins[Math.min(127,y>>1)]++;
+        rBins[rr>>1]++;gBins[gg>>1]++;bBins[bb>>1]++;
+        if(maxBins)maxBins[Math.max(rr,gg,bb)>>1]++;
+        const chanClip=(rr>=zebraClipCode||gg>=zebraClipCode||bb>=zebraClipCode);
+        if(chanClip)clipped++;
+        if(lum)lum[px]=y;
+
+        if(wfCount){
+          const wx=Math.min(159,((px%W)*160/W)|0);
+          const wy=Math.max(0,Math.min(99,99-Math.round(y*99/255)));
+          const wi=wy*160+wx;
+          if(wfCount[wi]<65535)wfCount[wi]++;
+        }
+
+        if(vsCount){
+          /* Rec.709 Y'CbCr chroma, mapped so nominal +/-0.5 reaches the
+             58-pixel graticule radius. */
+          const cb=(bb-y)/1.8556;
+          const cr=(rr-y)/1.5748;
+          let ux=Math.round(64+cb*(58/127.5));
+          let vy2=Math.round(64-cr*(58/127.5));
+          ux=Math.max(0,Math.min(127,ux));vy2=Math.max(0,Math.min(127,vy2));
+          const vi=(vy2<<7)+ux;
+          vsCount[vi]++;vsR[vi]+=rr;vsG[vi]+=gg;vsB[vi]+=bb;
+        }
+
+        if(zeb&&zi){
+          const xx=px%W, yy=(px/W)|0, o=px*4;
+          if(chanClip){
+            zi[o]=255;zi[o+1]=35;zi[o+2]=35;zi[o+3]=245;
+          }else if(y>=zebraY && (((xx+yy*2)>>2)&1)===0){
+            zi[o]=255;zi[o+1]=70;zi[o+2]=45;zi[o+3]=220;
+          }
+        }
+      }
+
+      /* Focus peaking: separable 3x3 Gaussian removes high-ISO pixel noise,
+         Sobel measures real edge energy, an image-derived noise floor adapts
+         sensitivity, and local-max suppression keeps contours thin. */
+      if(pk&&zi&&lum){
+        const tmp=new Uint16Array(N), blur=new Uint8Array(N);
+        for(let yy=0;yy<H;yy++){
+          const ro=yy*W;
+          tmp[ro]=lum[ro]; tmp[ro+W-1]=lum[ro+W-1];
+          for(let xx=1;xx<W-1;xx++){
+            const i=ro+xx;
+            tmp[i]=(lum[i-1]+2*lum[i]+lum[i+1]+2)>>2;
+          }
+        }
+        for(let xx=0;xx<W;xx++){blur[xx]=lum[xx];blur[(H-1)*W+xx]=lum[(H-1)*W+xx];}
+        for(let yy=1;yy<H-1;yy++){
+          const ro=yy*W;
+          for(let xx=1;xx<W-1;xx++){
+            const i=ro+xx;
+            blur[i]=(tmp[i-W]+2*tmp[i]+tmp[i+W]+2)>>2;
+          }
+        }
+        const grad=new Uint8Array(N), gh=new Uint32Array(256);
+        let gn=0;
+        for(let yy=1;yy<H-1;yy++){
+          for(let xx=1;xx<W-1;xx++){
+            const i=yy*W+xx;
+            const gx=-blur[i-W-1]+blur[i-W+1]-2*blur[i-1]+2*blur[i+1]-blur[i+W-1]+blur[i+W+1];
+            const gy=-blur[i-W-1]-2*blur[i-W]-blur[i-W+1]+blur[i+W-1]+2*blur[i+W]+blur[i+W+1];
+            const g=Math.min(255,(Math.abs(gx)+Math.abs(gy))>>2);
+            grad[i]=g;gh[g]++;gn++;
+          }
+        }
+        let acc=0,noise=0,target=gn*0.70;
+        for(let i=0;i<256;i++){acc+=gh[i];if(acc>=target){noise=i;break;}}
+        const peakTh=Math.max(42,Math.min(105,Math.round(noise*2.2+18)));
+        bp.title='Focus peaking: adaptive Sobel threshold '+peakTh+' (noise floor '+noise+'); source detail over active LUT';
+        for(let yy=2;yy<H-2;yy++){
+          for(let xx=2;xx<W-2;xx++){
+            const i=yy*W+xx,g=grad[i];
+            if(g<peakTh)continue;
+            if(g<grad[i-1]||g<grad[i+1]||g<grad[i-W]||g<grad[i+W])continue;
+            const o=i*4;
+            /* Preserve solid-red clipping warning when both tools are on. */
+            if(zi[o+3]>240&&zi[o]>240&&zi[o+1]<80)continue;
+            zi[o]=0;zi[o+1]=255;zi[o+2]=255;zi[o+3]=235;
+          }
+        }
+      }
+
+      if((zeb||pk)&&zd){
+        zc.width=W;zc.height=H;zctx.putImageData(zd,0,0);
+        const se=document.getElementById('stream');
+        if(se&&se.naturalWidth>0){
+          const r=se.getBoundingClientRect(),rc=cont.getBoundingClientRect();
+          const sc=Math.min(r.width/se.naturalWidth,r.height/se.naturalHeight);
+          const cw=se.naturalWidth*sc,ch=se.naturalHeight*sc;
+          const ox=r.left-rc.left+(r.width-cw)/2,oy=r.top-rc.top+(r.height-ch)/2;
+          zc.style.left=ox+'px';zc.style.top=oy+'px';zc.style.width=cw+'px';zc.style.height=ch+'px';
+          zc.style.zIndex='7';
+        }
+      }
+
+      if(wfCount){
+        const wfI=wfctx.createImageData(160,100),wfD=wfI.data;
+        let wm=1;for(let i=0;i<wfCount.length;i++)if(wfCount[i]>wm)wm=wfCount[i];
+        const den=Math.log1p(wm);
+        for(let i=0;i<wfCount.length;i++){
+          if(!wfCount[i])continue;
+          const v=Math.min(255,Math.round(255*Math.log1p(wfCount[i])/den));
+          const o=i*4;wfD[o]=v;wfD[o+1]=v;wfD[o+2]=v;wfD[o+3]=255;
+        }
+        wfctx.putImageData(wfI,0,0);
+        wfctx.font='8px monospace';wfctx.textBaseline='top';
+        [0,18,50,70,90,100].forEach(ire=>{
+          const yy=99-Math.round(ire*0.99);
+          wfctx.strokeStyle=ire===100?'rgba(255,90,90,.65)':'rgba(120,180,120,.28)';
+          wfctx.beginPath();wfctx.moveTo(0,yy+.5);wfctx.lineTo(160,yy+.5);wfctx.stroke();
+          if(ire===0||ire===50||ire===100){wfctx.fillStyle='rgba(190,220,190,.75)';wfctx.fillText(String(ire),2,Math.max(0,yy-8));}
+        });
+      }
+
+      if(vsCount){
+        const vsI=vsctx.createImageData(128,128),vsD=vsI.data;
+        let vm=1;for(let i=0;i<vsCount.length;i++)if(vsCount[i]>vm)vm=vsCount[i];
+        const vden=Math.log1p(vm);
+        for(let i=0;i<vsCount.length;i++){
+          const c=vsCount[i];if(!c)continue;
+          const gain=0.40+0.60*(Math.log1p(c)/vden);
+          const o=i*4;
+          vsD[o]=Math.min(255,Math.round((vsR[i]/c)*gain));
+          vsD[o+1]=Math.min(255,Math.round((vsG[i]/c)*gain));
+          vsD[o+2]=Math.min(255,Math.round((vsB[i]/c)*gain));
+          vsD[o+3]=255;
+        }
+        vsctx.putImageData(vsI,0,0);
+        vsctx.strokeStyle='rgba(255,255,255,.32)';vsctx.lineWidth=1;
+        vsctx.beginPath();vsctx.arc(64,64,58,0,6.2832);vsctx.stroke();
+        vsctx.beginPath();vsctx.moveTo(6,64);vsctx.lineTo(122,64);vsctx.moveTo(64,6);vsctx.lineTo(64,122);vsctx.stroke();
+        /* Approximate skin-tone guide at 123 degrees in Cb/Cr plane. */
+        const sa=123*Math.PI/180;
+        vsctx.strokeStyle='rgba(255,190,120,.65)';vsctx.beginPath();vsctx.moveTo(64,64);
+        vsctx.lineTo(64+55*Math.cos(sa),64-55*Math.sin(sa));vsctx.stroke();
+        function targetRGB(rr,gg,bb,label){
+          const y=(rr*.2126+gg*.7152+bb*.0722);
+          const cb=(bb-y)/1.8556,cr=(rr-y)/1.5748;
+          const x=64+cb*(58/127.5), yy=64-cr*(58/127.5);
+          vsctx.strokeStyle='rgba(255,255,255,.55)';vsctx.strokeRect(x-2.5,yy-2.5,5,5);
+          vsctx.fillStyle='rgba(255,255,255,.72)';vsctx.font='7px monospace';vsctx.fillText(label,x+4,yy+2);
+        }
+        targetRGB(255,0,0,'R');targetRGB(255,255,0,'Y');targetRGB(0,255,0,'G');
+        targetRGB(0,255,255,'C');targetRGB(0,0,255,'B');targetRGB(255,0,255,'M');
+      }
+
+      if(hist){
+        hctx.clearRect(0,0,256,80);hctx.fillStyle='rgba(0,0,0,.62)';hctx.fillRect(0,0,256,80);
+        hctx.strokeStyle='rgba(255,255,255,.13)';[20,40,60].forEach(y=>{hctx.beginPath();hctx.moveTo(0,y+.5);hctx.lineTo(256,y+.5);hctx.stroke();});
+        function histLine(arr,color){
+          let m=1;for(let i=0;i<arr.length;i++)if(arr[i]>m)m=arr[i];
+          const den=Math.log1p(m);
+          hctx.strokeStyle=color;hctx.lineWidth=1;hctx.beginPath();
+          for(let i=0;i<128;i++){
+            const hh=74*Math.log1p(arr[i])/den,x=i*2+1,y=78-hh;
+            if(i===0)hctx.moveTo(x,y);else hctx.lineTo(x,y);
+          }hctx.stroke();
+        }
+        histLine(rBins,'rgba(255,80,80,.78)');histLine(gBins,'rgba(90,255,110,.72)');
+        histLine(bBins,'rgba(90,140,255,.80)');histLine(bins,'rgba(245,245,245,.85)');
+      }
+
+      if(window.etOn&&window.ettrEl&&maxBins){
+        const tot=N, clipPct=100*clipped/tot;
+        if(clipped>0){
+          window.ettrEl.textContent='ETTR: RGB near clip '+clipPct.toFixed(2)+'%';
+          window.ettrEl.style.color='#f55';
+        }else{
+          let acc=0,tb=127,lim=Math.max(1,tot/1000);
+          for(let i=127;i>=0;i--){acc+=maxBins[i];if(acc>=lim){tb=i;break;}}
+          const p999=Math.max(1,Math.min(254,tb*2+1));
+          const hr=Math.max(0,Math.log2(254/p999));
+          window.ettrEl.textContent='ETTR +'+hr.toFixed(1)+' EV';
+          window.ettrEl.style.color=hr>0.4?'#8f8':'#fc3';
+        }
+      }
+    }catch(e){}
+    busy=false; setTimeout(tick,200);};
+    img.onerror=()=>{busy=false;setTimeout(tick,1200);};
+    img.src='/frame.jpg?t='+Date.now();
+  }
+  tick();
+})();
+</script>
+</body>
+</html>

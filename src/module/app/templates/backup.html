@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>CinePi Offload</title>
+    <meta name="theme-color" content="#000000">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="CinePi">
+    <link rel="manifest" href="/static/manifest.webmanifest">
+    <link rel="apple-touch-icon" href="/static/icons/apple-touch-icon.png">
+    <link rel="stylesheet" href="/static/css/cinemate-responsive.css?v=20260920p">
+    <script defer src="/static/js/cinemate-app.js?v=20260920p"></script>
+
+<style>
+ html,body{height:100%}
+ body{background:#111;color:#ddd;font-family:sans-serif;margin:0;padding:10px;box-sizing:border-box;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+ #hdr{display:flex;align-items:center;gap:14px;margin-bottom:8px}
+ #hdr h2{margin:0;font-size:20px}
+ .spacer{flex:1}
+ a{color:#8cf}
+ button{background:#222;color:#ddd;border:1px solid #444;padding:5px 12px;border-radius:4px;font-size:13px;cursor:pointer}
+ #dest{background:#1a1a1a;border:1px solid #333;border-radius:6px;padding:10px 14px;margin-bottom:8px;font-size:14px}
+ #bar{height:8px;background:#222;border-radius:4px;overflow:hidden;margin-top:8px;display:none}
+ #barf{height:100%;background:#4a8;width:0%}
+ ul{list-style:none;padding:0;margin:8px 0 0;flex:1;overflow-y:auto;min-height:0}
+ li{padding:8px 12px;border-bottom:1px solid #2a2a2a;display:flex;align-items:center;gap:12px}
+ li:hover{background:#1c1c1c}
+ .ok{color:#6d6}
+ .q{color:#cc6}
+ .no{color:#777}
+</style>
+</head>
+<body class="page-offload">
+<div id="hdr">
+  <h2>Offload</h2>
+  <button id="ball">Backup all missing</button>
+  <button id="bsel">Backup selected</button>
+  <label style="margin-right:10px;font-size:13px;color:#aaa"><input type="checkbox" id="autochk"> auto-offload</label><button id="bcancel" style="border-color:#644;color:#c66;display:none">Cancel</button>
+  <label style="font-size:13px;color:#aaa"><input type="checkbox" id="sall"> select all</label>
+  <span class="spacer"></span>
+  <button id="fullscreen-btn">Fullscreen</button>
+  <a href="/clips">&larr; clips</a>
+</div>
+<div id="dest">
+  <span id="dtext">checking destination&hellip;</span>
+  <div id="bar"><div id="barf"></div></div>
+</div>
+<ul id="list">
+{% for c in clips %}
+ <li data-name="{{c.name}}">
+   <input type="checkbox" class="chk" {% if c.backed %}disabled{% endif %}>
+   <span class="off-name">{{c.name}}</span>
+   <span class="off-size">{{c.gb}} GB</span>
+   {% if c.backed %}<span class="off-status ok">&#10003; backed up</span>
+   {% elif c.queued %}<span class="off-status q">queued</span>
+   {% else %}<span class="off-status no">not backed</span>{% endif %}
+ </li>
+{% endfor %}
+</ul>
+<script>
+function fmt(b){return b>1e9?(b/1e9).toFixed(2)+' GB':(b/1e6).toFixed(0)+' MB';}
+function poll(){
+  fetch('/backup/status').then(r=>r.json()).then(st=>{
+    const d=document.getElementById('dtext'), bar=document.getElementById('bar'), barf=document.getElementById('barf');
+    if(!st.dest){ d.textContent='No USB destination detected — plug in a USB SSD.'; bar.style.display='none'; }
+    else if(st.state==='copying'){
+      d.textContent='Copying '+st.clip+' — file '+st.file+'/'+st.files+' — '+fmt(st.bytes_done)+' / '+fmt(st.bytes_total)+' @ '+fmt(st.speed)+'/s';
+      bar.style.display='block';
+      barf.style.width=(100*st.bytes_done/st.bytes_total).toFixed(1)+'%';
+    }
+    else if(st.state==='paused (recording)'){ d.textContent='Paused — recording in progress'; }
+    else if(st.state==='error'){ d.textContent='Error on '+st.clip+': '+st.error; bar.style.display='none'; }
+    else { d.textContent='Destination: '+st.dest+' — '+fmt(st.dest_free||0)+' free — '+(st.queue||0)+' queued — '+st.state; bar.style.display='none'; }
+    const active = st.state==='copying' || st.state==='paused (recording)' || (st.queue||0)>0;
+    document.getElementById('bcancel').style.display = active ? '' : 'none';
+  }).catch(()=>{});
+}
+setInterval(poll,2000); poll();
+function refreshBadges(){
+  fetch('/backup/clips.json').then(r=>r.json()).then(items=>{
+    const map={}; items.forEach(i=>map[i.name]=i);
+    document.querySelectorAll('#list li').forEach(li=>{
+      const it=map[li.dataset.name]; if(!it) return;
+      const badge=li.querySelector('span:last-child');
+      const chk=li.querySelector('.chk');
+      if(it.backed){ badge.outerHTML='<span class="off-status ok">&#10003; backed up</span>'; chk.checked=false; chk.disabled=true; }
+      else if(it.queued){ badge.outerHTML='<span class="off-status q">queued</span>'; }
+      else { badge.outerHTML='<span class="off-status no">not backed</span>'; chk.disabled=false; }
+    });
+  }).catch(()=>{});
+}
+setInterval(refreshBadges,3000);
+const _ac=document.getElementById('autochk');
+fetch('/backup/auto').then(r=>r.json()).then(j=>{_ac.checked=!!j.on;});
+_ac.addEventListener('change',()=>{fetch('/backup/auto',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({on:_ac.checked})});});
+document.getElementById('bcancel').addEventListener('click',()=>{
+  if(!confirm('Cancel the running backup and clear the queue? (already-copied files are kept; the clip resumes where it left off next time)')) return;
+  fetch('/backup/cancel',{method:'POST'}).then(()=>refreshBadges());
+});
+function start(names){
+  fetch('/backup/start',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({names})})
+    .then(r=>r.json()).then(()=>{ document.querySelectorAll('.chk').forEach(x=>x.checked=false); refreshBadges(); });
+}
+document.getElementById('ball').addEventListener('click',()=>{
+  const names=[...document.querySelectorAll('#list li')].filter(li=>!li.querySelector('.ok')).map(li=>li.dataset.name);
+  if(!names.length){alert('Everything is already backed up');return;}
+  start(names);
+});
+document.getElementById('bsel').addEventListener('click',()=>{
+  const names=[...document.querySelectorAll('.chk:checked')].map(c=>c.closest('li').dataset.name);
+  if(!names.length){alert('Nothing selected');return;}
+  start(names);
+});
+document.getElementById('sall').addEventListener('change',e=>{
+  document.querySelectorAll('.chk:not(:disabled)').forEach(c=>c.checked=e.target.checked);
+});
+</script>
+
+</body>
+</html>
