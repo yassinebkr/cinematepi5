@@ -92,16 +92,35 @@ class ConfigLadderTests(TempCase):
         self.assertEqual(cfg.rung, rc.CONFIG_RUNG_CONF)
         self.assertEqual(cfg.port, 8087)
 
-    def test_missing_recovery_block_gives_documented_defaults(self):
-        # Requiring an edit to settings.json to get a working recovery
-        # console would be circular.
+    def test_missing_recovery_block_uses_installer_fallback(self):
+        self.settings.write_text('{"system": {}}', encoding="utf-8")
+        self.conf.write_text(
+            "port=8086\ntoken=generated-token\nallow_config_txt=false\n",
+            encoding="utf-8",
+        )
+        cfg = self.load()
+        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_CONF)
+        self.assertEqual(cfg.port, 8086)
+        self.assertEqual(cfg.token, "generated-token")
+        self.assertFalse(cfg.allow_config_txt)
+
+    def test_missing_recovery_block_and_conf_uses_read_only_defaults(self):
         self.settings.write_text('{"system": {}}', encoding="utf-8")
         cfg = self.load()
-        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_SETTINGS)
+        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_DEFAULTS)
         self.assertEqual(cfg.port, rc.DEFAULTS["port"])
-        self.assertTrue(cfg.enabled)
         self.assertEqual(cfg.token, "")
         self.assertFalse(cfg.allow_config_txt)
+
+    def test_explicit_empty_recovery_block_intentionally_uses_defaults(self):
+        self.settings.write_text(
+            '{"system": {"recovery": {}}}',
+            encoding="utf-8",
+        )
+        self.conf.write_text("token=should-not-win\n", encoding="utf-8")
+        cfg = self.load()
+        self.assertEqual(cfg.rung, rc.CONFIG_RUNG_SETTINGS)
+        self.assertEqual(cfg.token, "")
 
     def test_partial_block_fills_the_rest_from_defaults(self):
         self.settings.write_text(

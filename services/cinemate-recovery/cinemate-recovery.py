@@ -186,15 +186,21 @@ def load_config(
         data = json.loads(text)
         if not isinstance(data, dict):
             raise ValueError("top level is not an object")
-        block = data.get("system", {}).get("recovery", {})
-        if not isinstance(block, dict):
-            block = {}
-        reason = (
-            "settings.json parsed"
-            if block
-            else "settings.json parsed; no system.recovery block, using defaults"
-        )
-        return _merge(block, CONFIG_RUNG_SETTINGS, reason)
+        system = data.get("system", {})
+        if not isinstance(system, dict):
+            raise ValueError("system block is not an object")
+        if "recovery" in system:
+            block = system.get("recovery")
+            if not isinstance(block, dict):
+                raise ValueError("system.recovery block is not an object")
+            return _merge(
+                block,
+                CONFIG_RUNG_SETTINGS,
+                "settings.json parsed; using system.recovery",
+            )
+        # No recovery block on this branch's existing settings files. Continue
+        # to the installer-written fallback so its generated token is honoured.
+        settings_error = "settings.json parsed; no system.recovery block"
     except Exception as exc:
         settings_error = f"{type(exc).__name__}: {exc}"
 
