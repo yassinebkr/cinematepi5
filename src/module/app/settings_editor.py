@@ -14,6 +14,7 @@ import json
 import logging
 import os
 import secrets
+import subprocess
 import tempfile
 import threading
 from datetime import datetime, timezone
@@ -39,12 +40,15 @@ TOKEN_CONF = Path("/etc/cinemate-settings-editor.conf")
 TOKEN_HEADER = "X-CineMate-Settings-Token"
 BACKUP_KEEP = 10
 SETTINGS_BACKUP_DIR = Path.home() / ".local" / "state" / "cinemate" / "settings-backups"
+RESTART_HELPER = Path("/usr/local/bin/cinemate-restart-service")
+SUDO_BIN = Path("/usr/bin/sudo")
 
 _BUSY_KEYS = (
     ("recording", ParameterKey.IS_RECORDING.value),
     ("writing", ParameterKey.IS_WRITING.value),
     ("writing_buf", ParameterKey.IS_WRITING_BUF.value),
     ("buffering", ParameterKey.IS_BUFFERING.value),
+    ("storage_preroll", ParameterKey.STORAGE_PREROLL_ACTIVE.value),
 )
 
 # Never send these key names to the browser. A recovery/API token accidentally
@@ -199,6 +203,42 @@ def _busy_states(redis_controller=None) -> dict[str, bool]:
             logger.exception("Could not read settings-editor busy state %s", key)
             result[name] = True
     return result
+
+
+def _invoke_restart_helper(
+    *,
+    check: bool,
+    runner=subprocess.run,
+) -> str | None:
+    if not SUDO_BIN.is_file():
+        return f"Restart unavailable: {SUDO_BIN} is missing."
+    if not RESTART_HELPER.is_file():
+        return f"Restart unavailable: {RESTART_HELPER} is missing."
+
+    command = [str(SUDO_BIN), "-n", str(RESTART_HELPER)]
+    if check:
+        command.append("--check")
+
+    try:
+        result = runner(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=5,
+            check=False,
+        )
+    except (OSError, subprocess.SubprocessError) as exc:
+        return f"Restart helper failed: {type(exc).__name__}: {exc}"
+
+    if result.returncode != 0:
+        detail = (result.stderr or result.stdout or "").strip()
+        if detail:
+            detail = f" Detail: {detail[:300]}"
+        return (
+            f"Restart helper is unavailable or not authorized "
+            f"(exit {result.returncode}).{detail}"
+        )
+    return None
 
 
 def _busy_message(states: dict[str, bool]) -> str | None:
@@ -463,13 +503,11 @@ def restart_cinemate():
     if message:
         return jsonify({"ok": False, "message": message, "activity": states}), 409
 
-    controller = current_app.config.get("CINEPI_CONTROLLER")
+    preflight_error = _invoke_restart_helper(check=True)
+    if preflight_error:
+        return jsonify({"ok": False, "message": preflight_error}), 503
+
     redis_controller = current_app.config.get("REDIS_CONTROLLER")
-    if controller is None or not hasattr(controller, "restart_cinemate"):
-        return jsonify({
-            "ok": False,
-            "message": "CineMate restart control is unavailable.",
-        }), 503
 
     def guarded_restart():
         late_states = _busy_states(redis_controller)
@@ -479,16 +517,18 @@ def restart_cinemate():
                 late_states,
             )
             return
-        try:
-            controller.restart_cinemate()
-        except Exception:
-            logger.exception("Settings-editor CineMate restart failed")
+        restart_error = _invoke_restart_helper(check=False)
+        if restart_error:
+            logger.error(
+                "Settings-editor CineMate restart failed: %s",
+                restart_error,
+            )
 
     timer = threading.Timer(0.5, guarded_restart)
     timer.daemon = True
     timer.start()
     return jsonify({
         "ok": True,
-        "message": "CineMate restart scheduled.",
+        "message": "Systemd-managed CineMate restart scheduled.",
         "restarting": True,
     })

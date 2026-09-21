@@ -1410,6 +1410,7 @@ configure_sudoers() {
     log "Writing sudoers drop-ins"
     backup_file /etc/sudoers.d/cinemate-env
     backup_file /etc/sudoers.d/pi_cinemate
+    backup_file /etc/sudoers.d/cinemate-settings-editor
     write_root_file /etc/sudoers.d/cinemate-env 440 <<EOF
 $PI_USER ALL=(ALL) NOPASSWD: $VENV_DIR/bin/*
 EOF
@@ -1419,8 +1420,12 @@ $PI_USER ALL=(ALL) NOPASSWD: $CINEMATE_DIR/src/main.py
 $PI_USER ALL=(ALL) NOPASSWD: /bin/mount, /bin/umount, /usr/bin/ntfs-3g
 $PI_USER ALL=(ALL) NOPASSWD: /sbin/mount.ext4
 EOF
+    write_root_file /etc/sudoers.d/cinemate-settings-editor 440 <<EOF
+$PI_USER ALL=(root) NOPASSWD: /usr/local/bin/cinemate-restart-service
+EOF
     sudo visudo -cf /etc/sudoers.d/cinemate-env >/dev/null
     sudo visudo -cf /etc/sudoers.d/pi_cinemate >/dev/null
+    sudo visudo -cf /etc/sudoers.d/cinemate-settings-editor >/dev/null
     detail "sudoers validation passed"
 }
 
@@ -1571,8 +1576,11 @@ EOF_RECOVERY
 configure_settings_editor_auth() {
     log "Configuring settings-editor authentication"
     local tool_src="$CINEMATE_DIR/tools/cinemate-settings-editor-token.py"
+    local restart_src="$CINEMATE_DIR/tools/cinemate-restart-service"
     [[ -f "$tool_src" ]] || die "Missing settings-editor token helper at $tool_src"
+    [[ -f "$restart_src" ]] || die "Missing settings-editor restart helper at $restart_src"
     sudo install -m 755 "$tool_src" /usr/local/bin/cinemate-settings-editor-token
+    sudo install -o root -g root -m 755 "$restart_src" /usr/local/bin/cinemate-restart-service
     sudo /usr/local/bin/cinemate-settings-editor-token ensure --group "$PI_GROUP" >/dev/null
     detail "Settings-editor token stored in /etc/cinemate-settings-editor.conf (root:$PI_GROUP 0640)"
     detail "Show it locally with: cinemate-settings-editor-token show"

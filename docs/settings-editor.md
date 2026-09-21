@@ -90,6 +90,8 @@ It is disabled while the form contains unsaved edits and is refused whenever any
 
 The server checks activity again at the timer boundary immediately before invoking the restart. If activity starts after the button was pressed, the restart is cancelled rather than interrupting the take.
 
+Restart is systemd-managed. The web process never execs itself in place and is not granted general sudo access. A root-owned /usr/local/bin/cinemate-restart-service helper can only validate its installation or queue a restart of cinemate-autostart.service; sudoers grants the CineMate service user permission to invoke only that helper.
+
 ## Strict JSON
 
 The structured editor uses the same strict-JSON contract as normal CineMate startup, the terminal editsettings helper, and the recovery console.

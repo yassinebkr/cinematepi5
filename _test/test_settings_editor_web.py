@@ -216,6 +216,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
             ParameterKey.IS_WRITING.value,
             ParameterKey.IS_WRITING_BUF.value,
             ParameterKey.IS_BUFFERING.value,
+            ParameterKey.STORAGE_PREROLL_ACTIVE.value,
         ):
             with self.subTest(key=key):
                 self.redis.values = {key: "1"}
@@ -235,10 +236,35 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.assertEqual(self.controller.restarts, 0)
 
     def test_restart_rechecks_activity_at_timer_boundary(self):
-        with mock.patch.object(se.threading, "Timer", ImmediateTimer):
-            res = self.client.post("/settings-editor/api/restart", headers=self.headers(), json={})
+        invoke = mock.Mock(return_value=None)
+        with (
+            mock.patch.object(se, "_invoke_restart_helper", invoke),
+            mock.patch.object(se.threading, "Timer", ImmediateTimer),
+        ):
+            res = self.client.post(
+                "/settings-editor/api/restart",
+                headers=self.headers(),
+                json={},
+            )
         self.assertEqual(res.status_code, 200)
-        self.assertEqual(self.controller.restarts, 1)
+        self.assertEqual(
+            invoke.call_args_list,
+            [mock.call(check=True), mock.call(check=False)],
+        )
+
+    def test_restart_preflight_failure_is_reported_before_timer(self):
+        with mock.patch.object(
+            se,
+            "_invoke_restart_helper",
+            return_value="Restart helper is unavailable.",
+        ):
+            res = self.client.post(
+                "/settings-editor/api/restart",
+                headers=self.headers(),
+                json={},
+            )
+        self.assertEqual(res.status_code, 503)
+        self.assertIn("unavailable", res.get_json()["message"])
 
 
 if __name__ == "__main__":

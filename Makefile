@@ -30,8 +30,12 @@ all: help
 # Install / update the service file
 # -------------------------------------------------------------------
 install:
-	chmod 755 tools/cinemate-edit-settings.py tools/install-editsettings-alias.sh tools/cinemate-settings-editor-token.py
+	chmod 755 tools/cinemate-edit-settings.py tools/install-editsettings-alias.sh tools/cinemate-settings-editor-token.py tools/cinemate-restart-service
 	sudo install -m 755 tools/cinemate-settings-editor-token.py /usr/local/bin/cinemate-settings-editor-token
+	sudo install -o root -g root -m 755 tools/cinemate-restart-service /usr/local/bin/cinemate-restart-service
+	printf '%s\n' "$$(id -un) ALL=(root) NOPASSWD: /usr/local/bin/cinemate-restart-service" | sudo tee /etc/sudoers.d/cinemate-settings-editor >/dev/null
+	sudo chmod 440 /etc/sudoers.d/cinemate-settings-editor
+	sudo visudo -cf /etc/sudoers.d/cinemate-settings-editor >/dev/null
 	sudo /usr/local/bin/cinemate-settings-editor-token ensure --group "$$(id -gn)" >/dev/null
 	./tools/install-editsettings-alias.sh "$(CURDIR)"
 	sudo install -m 755 $(LOCAL_SCRIPT_FILE) $(SCRIPT_PATH)

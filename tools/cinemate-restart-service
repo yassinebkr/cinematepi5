@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+case "${1:-}" in
+    --check)
+        exit 0
+        ;;
+    "")
+        exec /bin/systemctl --no-block --no-ask-password restart cinemate-autostart.service
+        ;;
+    *)
+        echo "usage: cinemate-restart-service [--check]" >&2
+        exit 2
+        ;;
+esac

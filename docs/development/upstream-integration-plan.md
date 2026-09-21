@@ -119,7 +119,7 @@ The recovery console and degraded/no-camera hardening are integrated. The curren
 
 | Feature family | Assessment |
 | --- | --- |
-| Settings editor | Integrated on the hardening branch: dedicated non-persistent token auth, structured strict-JSON form, protected-secret preservation, revision conflicts, recording/flush lockout, backups, atomic writes and guarded explicit restart. Live-camera UI validation remains before promotion. |
+| Settings editor | Integrated and live backend-validated on the hardening branch: dedicated non-persistent token auth, structured strict-JSON form, protected-secret preservation, revision conflicts, recording/write/buffer/pre-roll lockout, backups, atomic writes and a narrowly authorized systemd-managed restart. Authenticated API, reversible save/restore, IMX283 recovery and restart were validated on the live Pi; operator visual/responsive review remains before promotion. |
 | settings.jsonc preservation | Deferred. This hardening phase keeps one strict-JSON contract across runtime, recovery and terminal editing; JSONC requires a separate migration design. |
 | Web API, SSE and UDP control | Useful external-control surface; command authorization and destructive actions need review. |
 | No-camera startup follow-up | Integrated: degraded startup/state, camera-control locking, truthful local/web UI and fresh-Redis paths are covered by dedicated regression tests. |

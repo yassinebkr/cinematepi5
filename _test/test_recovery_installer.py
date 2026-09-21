@@ -47,6 +47,24 @@ class RecoveryInstallerTests(unittest.TestCase):
             INSTALLER,
         )
 
+    def test_settings_editor_restart_helper_is_narrowly_installed(self):
+        self.assertIn(
+            'local restart_src="$CINEMATE_DIR/tools/cinemate-restart-service"',
+            INSTALLER,
+        )
+        self.assertIn(
+            'sudo install -o root -g root -m 755 "$restart_src" /usr/local/bin/cinemate-restart-service',
+            INSTALLER,
+        )
+        self.assertIn(
+            '$PI_USER ALL=(root) NOPASSWD: /usr/local/bin/cinemate-restart-service',
+            INSTALLER,
+        )
+        self.assertIn(
+            'visudo -cf /etc/sudoers.d/cinemate-settings-editor',
+            INSTALLER,
+        )
+
     def test_settings_editor_token_is_group_readable_not_world_readable(self):
         helper = (ROOT / "tools" / "cinemate-settings-editor-token.py").read_text(
             encoding="utf-8"
