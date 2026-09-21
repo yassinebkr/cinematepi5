@@ -176,20 +176,65 @@ class SettingsEditorRouteTests(unittest.TestCase):
             html,
         )
 
+    def test_operator_groups_and_recovery_link_are_present(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('id="settings-rail"', html)
+        self.assertIn('id="recovery-link"', html)
+        for label in (
+            "Look & feel",
+            "Cameras",
+            "Timing",
+            "Exposure & steps",
+            "Recording & monitoring",
+            "Physical controls",
+        ):
+            self.assertIn(label, html)
+        self.assertIn("function addOperatorGroup(", html)
+
+    def test_status_messages_do_not_use_colored_left_accent_borders(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertNotIn("border-left:3px solid var(--good)", html)
+        self.assertNotIn("border-left:3px solid var(--warn)", html)
+        self.assertNotIn("border-left:3px solid var(--bad)", html)
+
+    def test_boolean_and_step_widgets_follow_compact_operator_controls(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('className = "toggle-switch"', html)
+        self.assertIn('className = "value-chip"', html)
+        self.assertIn('className = "list-add-row"', html)
+
+    def test_potentiometer_help_distinguishes_encoders(self):
+        schema = json.loads(
+            (ROOT / "src/settings.schema.json").read_text(encoding="utf-8")
+        )
+        help_text = schema["x-cinemate-ui-map"]["analog_controls.iso_pot"]["help"]
+        self.assertIn("Grove Base HAT", help_text)
+        self.assertIn("separate from", help_text)
+
     def test_template_uses_hybrid_desktop_grid_and_mobile_collapse(self):
         html = (
             Path(__file__).resolve().parents[1]
             / "src/module/app/templates/settings_editor.html"
         ).read_text(encoding="utf-8")
         self.assertIn(
-            "#settings-root{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))",
+            ".settings-layout{display:grid;grid-template-columns:12.5rem minmax(0,1fr)",
+            html,
+        )
+        self.assertIn(
+            ".operator-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))",
             html,
         )
         self.assertIn(".field--wide{grid-column:1/-1}", html)
         self.assertIn('row.classList.add("metadata-field", "field--wide")', html)
         self.assertIn("function makePrimitiveListField(", html)
         self.assertIn("@media(max-width:900px)", html)
-        self.assertIn("#settings-root,.inside{grid-template-columns:1fr", html)
+        self.assertIn(".operator-grid,.inside{grid-template-columns:1fr", html)
 
     def test_get_exposes_ui_metadata_for_welcome_image(self):
         res = self.client.get("/settings-editor/api/settings", headers=self.headers())

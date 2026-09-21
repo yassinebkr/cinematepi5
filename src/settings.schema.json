@@ -280,7 +280,8 @@
         "None",
         null,
         ""
-      ]
+      ],
+      "help": "Optional Grove Base HAT analog input. This is separate from GPIO and I2C rotary encoders."
     },
     "analog_controls.iso_pot": {
       "label": "ISO potentiometer",
@@ -327,7 +328,8 @@
         "None",
         null,
         ""
-      ]
+      ],
+      "help": "Optional Grove Base HAT analog input. This is separate from GPIO and I2C rotary encoders."
     },
     "analog_controls.shutter_a_pot": {
       "label": "Shutter-angle potentiometer",
@@ -374,7 +376,8 @@
         "None",
         null,
         ""
-      ]
+      ],
+      "help": "Optional Grove Base HAT analog input. This is separate from GPIO and I2C rotary encoders."
     },
     "analog_controls.wb_pot": {
       "label": "White-balance potentiometer",
@@ -421,7 +424,8 @@
         "None",
         null,
         ""
-      ]
+      ],
+      "help": "Optional Grove Base HAT analog input. This is separate from GPIO and I2C rotary encoders."
     },
     "anamorphic_preview": {
       "label": "Anamorphic preview",
@@ -1120,7 +1124,8 @@
     },
     "quad_rotary_controller.enabled": {
       "label": "Quad rotary controller enabled",
-      "widget": "toggle"
+      "widget": "toggle",
+      "help": "Enables the separate Adafruit I2C quad-encoder board."
     },
     "quad_rotary_controller.encoders": {
       "label": "Encoders",
@@ -1488,7 +1493,8 @@
             "method": "dec_iso"
           }
         }
-      }
+      },
+      "help": "GPIO rotary encoders use CLK/DT pins and optional push buttons; they do not use the Grove potentiometer assignments."
     },
     "rotary_encoders.*.button_actions.double_click_action": {
       "widget": "action",

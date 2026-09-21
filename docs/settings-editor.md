@@ -115,3 +115,9 @@ settings.schema.json is still incomplete and is not treated as the runtime autho
 If the live settings file is already malformed or structurally unsafe, the normal settings editor refuses to edit it. Use the independent recovery console on port 8080 or the local editsettings helper instead.
 
 The recovery console remains intentionally independent of the main Flask app and has its own credential.
+
+## Operator-oriented presentation
+
+The editor groups settings by operator task instead of exposing the raw top-level JSON order: Look & feel, Cameras, Timing, Exposure & steps, Recording & monitoring, Physical controls, and Advanced. Value-step arrays use compact chip editors and booleans use switch controls. The presentation follows the useful grouping/control ideas in upstream CineMate while keeping this branch's existing settings model.
+
+A Recovery link opens the independent recovery console on port 8080.
