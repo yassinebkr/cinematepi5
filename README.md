@@ -4,8 +4,6 @@ CineMate is an open-source camera-control and monitoring stack for building a Ra
 
 The project combines 12-bit CinemaDNG recording, a responsive browser controller, HDMI monitoring, physical controls, storage management, IMU telemetry and post-production helpers in one camera-oriented runtime.
 
-![CineMate web monitoring interface](docs/images/monitoring/web-ui-monitoring-overview.jpg)
-
 ## Current focus
 
 This Pi 5 branch is being hardened around a Sony IMX283 camera, while keeping the sensor database and control architecture usable with other supported CinePi sensors.
