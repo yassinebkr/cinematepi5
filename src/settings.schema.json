@@ -836,8 +836,10 @@
       "widget": "toggle"
     },
     "camera.cam0.tuning_file_override.path": {
-      "label": "Tuning file path",
-      "widget": "path"
+      "label": "Tuning file",
+      "widget": "tuning-file",
+      "help": "Choose a bundled PiSP v2 tuning or upload a validated .json file.",
+      "accept": ".json,application/json"
     },
     "camera.cam1": {
       "label": "Cam1",
@@ -893,8 +895,10 @@
       "widget": "toggle"
     },
     "camera.cam1.tuning_file_override.path": {
-      "label": "Tuning file path",
-      "widget": "path"
+      "label": "Tuning file",
+      "widget": "tuning-file",
+      "help": "Choose a bundled PiSP v2 tuning or upload a validated .json file.",
+      "accept": ".json,application/json"
     },
     "camera.raw_buffer_count": {
       "label": "RAW buffer count",
@@ -1460,8 +1464,8 @@
     },
     "resolutions.custom_modes": {
       "label": "Custom sensor modes",
-      "widget": "json-object",
-      "help": "Advanced per-sensor custom mode definitions."
+      "widget": "custom-modes",
+      "help": "Optional extra sensor modes grouped by camera model. Each mode needs width, height and bit depth; fps_max is optional."
     },
     "resolutions.k_steps": {
       "label": "Exposed K-resolution groups",

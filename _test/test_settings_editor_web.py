@@ -50,6 +50,13 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.conf = self.tmp / "editor.conf"
         self.backup_dir = self.tmp / "settings-backups"
         self.asset_dir = self.tmp / "settings-assets"
+        self.tuning_dir = self.tmp / "tuning-files"
+        self.tuning_dir.mkdir()
+        self.stock_tuning = self.tuning_dir / "imx283.json"
+        self.stock_tuning.write_text(
+            json.dumps({"version": 2.0, "target": "pisp", "algorithms": []}),
+            encoding="utf-8",
+        )
         self.token = "test-token"
         self.conf.write_text("token=" + self.token + "\n", encoding="utf-8")
         self.initial = {
@@ -73,6 +80,8 @@ class SettingsEditorRouteTests(unittest.TestCase):
             mock.patch.object(se, "TOKEN_CONF", self.conf),
             mock.patch.object(se, "SETTINGS_BACKUP_DIR", self.backup_dir),
             mock.patch.object(se, "SETTINGS_ASSET_DIR", self.asset_dir),
+            mock.patch.object(se, "TUNING_FILES_DIR", self.tuning_dir),
+            mock.patch.object(se, "REPO_ROOT", self.tmp),
         ]
         for patch in self.patches:
             patch.start()
@@ -250,6 +259,67 @@ class SettingsEditorRouteTests(unittest.TestCase):
         Image.new("RGBA", (32, 18), (20, 40, 60, 128)).save(out, format="PNG")
         return out.getvalue()
 
+    def test_get_lists_stock_tuning_files(self):
+        res = self.client.get("/settings-editor/api/settings", headers=self.headers())
+        self.assertEqual(res.status_code, 200)
+        files = res.get_json()["tuning_files"]
+        self.assertEqual(len(files), 1)
+        self.assertEqual(files[0]["name"], "imx283.json")
+        self.assertEqual(files[0]["path"], "tuning-files/imx283.json")
+
+    def test_tuning_upload_validates_pisp_and_does_not_save_settings(self):
+        import io
+        before = self.settings.read_bytes()
+        raw = json.dumps({
+            "version": 2.0,
+            "target": "pisp",
+            "algorithms": [],
+        }).encode("utf-8")
+        res = self.client.post(
+            "/settings-editor/api/assets/tuning",
+            headers=self.headers(),
+            data={"file": (io.BytesIO(raw), "my-imx283.json")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(res.status_code, 200, res.get_data(as_text=True))
+        data = res.get_json()
+        target = Path(data["path"])
+        self.assertTrue(target.is_file())
+        self.assertTrue(target.name.startswith("settings-tuning-my-imx283-"))
+        self.assertEqual(self.settings.read_bytes(), before)
+        parsed = json.loads(target.read_text(encoding="utf-8"))
+        self.assertEqual(parsed["target"], "pisp")
+
+    def test_tuning_upload_rejects_non_pisp_document(self):
+        import io
+        raw = json.dumps({
+            "version": 2.0,
+            "target": "bcm2835",
+            "algorithms": [],
+        }).encode("utf-8")
+        res = self.client.post(
+            "/settings-editor/api/assets/tuning",
+            headers=self.headers(),
+            data={"file": (io.BytesIO(raw), "wrong.json")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertIn("PiSP", res.get_json()["message"])
+        self.assertEqual(list(self.asset_dir.glob("settings-tuning-*.json")), [])
+
+    def test_template_has_tuning_custom_modes_and_action_catalogue_widgets(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            "function makeTuningFileField(",
+            'api("assets/tuning"',
+            "function makeCustomModesField(",
+            'meta.widget === "custom-modes"',
+            'method = document.createElement("select")',
+        ):
+            self.assertIn(marker, html)
+
     def test_image_upload_is_authenticated_normalized_and_does_not_save_settings(self):
         import io
         before = self.settings.read_bytes()
@@ -397,7 +467,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
         expected = {
             "analog_controls.iso_pot": "select",
             "arrays.fps_steps": "number-list",
-            "resolutions.custom_modes": "json-object",
+            "resolutions.custom_modes": "custom-modes",
             "buttons": "object-list",
             "buttons.*.press_action": "action",
             "two_way_switches.*.state_on_action": "action",
@@ -405,7 +475,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
             "quad_rotary_controller.encoders.*.setting_name": "select",
             "dynamic_resolution.policy": "select",
             "sensors.database_file": "path",
-            "camera.cam1.tuning_file_override.path": "path",
+            "camera.cam1.tuning_file_override.path": "tuning-file",
             "i2c_oled.values": "string-list",
         }
         for path, widget in expected.items():

@@ -55,7 +55,10 @@
     .list-add-row{display:inline-flex;align-items:center;gap:.3rem}
     .list-add-row input{width:6rem;padding:.3rem .45rem}
     .list-add-row.string input{width:10rem}
-    .list-add{padding:.32rem .55rem}.object-list{display:flex;flex-direction:column;gap:.75rem}.object-card{border:1px solid var(--line);border-radius:8px;background:#0f1318;padding:.7rem}.object-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}.object-card-title{font-weight:650;margin-right:auto}.action-widget{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(10rem,1fr);gap:.55rem}.action-args{display:flex;flex-direction:column;gap:.35rem}.action-arg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem}.action-buttons{display:flex;gap:.4rem;flex-wrap:wrap}.optional-number{display:flex;gap:.55rem;align-items:center}.optional-number input[type=number]{flex:1}.json-object-area{min-height:10rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
+    .list-add{padding:.32rem .55rem}
+    .tuning-control{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.45rem;align-items:center}.tuning-control select{min-width:0;width:100%}
+    .custom-modes{display:flex;flex-direction:column;gap:.7rem}.custom-camera{border:1px solid var(--line);border-radius:8px;background:#0f1318;padding:.7rem}.custom-camera-head{display:grid;grid-template-columns:minmax(10rem,1fr) auto;gap:.45rem;align-items:center}.custom-mode-row{display:grid;grid-template-columns:repeat(4,minmax(5rem,1fr)) auto;gap:.4rem;align-items:end;margin-top:.5rem}.custom-mode-cell{display:flex;flex-direction:column;gap:.2rem}.custom-mode-cell span{font-size:.72rem;color:var(--muted)}.custom-mode-cell input{width:100%}.custom-add-row{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap;margin-top:.5rem}
+    .object-list{display:flex;flex-direction:column;gap:.75rem}.object-card{border:1px solid var(--line);border-radius:8px;background:#0f1318;padding:.7rem}.object-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}.object-card-title{font-weight:650;margin-right:auto}.action-widget{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(10rem,1fr);gap:.55rem}.action-args{display:flex;flex-direction:column;gap:.35rem}.action-arg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem}.action-buttons{display:flex;gap:.4rem;flex-wrap:wrap}.optional-number{display:flex;gap:.55rem;align-items:center}.optional-number input[type=number]{flex:1}.json-object-area{min-height:10rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
     .hidden-by-search{display:none!important}
     dialog{width:min(90vw,70rem);max-height:90vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
     dialog textarea{width:100%;height:60vh;font-family:ui-monospace,SFMono-Regular,monospace}
@@ -67,7 +70,7 @@
     .crop-controls input[type=range]{width:100%}
     .crop-meta{color:var(--muted);font-size:.84rem;margin:.45rem 0 0}
     .pill{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:.25rem .55rem;color:var(--muted)}
-    @media(max-width:900px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.settings-layout{grid-template-columns:1fr}.settings-rail{position:static;display:flex;flex-direction:row;overflow-x:auto;max-height:none;padding-bottom:.25rem}.settings-rail a{white-space:nowrap;border:1px solid var(--line)}.operator-grid,.inside{grid-template-columns:1fr;gap:.55rem}.field,.metadata-field{grid-column:auto;display:flex;flex-direction:column;gap:.35rem;padding:.6rem 0;background:transparent;border:0;border-top:1px solid rgba(52,58,70,.55);border-radius:0}.metadata-field{border-top:0;border-bottom:1px solid var(--line);padding:.35rem 0 .7rem}.nested{grid-column:auto}.image-widget{grid-template-columns:1fr}.image-preview{max-height:13rem}.brand{width:100%}}
+    @media(max-width:900px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.settings-layout{grid-template-columns:1fr}.settings-rail{position:static;display:flex;flex-direction:row;overflow-x:auto;max-height:none;padding-bottom:.25rem}.settings-rail a{white-space:nowrap;border:1px solid var(--line)}.operator-grid,.inside{grid-template-columns:1fr;gap:.55rem}.field,.metadata-field{grid-column:auto;display:flex;flex-direction:column;gap:.35rem;padding:.6rem 0;background:transparent;border:0;border-top:1px solid rgba(52,58,70,.55);border-radius:0}.metadata-field{border-top:0;border-bottom:1px solid var(--line);padding:.35rem 0 .7rem}.nested{grid-column:auto}.image-widget{grid-template-columns:1fr}.image-preview{max-height:13rem}.custom-mode-row{grid-template-columns:1fr 1fr}.custom-mode-row>button{grid-column:1/-1}.tuning-control{grid-template-columns:1fr}.brand{width:100%}}
   </style>
 </head>
 <body>
@@ -147,6 +150,7 @@
   var revision = "";
   var originalJson = "";
   var uiMetadata = {};
+  var tuningFiles = [];
   var busy = false;
 
   var login = document.getElementById("login");
@@ -831,6 +835,200 @@
     return row;
   }
 
+  function makeTuningFileField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = (pathText(path) + " tuning pisp upload").toLowerCase();
+    appendSemanticHeader(row, path, meta);
+
+    var control = document.createElement("div");
+    control.className = "tuning-control";
+    var select = document.createElement("select");
+    var choices = tuningFiles.slice();
+    if (value && !choices.some(function(item){ return item.path === value; })) {
+      choices.unshift({name:String(value).split("/").pop() + " (configured)", path:value});
+    }
+    if (!choices.length) {
+      choices.push({name:"No tuning files found", path:value || ""});
+    }
+    choices.forEach(function(item){
+      var opt = document.createElement("option");
+      opt.value = item.path;
+      opt.textContent = item.name + (item.source === "uploaded" ? " — uploaded" : "");
+      if (item.path === value) opt.selected = true;
+      select.appendChild(opt);
+    });
+    select.addEventListener("change", function(){
+      parent[key] = select.value;
+      updateDirty();
+    });
+
+    var upload = document.createElement("button");
+    upload.type = "button";
+    upload.textContent = "Upload .json";
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = meta.accept || ".json,application/json";
+    input.hidden = true;
+    upload.addEventListener("click", function(){ input.click(); });
+    input.addEventListener("change", async function(){
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var form = new FormData();
+      form.append("file", file);
+      upload.disabled = true;
+      setMessage("Validating PiSP tuning file...", "good");
+      try {
+        var data = await api("assets/tuning", {method:"POST", body:form});
+        parent[key] = data.path;
+        if (!tuningFiles.some(function(item){ return item.path === data.path; })) {
+          tuningFiles.push({name:data.name, path:data.path, source:"uploaded"});
+        }
+        render();
+        setMessage(data.message, "good");
+      } catch(e) {
+        setMessage(e.message, e.status === 409 ? "warn" : "bad");
+      } finally {
+        upload.disabled = false;
+        input.value = "";
+      }
+    });
+
+    control.appendChild(select);
+    control.appendChild(upload);
+    control.appendChild(input);
+    row.appendChild(control);
+    return row;
+  }
+
+  function makeCustomModesField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = (pathText(path) + " custom sensor modes fps ceilings").toLowerCase();
+    appendSemanticHeader(row, path, meta);
+
+    var wrap = document.createElement("div");
+    wrap.className = "custom-modes";
+    var validObject = value && typeof value === "object" && !Array.isArray(value);
+    if (!validObject) {
+      var note = document.createElement("div");
+      note.className = "semantic-help";
+      note.textContent = "Custom modes is not an object; use View JSON to repair it.";
+      wrap.appendChild(note);
+      row.appendChild(wrap);
+      return row;
+    }
+
+    Object.keys(value).forEach(function(cameraName){
+      var modes = Array.isArray(value[cameraName]) ? value[cameraName] : [];
+      var card = document.createElement("div");
+      card.className = "custom-camera";
+      var head = document.createElement("div");
+      head.className = "custom-camera-head";
+      var cameraInput = document.createElement("input");
+      cameraInput.type = "text";
+      cameraInput.value = cameraName;
+      cameraInput.setAttribute("aria-label", "Camera model");
+      cameraInput.addEventListener("change", function(){
+        var next = cameraInput.value.trim();
+        if (!next || next === cameraName || Object.prototype.hasOwnProperty.call(value, next)) {
+          cameraInput.value = cameraName;
+          return;
+        }
+        value[next] = value[cameraName];
+        delete value[cameraName];
+        render();
+      });
+      var removeCamera = document.createElement("button");
+      removeCamera.type = "button";
+      removeCamera.textContent = "Remove camera";
+      removeCamera.addEventListener("click", function(){
+        delete value[cameraName];
+        render();
+      });
+      head.appendChild(cameraInput);
+      head.appendChild(removeCamera);
+      card.appendChild(head);
+
+      modes.forEach(function(mode, index){
+        if (!mode || typeof mode !== "object" || Array.isArray(mode)) return;
+        var line = document.createElement("div");
+        line.className = "custom-mode-row";
+        [
+          ["width", "Width", true],
+          ["height", "Height", true],
+          ["bit_depth", "Bit depth", true],
+          ["fps_max", "FPS max", false]
+        ].forEach(function(spec){
+          var cell = document.createElement("label");
+          cell.className = "custom-mode-cell";
+          var label = document.createElement("span");
+          label.textContent = spec[1];
+          var input = document.createElement("input");
+          input.type = "number";
+          input.min = "1";
+          input.step = spec[0] === "fps_max" ? "any" : "1";
+          input.required = spec[2];
+          input.value = mode[spec[0]] == null ? "" : String(mode[spec[0]]);
+          input.addEventListener("input", function(){
+            if (input.value === "" && !spec[2]) {
+              delete mode[spec[0]];
+            } else {
+              var n = Number(input.value);
+              if (Number.isFinite(n) && n > 0) mode[spec[0]] = n;
+            }
+            updateDirty();
+          });
+          cell.appendChild(label);
+          cell.appendChild(input);
+          line.appendChild(cell);
+        });
+        var remove = document.createElement("button");
+        remove.type = "button";
+        remove.textContent = "Remove";
+        remove.addEventListener("click", function(){
+          modes.splice(index, 1);
+          value[cameraName] = modes;
+          render();
+        });
+        line.appendChild(remove);
+        card.appendChild(line);
+      });
+
+      var addMode = document.createElement("button");
+      addMode.type = "button";
+      addMode.textContent = "Add mode";
+      addMode.style.marginTop = ".55rem";
+      addMode.addEventListener("click", function(){
+        modes.push({width:1920, height:1080, bit_depth:12});
+        value[cameraName] = modes;
+        render();
+      });
+      card.appendChild(addMode);
+      wrap.appendChild(card);
+    });
+
+    var addRow = document.createElement("div");
+    addRow.className = "custom-add-row";
+    var cameraName = document.createElement("input");
+    cameraName.type = "text";
+    cameraName.placeholder = "camera model, e.g. imx283";
+    var addCamera = document.createElement("button");
+    addCamera.type = "button";
+    addCamera.textContent = "Add camera";
+    addCamera.addEventListener("click", function(){
+      var name = cameraName.value.trim();
+      if (!name || Object.prototype.hasOwnProperty.call(value, name)) return;
+      value[name] = [];
+      render();
+    });
+    addRow.appendChild(cameraName);
+    addRow.appendChild(addCamera);
+    wrap.appendChild(addRow);
+    row.appendChild(wrap);
+    return row;
+  }
+
   function makeJsonObjectField(parent, key, value, path, meta){
     var row = document.createElement("div");
     row.className = "field field--wide semantic-field";
@@ -925,23 +1123,33 @@
     var widget = document.createElement("div");
     widget.className = "action-widget";
     var methodWrap = document.createElement("div");
-    var method = document.createElement("input");
-    method.type = "text";
-    method.placeholder = "None / method name";
-    method.value = methodValue;
+    var method;
     if (Array.isArray(meta.suggestions) && meta.suggestions.length) {
-      var dataList = document.createElement("datalist");
-      dataList.id = "actions-" + Math.random().toString(36).slice(2);
-      meta.suggestions.forEach(function(choice){
+      method = document.createElement("select");
+      var none = document.createElement("option");
+      none.value = "";
+      none.textContent = "None";
+      method.appendChild(none);
+      var catalogue = meta.suggestions.slice();
+      if (methodValue && catalogue.indexOf(methodValue) === -1) {
+        catalogue.unshift(methodValue);
+      }
+      catalogue.forEach(function(choice){
         var option = document.createElement("option");
         option.value = choice;
-        dataList.appendChild(option);
+        option.textContent = choice === methodValue &&
+          meta.suggestions.indexOf(choice) === -1 ? choice + " (configured)" : choice;
+        method.appendChild(option);
       });
-      method.setAttribute("list", dataList.id);
-      methodWrap.appendChild(dataList);
+      method.value = methodValue;
+    } else {
+      method = document.createElement("input");
+      method.type = "text";
+      method.placeholder = "None / method name";
+      method.value = methodValue;
     }
     method.addEventListener("change", function(){
-      var name = method.value.trim();
+      var name = String(method.value || "").trim();
       if (!name || name.toLowerCase() === "none") {
         parent[key] = "None";
       } else {
@@ -1015,6 +1223,9 @@
     var meta = semanticMeta(path) || {};
     if (meta.widget === "image-upload") {
       return makeImageUploadField(parent, key, value, path, meta);
+    }
+    if (meta.widget === "tuning-file") {
+      return makeTuningFileField(parent, key, value, path, meta);
     }
 
     var row = document.createElement("div");
@@ -1102,7 +1313,9 @@
         container.appendChild(makePrimitiveListField(obj, key, value, next, meta));
       }
     } else if (value && typeof value === "object") {
-      if (meta.widget === "json-object") {
+      if (meta.widget === "custom-modes") {
+        container.appendChild(makeCustomModesField(obj, key, value, next, meta));
+      } else if (meta.widget === "json-object") {
         container.appendChild(makeJsonObjectField(obj, key, value, next, meta));
       } else {
         var details = document.createElement("details");
@@ -1252,6 +1465,7 @@
       var data = await api("settings");
       loaded = deepClone(data.settings);
       uiMetadata = data.ui || {};
+      tuningFiles = data.tuning_files || [];
       revision = data.revision;
       originalJson = JSON.stringify(loaded);
       render();

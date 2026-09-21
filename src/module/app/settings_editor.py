@@ -27,6 +27,7 @@ from flask import Blueprint, current_app, jsonify, render_template, request, sen
 
 from module.config_loader import SettingsLoadError, load_settings
 from module.redis_controller import ParameterKey
+from module.tuning_files import tuning_json_problem
 from PIL import Image, ImageOps, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
@@ -41,11 +42,14 @@ settings_editor_bp = Blueprint(
 SETTINGS_FILE = Path(__file__).resolve().parents[2] / "settings.json"
 SETTINGS_SCHEMA_FILE = SETTINGS_FILE.with_name("settings.schema.json")
 SETTINGS_ASSET_DIR = Path.home() / ".local" / "share" / "cinemate" / "settings-assets"
+REPO_ROOT = Path(__file__).resolve().parents[3]
+TUNING_FILES_DIR = REPO_ROOT / "resources" / "tuning_files"
 TOKEN_CONF = Path("/etc/cinemate-settings-editor.conf")
 TOKEN_HEADER = "X-CineMate-Settings-Token"
 BACKUP_KEEP = 10
 MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
 MAX_IMAGE_PIXELS = 25_000_000
+MAX_TUNING_UPLOAD_BYTES = 2 * 1024 * 1024
 SETTINGS_BACKUP_DIR = Path.home() / ".local" / "state" / "cinemate" / "settings-backups"
 RESTART_HELPER = Path("/usr/local/bin/cinemate-restart-service")
 SUDO_BIN = Path("/usr/bin/sudo")
@@ -219,6 +223,61 @@ def _normalize_uploaded_image(raw: bytes) -> tuple[bytes, int, int]:
     output = io.BytesIO()
     normalized.save(output, format="PNG", optimize=True)
     return output.getvalue(), width, height
+
+
+def _available_tuning_files() -> list[dict[str, str]]:
+    """Return stock relative paths plus managed uploaded PiSP tuning files."""
+    found: list[dict[str, str]] = []
+
+    try:
+        for path in sorted(TUNING_FILES_DIR.glob("*.json"), key=lambda p: p.name.lower()):
+            if path.is_file():
+                try:
+                    rel = path.resolve().relative_to(REPO_ROOT.resolve())
+                    value = rel.as_posix()
+                except (OSError, ValueError):
+                    value = str(path.resolve())
+                found.append({"name": path.name, "path": value, "source": "stock"})
+    except OSError:
+        pass
+
+    try:
+        managed = sorted(
+            SETTINGS_ASSET_DIR.glob("settings-tuning-*.json"),
+            key=lambda p: p.name.lower(),
+        )
+    except OSError:
+        managed = []
+    for path in managed:
+        if path.is_file():
+            found.append({
+                "name": path.name,
+                "path": str(path.resolve()),
+                "source": "uploaded",
+            })
+
+    return found
+
+
+def _normalize_tuning_upload(raw: bytes) -> bytes:
+    if not raw:
+        raise ValueError("The uploaded tuning file is empty.")
+    if len(raw) > MAX_TUNING_UPLOAD_BYTES:
+        raise ValueError(
+            f"Tuning file exceeds the {MAX_TUNING_UPLOAD_BYTES // (1024 * 1024)} MiB upload limit."
+        )
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError as exc:
+        raise ValueError(f"Tuning file is not valid UTF-8: {exc}") from exc
+    try:
+        data = json.loads(text)
+    except json.JSONDecodeError as exc:
+        raise ValueError(f"Tuning file is not valid JSON: {exc}") from exc
+    problem = tuning_json_problem(data)
+    if problem:
+        raise ValueError(f"Not a PiSP v2 tuning file: {problem}")
+    return (json.dumps(data, indent=2, ensure_ascii=False) + "\n").encode("utf-8")
 
 
 def _managed_asset_path(raw_path: str) -> Path:
@@ -477,6 +536,61 @@ def get_settings():
         "revision": _revision(data),
         "activity": _busy_states(),
         "ui": _load_editor_ui_metadata(),
+        "tuning_files": _available_tuning_files(),
+    })
+
+
+@settings_editor_bp.route("/api/assets/tuning", methods=["POST"])
+@require_editor_token
+def upload_settings_tuning():
+    states = _busy_states()
+    message = _busy_message(states)
+    if message:
+        return jsonify({"ok": False, "message": message, "activity": states}), 409
+
+    uploaded = request.files.get("file")
+    if uploaded is None:
+        return jsonify({"ok": False, "message": "Upload requires a file field."}), 400
+
+    raw = uploaded.stream.read(MAX_TUNING_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_TUNING_UPLOAD_BYTES:
+        return jsonify({
+            "ok": False,
+            "message": (
+                f"Tuning file exceeds the {MAX_TUNING_UPLOAD_BYTES // (1024 * 1024)} MiB "
+                "upload limit."
+            ),
+        }), 413
+
+    try:
+        normalized = _normalize_tuning_upload(raw)
+    except ValueError as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 400
+
+    original = Path(uploaded.filename or "tuning.json").stem
+    safe_stem = "".join(
+        ch if ch.isalnum() or ch in ("-", "_") else "-"
+        for ch in original
+    ).strip("-_")[:40] or "tuning"
+    digest = hashlib.sha256(normalized).hexdigest()
+    target = SETTINGS_ASSET_DIR / (
+        f"settings-tuning-{safe_stem}-{digest[:12]}.json"
+    )
+    try:
+        _atomic_write_asset(target, normalized)
+    except OSError as exc:
+        logger.exception("Could not store managed tuning file")
+        return jsonify({
+            "ok": False,
+            "message": f"Could not store tuning asset: {exc}",
+        }), 500
+
+    return jsonify({
+        "ok": True,
+        "name": target.name,
+        "path": str(target.resolve()),
+        "bytes": len(normalized),
+        "message": "PiSP tuning file uploaded. Save settings to make it active.",
     })
 
 
