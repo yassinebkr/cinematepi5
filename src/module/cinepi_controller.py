@@ -124,6 +124,7 @@ class CinePiController:
         self.dynamic_resolution_suspended = False
         
         self.wb_cg_rb_array = {}  # Initialize as an empty dictionary
+        self.file_size = 0.0  # No usable camera frame size until a real mode is known.
         
         self.fps = int(round(float(self.redis_controller.get_value(ParameterKey.FPS_LAST.value))))
         self.current_fps = float(self.redis_controller.get_value(ParameterKey.FPS_USER.value))
@@ -227,7 +228,13 @@ class CinePiController:
         self.gui_layout = self.sensor_detect.get_gui_layout(self.current_sensor, self.sensor_mode)
         self.exposure_time_s = float(self.redis_controller.get_value(ParameterKey.SHUTTER_A.value)) / 360 * (1 / self.fps) 
         self.exposure_time_saved = self.exposure_time_s
-        self.file_size = self.sensor_detect.get_file_size(self.current_sensor, self.sensor_mode)
+        if self.sensor_detect.res_modes:
+            try:
+                self.file_size = float(
+                    self.sensor_detect.get_file_size(self.current_sensor, self.sensor_mode) or 0.0
+                )
+            except (TypeError, ValueError):
+                self.file_size = 0.0
         
         self._publish_dynamic_resolution_state()
         
@@ -272,10 +279,28 @@ class CinePiController:
     def _get_startup_sensor_mode(self) -> int:
         value = self.redis_controller.get_value(ParameterKey.SENSOR_MODE.value)
         try:
-            return int(value)
+            mode = int(value)
         except (TypeError, ValueError):
-            self.redis_controller.set_value(ParameterKey.SENSOR_MODE.value, 0)
-            return 0
+            mode = 0
+
+        # A degraded boot has no authoritative mode table. Preserve the stored
+        # value in memory and, critically, do not write a fabricated fallback
+        # back to Redis. The next healthy boot can then restore the operator's
+        # previous mode.
+        if not self.sensor_detect.res_modes:
+            return mode
+
+        if mode in self.sensor_detect.res_modes:
+            return mode
+
+        fallback = sorted(self.sensor_detect.res_modes, key=int)[0]
+        logging.warning(
+            "Stored sensor mode %s is unavailable; falling back to mode %s",
+            mode,
+            fallback,
+        )
+        self.redis_controller.set_value(ParameterKey.SENSOR_MODE.value, fallback)
+        return int(fallback)
 
     def _get_startup_dynamic_resolution_desired_mode(self) -> int:
         value = self.redis_controller.get_value(
@@ -285,6 +310,10 @@ class CinePiController:
             desired_mode = int(value)
         except (TypeError, ValueError):
             return self.sensor_mode
+
+        if not self.sensor_detect.res_modes:
+            return desired_mode
+
         if desired_mode not in self.sensor_detect.res_modes:
             return self.sensor_mode
         return desired_mode
@@ -298,7 +327,10 @@ class CinePiController:
             ParameterKey.DYNAMIC_RESOLUTION_ACTIVE.value,
             1 if self.dynamic_resolution_active else 0,
         )
-        if self.dynamic_resolution_desired_mode is not None:
+        if (
+            self.dynamic_resolution_desired_mode is not None
+            and self.sensor_detect.res_modes
+        ):
             self.redis_controller.set_value(
                 ParameterKey.DYNAMIC_RESOLUTION_DESIRED_MODE.value,
                 self.dynamic_resolution_desired_mode,
@@ -347,7 +379,34 @@ class CinePiController:
             policy=self.dynamic_resolution_policy,
         )
 
+    def _stored_fps_max(self):
+        """Read a usable FPS ceiling without writing derived state."""
+        raw = self.redis_controller.get_value(ParameterKey.FPS_MAX.value)
+        try:
+            stored = int(float(raw))
+        except (TypeError, ValueError):
+            stored = 0
+        if stored > 0:
+            return stored
+
+        configured = []
+        for step in (self.fps_steps or []):
+            try:
+                value = float(step)
+            except (TypeError, ValueError):
+                continue
+            if value > 0:
+                configured.append(value)
+        return int(max(configured)) if configured else 24
+
     def _refresh_fps_max(self):
+        if not self.sensor_detect.res_modes:
+            # No sensor mode table means there is no measured hardware ceiling.
+            # Keep the last operator/session value and do not poison Redis with
+            # _sensor_readout_fps_max()'s emergency fallback.
+            self.fps_max = self._stored_fps_max()
+            return self.fps_max
+
         sensor_max = self._sensor_readout_fps_max()
         dynamic_max = self._dynamic_context_fps_max()
         fps_max = int(dynamic_max) if dynamic_max is not None else sensor_max
@@ -609,9 +668,10 @@ class CinePiController:
             return []
 
     def initialize_fps_steps(self, fps_steps):
-        self.fps_max = int(self.redis_controller.get_value(ParameterKey.FPS_MAX.value))
-        
-        self.redis_controller.set_value(ParameterKey.FPS_MAX.value, self.fps_max)
+        self.fps_max = self._stored_fps_max()
+
+        if self.sensor_detect.res_modes:
+            self.redis_controller.set_value(ParameterKey.FPS_MAX.value, self.fps_max)
 
         """Initialize fps_steps based on the provided list and capped by fps_max."""
         self.fps_steps_dynamic = self._fps_steps_capped_at_max(fps_steps)
@@ -705,7 +765,7 @@ class CinePiController:
 
         # No per-sensor fps correction factor: the cinepi-raw phase lock drives the
         # recorded cadence onto the nominal fps, so the hardware fps == the user fps.
-        fps_max = int(float(self.redis_controller.get_value(ParameterKey.FPS_MAX.value)))
+        fps_max = self._stored_fps_max()
 
         # ── choose the final fps value ──────────────────────────────────────
         if self.shutter_a_sync_mode == 1 or self.fps_free:
@@ -1069,6 +1129,10 @@ class CinePiController:
         return False
 
     def start_recording(self):
+        if not self.sensor_detect.res_modes:
+            logging.info("rec ignored -- no camera detected")
+            return
+
         # Safety: refuse to start a new take while the previous take's frames are
         # still flushing from RAM to disk (the green is_writing_buf state). Letting
         # the buffer finish means no recorded frame is lost; the operator presses
@@ -1316,7 +1380,16 @@ class CinePiController:
     def _apply_resolution_mode(self, value, restore_user_fps=None, *, restart_process=False):
         try:
             value = self._normalize_sensor_mode_value(value)
-            resolution_info = self.sensor_detect.res_modes[value]
+            resolution_info = self.sensor_detect.res_modes.get(value)
+            if resolution_info is None:
+                logging.info(
+                    "No camera mode table -- resolution unavailable (requested mode %s)",
+                    value,
+                )
+                self.redis_controller.set_value(
+                    ParameterKey.RESOLUTION_SWITCHING.value, 0
+                )
+                return False
             recording = self._is_recording()
             if recording:
                 logging.warning(
@@ -1367,7 +1440,7 @@ class CinePiController:
             self._schedule_resolution_switch_complete(value, resolution_info)
             return True
 
-        except ValueError as error:
+        except (KeyError, ValueError) as error:
             self.redis_controller.set_value(ParameterKey.RESOLUTION_SWITCHING.value, 0)
             logging.error(f"Error setting resolution: {error}")
             return False
@@ -1956,7 +2029,7 @@ class CinePiController:
         
     def initialize_wb_cg_rb_array(self):
         """Initialize the white balance cg_rb array based on the sensor model."""
-        sensor_key = self.current_sensor.replace('_mono', '')
+        sensor_key = (self.current_sensor or '').replace('_mono', '')
 
         if sensor_key == 'imx283':
             default_ct_curve = [
@@ -2000,28 +2073,38 @@ class CinePiController:
         self.wb_cg_rb_array = {}  # Ensuring it is initialized as a dictionary
 
         try:
-            tuning_file_path = (
-                f"/home/pi/libcamera/src/ipa/rpi/pisp/data/"
-                f"{self.current_sensor.replace('_mono', '')}.json"
-            )
-            logging.info(f"Loading tuning file from: {tuning_file_path}")
-
-            with open(tuning_file_path, 'r') as file:
-                data = json.load(file)
-                logging.info("Tuning data loaded successfully.")
-
-            awb_data = next((algo['rpi.awb'] for algo in data['algorithms'] if 'rpi.awb' in algo), None)
-            if not awb_data:
-                logging.warning("'rpi.awb' algorithm data not found, using default ct_curve.")
-                ct_curve = default_ct_curve
+            ct_curve = default_ct_curve
+            if not sensor_key:
+                logging.info(
+                    "No sensor detected -- using default ct_curve for white balance"
+                )
             else:
-                logging.info(f"'rpi.awb' data found: {awb_data}")
-                ct_curve = awb_data.get('ct_curve', None)
-                if not ct_curve:
-                    logging.warning("'ct_curve' not found in 'rpi.awb' data, using default ct_curve.")
-                    ct_curve = default_ct_curve
+                tuning_file_path = (
+                    f"/home/pi/libcamera/src/ipa/rpi/pisp/data/{sensor_key}.json"
+                )
+                logging.info(f"Loading tuning file from: {tuning_file_path}")
+
+                with open(tuning_file_path, 'r') as file:
+                    data = json.load(file)
+                    logging.info("Tuning data loaded successfully.")
+
+                awb_data = next(
+                    (algo['rpi.awb'] for algo in data['algorithms'] if 'rpi.awb' in algo),
+                    None,
+                )
+                if not awb_data:
+                    logging.warning(
+                        "'rpi.awb' algorithm data not found, using default ct_curve."
+                    )
                 else:
-                    logging.info(f"Retrieved ct_curve: {ct_curve}")
+                    tuning_ct_curve = awb_data.get('ct_curve')
+                    if not tuning_ct_curve:
+                        logging.warning(
+                            "'ct_curve' not found in 'rpi.awb' data, using default ct_curve."
+                        )
+                    else:
+                        ct_curve = tuning_ct_curve
+                        logging.info(f"Retrieved ct_curve: {ct_curve}")
 
             temperatures = ct_curve[0::3]
             r_values = ct_curve[1::3]
