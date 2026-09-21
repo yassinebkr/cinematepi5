@@ -80,15 +80,14 @@ The recovery editor works on the configuration actually used by this branch:
 
     /home/pi/cinemate/src/settings.json
 
-A save follows a validation ladder:
+A save follows a two-rung validation path:
 
 1. use the system Python interpreter with CineMate's own module.config_loader
-2. if that validator cannot run, use the Python standard-library JSON parser
-3. if no validator is available, permit the repair as explicitly **unvalidated**
+2. if that validator cannot run, use Python's standard-library JSON parser and require a top-level object
 
-The final rung is intentionally fail-open because a broken settings file may be the reason the recovery console is needed. Safety comes from making a backup before the write.
+A malformed file is never written. The fallback validator is part of Python's standard library, so recovery does not need the CineMate virtual environment merely to reject broken JSON.
 
-This branch uses strict JSON. JSONC comments and trailing commas are therefore rejected rather than accepted by the fallback validator.
+This branch uses strict JSON. Comments and trailing commas are rejected by the recovery editor for the same reason they are rejected by the main runtime.
 
 ## Atomic writes and backups
 
@@ -120,11 +119,11 @@ It cannot recover a change that prevents the Pi from reaching userspace at all. 
 
 Recovery configuration is resolved independently of the main camera process.
 
-The service first looks for an explicit system.recovery object in src/settings.json. If that block does not exist, it uses:
+The service reads system.recovery from src/settings.json when that file is valid. Values present there override the installer fallback; omitted values, including the token, can be inherited from:
 
     /etc/cinemate-recovery.conf
 
-If neither source is usable, built-in defaults keep the diagnostic pages available, but write actions remain disabled because no token is available.
+If settings.json is malformed or missing, the fallback file becomes the complete recovery configuration. If neither source is usable, built-in defaults keep the diagnostic pages available but mutating actions remain locked because no token is available.
 
 This avoids a circular dependency where a broken or older settings file would prevent access to the service intended to repair it.
 
