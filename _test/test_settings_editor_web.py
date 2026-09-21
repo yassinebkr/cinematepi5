@@ -104,6 +104,21 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.assertIn('var editorToken = "";', html)
 
 
+    def test_template_uses_hybrid_desktop_grid_and_mobile_collapse(self):
+        html = (
+            Path(__file__).resolve().parents[1]
+            / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "#settings-root{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))",
+            html,
+        )
+        self.assertIn(".field--wide{grid-column:1/-1}", html)
+        self.assertIn('row.classList.add("metadata-field", "field--wide")', html)
+        self.assertIn("field field--wide field--array", html)
+        self.assertIn("@media(max-width:900px)", html)
+        self.assertIn("#settings-root,.inside{grid-template-columns:1fr", html)
+
     def test_api_requires_token(self):
         self.assertEqual(self.client.get("/settings-editor/api/settings").status_code, 403)
         self.assertEqual(
