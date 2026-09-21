@@ -30,11 +30,12 @@
     .field textarea{width:100%;min-height:5.5rem;resize:vertical;font-family:ui-monospace,SFMono-Regular,monospace}.field--array textarea{min-height:6rem}.field input[type="text"],.field input[type="number"],.field input[type="password"]{width:100%}
     .bool{display:flex;align-items:center;gap:.55rem}.bool input{width:1.15rem;height:1.15rem}
     .secret-wrap{display:flex;gap:.4rem}.secret-wrap input{flex:1}
+    .semantic-field{gap:.55rem}.semantic-title{font-weight:650}.semantic-help{font-size:.82rem;color:var(--muted);margin-top:-.15rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
     .hidden-by-search{display:none!important}
     dialog{width:min(90vw,70rem);max-height:85vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
     dialog textarea{width:100%;height:60vh;font-family:ui-monospace,SFMono-Regular,monospace}
     .pill{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:.25rem .55rem;color:var(--muted)}
-    @media(max-width:900px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}#settings-root,.inside{grid-template-columns:1fr;gap:.55rem}.field,.metadata-field{grid-column:auto;display:flex;flex-direction:column;gap:.35rem;padding:.6rem 0;background:transparent;border:0;border-top:1px solid rgba(52,58,70,.55);border-radius:0}.metadata-field{border-top:0;border-bottom:1px solid var(--line);padding:.35rem 0 .7rem}.nested{grid-column:auto}.brand{width:100%}}
+    @media(max-width:900px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}#settings-root,.inside{grid-template-columns:1fr;gap:.55rem}.field,.metadata-field{grid-column:auto;display:flex;flex-direction:column;gap:.35rem;padding:.6rem 0;background:transparent;border:0;border-top:1px solid rgba(52,58,70,.55);border-radius:0}.metadata-field{border-top:0;border-bottom:1px solid var(--line);padding:.35rem 0 .7rem}.nested{grid-column:auto}.image-widget{grid-template-columns:1fr}.image-preview{max-height:13rem}.brand{width:100%}}
   </style>
 </head>
 <body>
@@ -88,6 +89,7 @@
   var loaded = null;
   var revision = "";
   var originalJson = "";
+  var uiMetadata = {};
   var busy = false;
 
   var login = document.getElementById("login");
@@ -109,7 +111,7 @@
     options = options || {};
     options.headers = options.headers || {};
     options.headers["X-CineMate-Settings-Token"] = editorToken;
-    if (options.body && !options.headers["Content-Type"]) {
+    if (options.body && !(options.body instanceof FormData) && !options.headers["Content-Type"]) {
       options.headers["Content-Type"] = "application/json";
     }
     return fetch("/settings-editor/api/" + path, options).then(async function(res){
@@ -143,7 +145,139 @@
     return key.indexOf("password") !== -1;
   }
 
+  function semanticMeta(path){
+    return uiMetadata[pathText(path)] || null;
+  }
+
+  function setManagedImagePreview(img, pathValue){
+    if (!pathValue) {
+      img.removeAttribute("src");
+      img.classList.add("empty");
+      img.alt = "No startup image selected";
+      return;
+    }
+    fetch(
+      "/settings-editor/api/assets/image?path=" + encodeURIComponent(pathValue),
+      {headers: {"X-CineMate-Settings-Token": editorToken}}
+    ).then(function(res){
+      if (!res.ok) throw new Error("preview unavailable");
+      return res.blob();
+    }).then(function(blob){
+      if (img.dataset.objectUrl) URL.revokeObjectURL(img.dataset.objectUrl);
+      var url = URL.createObjectURL(blob);
+      img.dataset.objectUrl = url;
+      img.src = url;
+      img.classList.remove("empty");
+      img.alt = "Startup image preview";
+    }).catch(function(){
+      img.removeAttribute("src");
+      img.classList.add("empty");
+      img.alt = "Preview unavailable for this path";
+    });
+  }
+
+  function makeImageUploadField(parent, key, value, path, meta){
+    var row = document.createElement("div");
+    row.className = "field field--wide semantic-field";
+    row.dataset.search = pathText(path).toLowerCase();
+
+    var title = document.createElement("div");
+    title.className = "semantic-title";
+    title.textContent = meta.label || pathText(path);
+    row.appendChild(title);
+
+    var pathLabel = document.createElement("div");
+    pathLabel.className = "path";
+    pathLabel.textContent = pathText(path);
+    row.appendChild(pathLabel);
+
+    if (meta.help) {
+      var help = document.createElement("div");
+      help.className = "semantic-help";
+      help.textContent = meta.help;
+      row.appendChild(help);
+    }
+
+    var widget = document.createElement("div");
+    widget.className = "image-widget";
+    var preview = document.createElement("img");
+    preview.className = "image-preview empty";
+    preview.alt = "No startup image selected";
+    widget.appendChild(preview);
+
+    var side = document.createElement("div");
+    var actions = document.createElement("div");
+    actions.className = "image-actions";
+    var choose = document.createElement("button");
+    choose.type = "button";
+    choose.textContent = value ? "Replace image" : "Upload image";
+    var clear = document.createElement("button");
+    clear.type = "button";
+    clear.textContent = "Clear";
+    clear.disabled = !value;
+    var input = document.createElement("input");
+    input.type = "file";
+    input.accept = meta.accept || "image/*";
+    input.hidden = true;
+    var valuePath = document.createElement("div");
+    valuePath.className = "image-path";
+    valuePath.textContent = value || "No image selected";
+
+    choose.addEventListener("click", function(){ input.click(); });
+    clear.addEventListener("click", function(){
+      parent[key] = null;
+      valuePath.textContent = "No image selected";
+      choose.textContent = "Upload image";
+      clear.disabled = true;
+      setManagedImagePreview(preview, null);
+      updateDirty();
+    });
+    input.addEventListener("change", async function(){
+      var file = input.files && input.files[0];
+      if (!file) return;
+      var form = new FormData();
+      form.append("file", file);
+      widget.classList.add("upload-busy");
+      setMessage("Validating and uploading image...", "good");
+      try {
+        var data = await api("assets/image", {method:"POST", body:form});
+        parent[key] = data.path;
+        valuePath.textContent = data.path;
+        choose.textContent = "Replace image";
+        clear.disabled = false;
+        if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
+        var localUrl = URL.createObjectURL(file);
+        preview.dataset.objectUrl = localUrl;
+        preview.src = localUrl;
+        preview.classList.remove("empty");
+        preview.alt = "Startup image preview";
+        updateDirty();
+        setMessage(data.message, "good");
+      } catch(e) {
+        setMessage(e.message, e.status === 409 ? "warn" : "bad");
+      } finally {
+        widget.classList.remove("upload-busy");
+        input.value = "";
+      }
+    });
+
+    actions.appendChild(choose);
+    actions.appendChild(clear);
+    side.appendChild(actions);
+    side.appendChild(valuePath);
+    side.appendChild(input);
+    widget.appendChild(side);
+    row.appendChild(widget);
+    setManagedImagePreview(preview, value);
+    return row;
+  }
+
   function makeScalarField(parent, key, value, path){
+    var meta = semanticMeta(path);
+    if (meta && meta.widget === "image-upload") {
+      return makeImageUploadField(parent, key, value, path, meta);
+    }
+
     var row = document.createElement("div");
     row.className = "field";
     row.dataset.search = pathText(path).toLowerCase();
@@ -334,6 +468,7 @@
     try {
       var data = await api("settings");
       loaded = deepClone(data.settings);
+      uiMetadata = data.ui || {};
       revision = data.revision;
       originalJson = JSON.stringify(loaded);
       render();
@@ -366,6 +501,7 @@
   function lock(){
     editorToken = "";
     loaded = null;
+    uiMetadata = {};
     revision = "";
     originalJson = "";
     root.innerHTML = "";

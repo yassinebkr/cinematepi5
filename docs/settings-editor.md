@@ -38,6 +38,14 @@ The installer creates it as root:pi mode 0640, generates a cryptographically ran
 
 The settings-editor token is deliberately separate from the recovery-console token.
 
+## Semantic widgets
+
+The editor can use optional x-cinemate-ui metadata from settings.schema.json to select controls that understand the meaning of a setting. These annotations affect presentation only; config_loader remains the runtime validation authority and the generic JSON-type renderer remains the fallback.
+
+welcome_image is the reference semantic widget. Its Upload image control accepts an image, validates it through Pillow, applies EXIF orientation, normalizes it to RGB PNG, and stores the content-addressed asset under ~/.local/share/cinemate/settings-assets/. Uploading does not modify settings.json; the new path remains a pending editor change until Save changes is used.
+
+Only files inside that managed asset directory can be previewed through the editor API. Existing external image paths remain valid settings but are not exposed through the preview endpoint.
+
 ## What the page shows
 
 After authentication, the current strict JSON document is rendered as nested sections:

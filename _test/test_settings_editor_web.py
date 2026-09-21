@@ -47,6 +47,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.settings = self.tmp / "settings.json"
         self.conf = self.tmp / "editor.conf"
         self.backup_dir = self.tmp / "settings-backups"
+        self.asset_dir = self.tmp / "settings-assets"
         self.token = "test-token"
         self.conf.write_text("token=" + self.token + "\n", encoding="utf-8")
         self.initial = {
@@ -69,6 +70,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
             mock.patch.object(se, "SETTINGS_FILE", self.settings),
             mock.patch.object(se, "TOKEN_CONF", self.conf),
             mock.patch.object(se, "SETTINGS_BACKUP_DIR", self.backup_dir),
+            mock.patch.object(se, "SETTINGS_ASSET_DIR", self.asset_dir),
         ]
         for patch in self.patches:
             patch.start()
@@ -104,6 +106,17 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.assertIn('var editorToken = "";', html)
 
 
+    def test_template_renders_schema_driven_image_widget(self):
+        html = (
+            Path(__file__).resolve().parents[1]
+            / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn('meta.widget === "image-upload"', html)
+        self.assertIn('form.append("file", file)', html)
+        self.assertIn('parent[key] = null', html)
+        self.assertIn('/settings-editor/api/assets/image?path=', html)
+        self.assertIn('!(options.body instanceof FormData)', html)
+
     def test_template_uses_hybrid_desktop_grid_and_mobile_collapse(self):
         html = (
             Path(__file__).resolve().parents[1]
@@ -118,6 +131,81 @@ class SettingsEditorRouteTests(unittest.TestCase):
         self.assertIn("field field--wide field--array", html)
         self.assertIn("@media(max-width:900px)", html)
         self.assertIn("#settings-root,.inside{grid-template-columns:1fr", html)
+
+    def test_get_exposes_ui_metadata_for_welcome_image(self):
+        res = self.client.get("/settings-editor/api/settings", headers=self.headers())
+        self.assertEqual(res.status_code, 200)
+        ui = res.get_json()["ui"]
+        self.assertEqual(ui["welcome_image"]["widget"], "image-upload")
+        self.assertEqual(ui["welcome_image"]["accept"], "image/*")
+
+    def _png_bytes(self):
+        import io
+        from PIL import Image
+        out = io.BytesIO()
+        Image.new("RGBA", (32, 18), (20, 40, 60, 128)).save(out, format="PNG")
+        return out.getvalue()
+
+    def test_image_upload_is_authenticated_normalized_and_does_not_save_settings(self):
+        import io
+        before = self.settings.read_bytes()
+        res = self.client.post(
+            "/settings-editor/api/assets/image",
+            headers=self.headers(),
+            data={"file": (io.BytesIO(self._png_bytes()), "startup.png")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(res.status_code, 200, res.get_data(as_text=True))
+        data = res.get_json()
+        asset = Path(data["path"])
+        self.assertEqual(asset.parent, self.asset_dir)
+        self.assertEqual(asset.suffix, ".png")
+        self.assertTrue(asset.is_file())
+        self.assertEqual(self.settings.read_bytes(), before)
+        from PIL import Image
+        with Image.open(asset) as image:
+            self.assertEqual(image.mode, "RGB")
+            self.assertEqual(image.size, (32, 18))
+        preview = self.client.get(
+            "/settings-editor/api/assets/image",
+            headers=self.headers(),
+            query_string={"path": str(asset)},
+        )
+        self.assertEqual(preview.status_code, 200)
+        self.assertEqual(preview.mimetype, "image/png")
+
+    def test_image_upload_rejects_invalid_image(self):
+        import io
+        res = self.client.post(
+            "/settings-editor/api/assets/image",
+            headers=self.headers(),
+            data={"file": (io.BytesIO(b"not-an-image"), "fake.png")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(res.status_code, 400)
+        self.assertEqual(list(self.asset_dir.glob("*")), [])
+
+    def test_image_preview_refuses_external_file(self):
+        external = self.tmp / "external.png"
+        external.write_bytes(self._png_bytes())
+        res = self.client.get(
+            "/settings-editor/api/assets/image",
+            headers=self.headers(),
+            query_string={"path": str(external)},
+        )
+        self.assertEqual(res.status_code, 404)
+
+    def test_image_upload_is_locked_during_camera_activity(self):
+        import io
+        self.redis.values = {ParameterKey.IS_RECORDING.value: "1"}
+        res = self.client.post(
+            "/settings-editor/api/assets/image",
+            headers=self.headers(),
+            data={"file": (io.BytesIO(self._png_bytes()), "startup.png")},
+            content_type="multipart/form-data",
+        )
+        self.assertEqual(res.status_code, 409)
+        self.assertEqual(list(self.asset_dir.glob("*")), [])
 
     def test_api_requires_token(self):
         self.assertEqual(self.client.get("/settings-editor/api/settings").status_code, 403)

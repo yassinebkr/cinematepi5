@@ -58,8 +58,22 @@
       "default": true
     },
     "welcome_image": {
-      "anyOf": [{"type": "string"}, {"type": "null"}],
-      "default": null
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "description": "Optional startup splash image. When set, it is displayed instead of welcome_message.",
+      "x-cinemate-ui": {
+        "widget": "image-upload",
+        "label": "Welcome image",
+        "accept": "image/*",
+        "help": "Upload a startup image. CineMate validates it and stores a normalized PNG in its managed settings-assets directory."
+      }
     },
     "audio": {
       "type": "object",
@@ -68,16 +82,28 @@
           "type": "object",
           "description": "Settings for the 24-bit USB dsnoop path (RØDE NTG, mic_24bit alias)",
           "properties": {
-            "capture_gain_db": { "type": "number", "default": 0.0 },
-            "timecode_offset_frames": { "type": "integer", "default": 0 }
+            "capture_gain_db": {
+              "type": "number",
+              "default": 0.0
+            },
+            "timecode_offset_frames": {
+              "type": "integer",
+              "default": 0
+            }
           }
         },
         "16bit": {
           "type": "object",
           "description": "Settings for the 16-bit plain-arecord fallback path (generic USB PnP mics)",
           "properties": {
-            "capture_gain_db": { "type": "number", "default": 0.0 },
-            "timecode_offset_frames": { "type": "integer", "default": 0 }
+            "capture_gain_db": {
+              "type": "number",
+              "default": 0.0
+            },
+            "timecode_offset_frames": {
+              "type": "integer",
+              "default": 0
+            }
           }
         }
       },
@@ -130,7 +156,9 @@
         },
         "policy": {
           "type": "string",
-          "enum": ["highest_sustainable_resolution"],
+          "enum": [
+            "highest_sustainable_resolution"
+          ],
           "default": "highest_sustainable_resolution"
         },
         "safety_margin_fps": {
@@ -159,8 +187,12 @@
     "camera": {
       "type": "object",
       "properties": {
-        "cam0": { "$ref": "#/definitions/cam_config" },
-        "cam1": { "$ref": "#/definitions/cam_config" }
+        "cam0": {
+          "$ref": "#/definitions/cam_config"
+        },
+        "cam1": {
+          "$ref": "#/definitions/cam_config"
+        }
       },
       "additionalProperties": true
     }

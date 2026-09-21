@@ -10,6 +10,7 @@ X-CineMate-Settings-Token. The browser keeps it only in JavaScript memory.
 from __future__ import annotations
 
 import hashlib
+import io
 import json
 import logging
 import os
@@ -17,14 +18,16 @@ import secrets
 import subprocess
 import tempfile
 import threading
+import warnings
 from datetime import datetime, timezone
 from functools import wraps
 from pathlib import Path
 
-from flask import Blueprint, current_app, jsonify, render_template, request
+from flask import Blueprint, current_app, jsonify, render_template, request, send_file
 
 from module.config_loader import SettingsLoadError, load_settings
 from module.redis_controller import ParameterKey
+from PIL import Image, ImageOps, UnidentifiedImageError
 
 logger = logging.getLogger(__name__)
 
@@ -36,9 +39,13 @@ settings_editor_bp = Blueprint(
 )
 
 SETTINGS_FILE = Path(__file__).resolve().parents[2] / "settings.json"
+SETTINGS_SCHEMA_FILE = SETTINGS_FILE.with_name("settings.schema.json")
+SETTINGS_ASSET_DIR = Path.home() / ".local" / "share" / "cinemate" / "settings-assets"
 TOKEN_CONF = Path("/etc/cinemate-settings-editor.conf")
 TOKEN_HEADER = "X-CineMate-Settings-Token"
 BACKUP_KEEP = 10
+MAX_IMAGE_UPLOAD_BYTES = 10 * 1024 * 1024
+MAX_IMAGE_PIXELS = 25_000_000
 SETTINGS_BACKUP_DIR = Path.home() / ".local" / "state" / "cinemate" / "settings-backups"
 RESTART_HELPER = Path("/usr/local/bin/cinemate-restart-service")
 SUDO_BIN = Path("/usr/bin/sudo")
@@ -120,6 +127,103 @@ def _strict_raw_settings(data: bytes) -> dict:
     if not isinstance(parsed, dict):
         raise ValueError("settings.json must contain a top-level JSON object")
     return parsed
+
+
+def _load_editor_ui_metadata(path: Path | None = None) -> dict:
+    source = SETTINGS_SCHEMA_FILE if path is None else Path(path)
+    try:
+        schema = json.loads(source.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError) as exc:
+        logger.warning("Settings UI metadata unavailable from %s: %s", source, exc)
+        return {}
+
+    result = {}
+
+    def walk(node, parts):
+        if not isinstance(node, dict):
+            return
+        ui = node.get("x-cinemate-ui")
+        if parts and isinstance(ui, dict):
+            result[".".join(parts)] = dict(ui)
+        props = node.get("properties")
+        if isinstance(props, dict):
+            for key, child in props.items():
+                walk(child, parts + [str(key)])
+
+    walk(schema, [])
+    return result
+
+
+def _atomic_write_asset(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    os.chmod(path.parent, 0o750)
+    if path.exists():
+        return
+    fd, tmp_name = tempfile.mkstemp(
+        dir=str(path.parent),
+        prefix=f".{path.name}.",
+        suffix=".tmp",
+    )
+    try:
+        with os.fdopen(fd, "wb") as handle:
+            handle.write(data)
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.chmod(tmp_name, 0o644)
+        os.replace(tmp_name, path)
+        tmp_name = ""
+        _fsync_directory(path.parent)
+    finally:
+        if tmp_name:
+            try:
+                os.unlink(tmp_name)
+            except OSError:
+                pass
+
+
+def _normalize_uploaded_image(raw: bytes) -> tuple[bytes, int, int]:
+    if not raw:
+        raise ValueError("The uploaded image is empty.")
+    if len(raw) > MAX_IMAGE_UPLOAD_BYTES:
+        raise ValueError(
+            f"Image exceeds the {MAX_IMAGE_UPLOAD_BYTES // (1024 * 1024)} MiB upload limit."
+        )
+
+    try:
+        with warnings.catch_warnings():
+            warnings.simplefilter("error", Image.DecompressionBombWarning)
+            with Image.open(io.BytesIO(raw)) as opened:
+                opened.load()
+                image = ImageOps.exif_transpose(opened)
+                width, height = image.size
+                if width <= 0 or height <= 0:
+                    raise ValueError("Image dimensions are invalid.")
+                if width * height > MAX_IMAGE_PIXELS:
+                    raise ValueError(
+                        f"Image is too large after decoding ({width}x{height}); "
+                        f"maximum is {MAX_IMAGE_PIXELS:,} pixels."
+                    )
+                normalized = image.convert("RGB")
+    except (UnidentifiedImageError, OSError, Image.DecompressionBombError) as exc:
+        raise ValueError(f"Unsupported or invalid image: {exc}") from exc
+    except Image.DecompressionBombWarning as exc:
+        raise ValueError(f"Image is too large to decode safely: {exc}") from exc
+
+    output = io.BytesIO()
+    normalized.save(output, format="PNG", optimize=True)
+    return output.getvalue(), width, height
+
+
+def _managed_asset_path(raw_path: str) -> Path:
+    base = SETTINGS_ASSET_DIR.resolve()
+    candidate = Path(raw_path).expanduser().resolve(strict=True)
+    try:
+        candidate.relative_to(base)
+    except ValueError as exc:
+        raise ValueError("Only CineMate-managed settings assets can be previewed.") from exc
+    if not candidate.is_file():
+        raise ValueError("Managed settings asset does not exist.")
+    return candidate
 
 
 def _settings_for_editor(value):
@@ -365,7 +469,69 @@ def get_settings():
         "settings": _settings_for_editor(raw),
         "revision": _revision(data),
         "activity": _busy_states(),
+        "ui": _load_editor_ui_metadata(),
     })
+
+
+@settings_editor_bp.route("/api/assets/image", methods=["POST"])
+@require_editor_token
+def upload_settings_image():
+    states = _busy_states()
+    message = _busy_message(states)
+    if message:
+        return jsonify({"ok": False, "message": message, "activity": states}), 409
+
+    uploaded = request.files.get("file")
+    if uploaded is None:
+        return jsonify({"ok": False, "message": "Upload requires a file field."}), 400
+
+    raw = uploaded.stream.read(MAX_IMAGE_UPLOAD_BYTES + 1)
+    if len(raw) > MAX_IMAGE_UPLOAD_BYTES:
+        return jsonify({
+            "ok": False,
+            "message": (
+                f"Image exceeds the {MAX_IMAGE_UPLOAD_BYTES // (1024 * 1024)} MiB "
+                "upload limit."
+            ),
+        }), 413
+
+    try:
+        normalized, width, height = _normalize_uploaded_image(raw)
+    except ValueError as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 400
+
+    digest = hashlib.sha256(normalized).hexdigest()
+    target = SETTINGS_ASSET_DIR / f"settings-image-{digest[:20]}.png"
+    try:
+        _atomic_write_asset(target, normalized)
+    except OSError as exc:
+        logger.exception("Could not store managed settings image")
+        return jsonify({
+            "ok": False,
+            "message": f"Could not store image asset: {exc}",
+        }), 500
+
+    return jsonify({
+        "ok": True,
+        "path": str(target),
+        "width": width,
+        "height": height,
+        "bytes": len(normalized),
+        "message": "Image uploaded and normalized to PNG. Save settings to make it active.",
+    })
+
+
+@settings_editor_bp.route("/api/assets/image")
+@require_editor_token
+def preview_settings_image():
+    raw_path = request.args.get("path", "")
+    if not raw_path:
+        return jsonify({"ok": False, "message": "Missing asset path."}), 400
+    try:
+        target = _managed_asset_path(raw_path)
+    except (OSError, ValueError) as exc:
+        return jsonify({"ok": False, "message": str(exc)}), 404
+    return send_file(target, mimetype="image/png", conditional=True, max_age=0)
 
 
 @settings_editor_bp.route("/api/settings", methods=["PUT"])
