@@ -1,0 +1,445 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>CineMate Settings</title>
+  <style>
+    :root{color-scheme:dark;--bg:#0d0f12;--panel:#171a20;--panel2:#20242c;--line:#343a46;--text:#eef1f5;--muted:#9ba6b6;--good:#79d59b;--warn:#f0bd69;--bad:#ff7d7d;--accent:#9fc4ff}
+    *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 system-ui,-apple-system,sans-serif}
+    button,input,textarea{font:inherit} button{cursor:pointer}
+    .shell{width:min(100% - 2rem,110rem);margin:auto;padding:1rem}
+    .top{position:sticky;top:0;z-index:5;background:rgba(13,15,18,.96);backdrop-filter:blur(8px);padding:.75rem 0;border-bottom:1px solid var(--line)}
+    .row{display:flex;gap:.65rem;align-items:center;flex-wrap:wrap}
+    .brand{font-weight:750;font-size:1.15rem;margin-right:auto}.muted{color:var(--muted)}
+    .card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:1rem;margin:1rem 0}
+    .auth{max-width:44rem;margin:9vh auto}.auth input{flex:1;min-width:15rem}
+    input,textarea{background:#101318;border:1px solid var(--line);color:var(--text);border-radius:7px;padding:.55rem .65rem}
+    input:focus,textarea:focus{outline:2px solid #5078a8;outline-offset:1px}
+    button{border:1px solid var(--line);background:var(--panel2);color:var(--text);border-radius:7px;padding:.55rem .8rem}
+    button.primary{background:#27466f;border-color:#4774a9} button.danger{background:#5d2929;border-color:#8a4343}
+    button:disabled{opacity:.45;cursor:not-allowed}
+    #app[hidden],#login[hidden]{display:none}
+    .toolbar{display:grid;grid-template-columns:minmax(12rem,1fr) auto auto auto auto;gap:.55rem;margin-top:.8rem}
+    .status{padding:.65rem .8rem;border-radius:8px;background:var(--panel2);margin:.8rem 0}.status.good{border-left:3px solid var(--good)}.status.warn{border-left:3px solid var(--warn)}.status.bad{border-left:3px solid var(--bad)}
+    .group{border:1px solid var(--line);border-radius:10px;margin:.8rem 0;background:var(--panel)}
+    .group>summary{font-weight:700;padding:.85rem 1rem;cursor:pointer}.group>.inside{padding:0 1rem 1rem}
+    .nested{border-left:2px solid var(--line);margin:.7rem 0;padding-left:.9rem}.nested>summary{cursor:pointer;font-weight:650;color:#dce6f5;padding:.3rem 0}
+    .field{display:grid;grid-template-columns:minmax(13rem,28rem) minmax(14rem,1fr);gap:1rem;align-items:center;padding:.55rem 0;border-top:1px solid rgba(52,58,70,.55)}
+    .field:first-child{border-top:0}.path{font-family:ui-monospace,SFMono-Regular,monospace;font-size:.86rem;color:#c3cede;overflow-wrap:anywhere}
+    .field textarea{width:100%;min-height:5.5rem;resize:vertical;font-family:ui-monospace,SFMono-Regular,monospace}.field input[type="text"],.field input[type="number"],.field input[type="password"]{width:100%}
+    .bool{display:flex;align-items:center;gap:.55rem}.bool input{width:1.15rem;height:1.15rem}
+    .secret-wrap{display:flex;gap:.4rem}.secret-wrap input{flex:1}
+    .hidden-by-search{display:none!important}
+    dialog{width:min(90vw,70rem);max-height:85vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
+    dialog textarea{width:100%;height:60vh;font-family:ui-monospace,SFMono-Regular,monospace}
+    .pill{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:.25rem .55rem;color:var(--muted)}
+    @media(max-width:800px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}.field{grid-template-columns:1fr;gap:.35rem}.brand{width:100%}}
+  </style>
+</head>
+<body>
+<div class="shell">
+  <section id="login" class="card auth">
+    <h1>CineMate Settings</h1>
+    <p class="muted">Enter the settings-editor token. It is kept only in this page's memory and is cleared by reload or navigation.</p>
+    <form id="login-form" class="row" autocomplete="off">
+      <input id="token" type="password" autocomplete="off" spellcheck="false" placeholder="Settings-editor token" required>
+      <button class="primary" type="submit">Unlock</button>
+    </form>
+    <p class="muted">Forgot it? On the Pi run: <strong>cinemate-settings-editor-token show</strong></p>
+    <div id="login-message" class="status" hidden></div>
+  </section>
+
+  <main id="app" hidden>
+    <header class="top">
+      <div class="row">
+        <div class="brand">CineMate Settings</div>
+        <span id="activity-pill" class="pill">checking activity</span>
+        <span id="dirty-pill" class="pill">0 unsaved</span>
+        <button id="lock-btn">Lock</button>
+      </div>
+      <div class="toolbar">
+        <input id="search" type="search" placeholder="Search settings...">
+        <button id="raw-btn">View JSON</button>
+        <button id="reload-btn">Reload</button>
+        <button id="restart-btn">Restart CineMate</button>
+        <button id="save-btn" class="primary" disabled>Save changes</button>
+      </div>
+    </header>
+
+    <div id="message" class="status good">Authenticated. Loading settings...</div>
+    <div id="settings-root"></div>
+  </main>
+</div>
+
+<dialog id="raw-dialog">
+  <div class="row">
+    <h2 style="margin-right:auto">Current editor state</h2>
+    <button id="raw-close">Close</button>
+  </div>
+  <p class="muted">Strict JSON preview. Hidden token/secret/credential keys are intentionally not sent to the browser and are preserved server-side.</p>
+  <textarea id="raw-text" readonly></textarea>
+</dialog>
+
+<script>
+(function(){
+  "use strict";
+  var editorToken = "";
+  var loaded = null;
+  var revision = "";
+  var originalJson = "";
+  var busy = false;
+
+  var login = document.getElementById("login");
+  var app = document.getElementById("app");
+  var loginForm = document.getElementById("login-form");
+  var tokenInput = document.getElementById("token");
+  var loginMessage = document.getElementById("login-message");
+  var message = document.getElementById("message");
+  var root = document.getElementById("settings-root");
+  var search = document.getElementById("search");
+  var saveBtn = document.getElementById("save-btn");
+  var restartBtn = document.getElementById("restart-btn");
+  var dirtyPill = document.getElementById("dirty-pill");
+  var activityPill = document.getElementById("activity-pill");
+  var rawDialog = document.getElementById("raw-dialog");
+  var rawText = document.getElementById("raw-text");
+
+  function api(path, options){
+    options = options || {};
+    options.headers = options.headers || {};
+    options.headers["X-CineMate-Settings-Token"] = editorToken;
+    if (options.body && !options.headers["Content-Type"]) {
+      options.headers["Content-Type"] = "application/json";
+    }
+    return fetch("/settings-editor/api/" + path, options).then(async function(res){
+      var data = {};
+      try { data = await res.json(); } catch(e) {}
+      if (!res.ok) {
+        var err = new Error(data.message || ("HTTP " + res.status));
+        err.status = res.status;
+        err.data = data;
+        throw err;
+      }
+      return data;
+    });
+  }
+
+  function setMessage(text, kind){
+    message.textContent = text;
+    message.className = "status " + (kind || "good");
+  }
+
+  function deepClone(value){
+    return JSON.parse(JSON.stringify(value));
+  }
+
+  function pathText(path){
+    return path.join(".");
+  }
+
+  function isSecretPath(path){
+    var key = String(path[path.length - 1] || "").toLowerCase();
+    return key.indexOf("password") !== -1;
+  }
+
+  function makeScalarField(parent, key, value, path){
+    var row = document.createElement("div");
+    row.className = "field";
+    row.dataset.search = pathText(path).toLowerCase();
+
+    var label = document.createElement("div");
+    label.className = "path";
+    label.textContent = pathText(path);
+    row.appendChild(label);
+
+    var control;
+    if (typeof value === "boolean") {
+      control = document.createElement("label");
+      control.className = "bool";
+      var checkbox = document.createElement("input");
+      checkbox.type = "checkbox";
+      checkbox.checked = value;
+      checkbox.addEventListener("change", function(){
+        parent[key] = checkbox.checked;
+        updateDirty();
+      });
+      control.appendChild(checkbox);
+      control.appendChild(document.createTextNode(value ? "enabled" : "disabled"));
+      checkbox.addEventListener("change", function(){
+        control.lastChild.nodeValue = checkbox.checked ? "enabled" : "disabled";
+      });
+    } else if (typeof value === "number") {
+      control = document.createElement("input");
+      control.type = "number";
+      control.step = "any";
+      control.value = String(value);
+      control.addEventListener("input", function(){
+        var n = Number(control.value);
+        if (Number.isFinite(n)) parent[key] = n;
+        updateDirty();
+      });
+    } else if (typeof value === "string") {
+      if (isSecretPath(path)) {
+        control = document.createElement("div");
+        control.className = "secret-wrap";
+        var secret = document.createElement("input");
+        secret.type = "password";
+        secret.value = value;
+        secret.autocomplete = "new-password";
+        secret.addEventListener("input", function(){
+          parent[key] = secret.value;
+          updateDirty();
+        });
+        var reveal = document.createElement("button");
+        reveal.type = "button";
+        reveal.textContent = "Show";
+        reveal.addEventListener("click", function(){
+          var showing = secret.type === "text";
+          secret.type = showing ? "password" : "text";
+          reveal.textContent = showing ? "Show" : "Hide";
+        });
+        control.appendChild(secret);
+        control.appendChild(reveal);
+      } else {
+        control = document.createElement("input");
+        control.type = "text";
+        control.value = value;
+        control.addEventListener("input", function(){
+          parent[key] = control.value;
+          updateDirty();
+        });
+      }
+    } else {
+      control = document.createElement("textarea");
+      control.value = JSON.stringify(value, null, 2);
+      control.addEventListener("change", function(){
+        try {
+          parent[key] = JSON.parse(control.value);
+          control.setCustomValidity("");
+          setMessage("Value parsed.", "good");
+        } catch(e) {
+          control.setCustomValidity("Invalid JSON value");
+          setMessage("Invalid JSON in " + pathText(path) + ": " + e.message, "bad");
+        }
+        updateDirty();
+      });
+    }
+    row.appendChild(control);
+    return row;
+  }
+
+  function renderObject(container, obj, path, topLevel){
+    Object.keys(obj).forEach(function(key){
+      var value = obj[key];
+      var next = path.concat([key]);
+      if (value && typeof value === "object" && !Array.isArray(value)) {
+        var details = document.createElement("details");
+        details.open = topLevel;
+        details.className = topLevel ? "group" : "nested";
+        details.dataset.search = pathText(next).toLowerCase();
+        var summary = document.createElement("summary");
+        summary.textContent = key;
+        details.appendChild(summary);
+        var inside = document.createElement("div");
+        inside.className = "inside";
+        renderObject(inside, value, next, false);
+        details.appendChild(inside);
+        container.appendChild(details);
+      } else if (Array.isArray(value)) {
+        var row = document.createElement("div");
+        row.className = "field";
+        row.dataset.search = pathText(next).toLowerCase();
+        var label = document.createElement("div");
+        label.className = "path";
+        label.textContent = pathText(next);
+        var area = document.createElement("textarea");
+        area.value = JSON.stringify(value, null, 2);
+        area.addEventListener("change", function(){
+          try {
+            var parsed = JSON.parse(area.value);
+            if (!Array.isArray(parsed)) throw new Error("must remain a JSON array");
+            obj[key] = parsed;
+            area.setCustomValidity("");
+            setMessage("Array parsed.", "good");
+          } catch(e) {
+            area.setCustomValidity("Invalid JSON array");
+            setMessage("Invalid array in " + pathText(next) + ": " + e.message, "bad");
+          }
+          updateDirty();
+        });
+        row.appendChild(label);
+        row.appendChild(area);
+        container.appendChild(row);
+      } else {
+        container.appendChild(makeScalarField(obj, key, value, next));
+      }
+    });
+  }
+
+  function render(){
+    root.innerHTML = "";
+    renderObject(root, loaded, [], true);
+    applySearch();
+    updateDirty();
+  }
+
+  function currentJson(){
+    return JSON.stringify(loaded);
+  }
+
+  function updateDirty(){
+    var dirty = currentJson() !== originalJson;
+    dirtyPill.textContent = dirty ? "unsaved changes" : "0 unsaved";
+    saveBtn.disabled = !dirty || busy || !!root.querySelector(":invalid");
+    restartBtn.disabled = busy || dirty;
+  }
+
+  function applySearch(){
+    var q = search.value.trim().toLowerCase();
+    var fields = Array.from(root.querySelectorAll(".field"));
+    fields.forEach(function(el){
+      el.classList.toggle(
+        "hidden-by-search",
+        !!q && el.dataset.search.indexOf(q) === -1
+      );
+    });
+
+    var groups = Array.from(root.querySelectorAll("details")).reverse();
+    groups.forEach(function(el){
+      if (!q) {
+        el.classList.remove("hidden-by-search");
+        return;
+      }
+      var selfMatch = (el.dataset.search || "").indexOf(q) !== -1;
+      var childMatch = !!el.querySelector(
+        ".field:not(.hidden-by-search), details:not(.hidden-by-search)"
+      );
+      el.classList.toggle("hidden-by-search", !selfMatch && !childMatch);
+      if (selfMatch || childMatch) el.open = true;
+    });
+  }
+
+  async function loadSettings(){
+    setMessage("Loading settings...", "good");
+    try {
+      var data = await api("settings");
+      loaded = deepClone(data.settings);
+      revision = data.revision;
+      originalJson = JSON.stringify(loaded);
+      render();
+      updateActivity(data.activity || {});
+      setMessage("Loaded strict settings.json. No changes have been written.", "good");
+    } catch(e) {
+      setMessage(e.message, "bad");
+    }
+  }
+
+  function updateActivity(states){
+    var active = Object.keys(states).filter(function(k){ return states[k]; });
+    busy = active.length > 0;
+    activityPill.textContent = busy ? ("busy: " + active.join(", ")) : "camera finalized";
+    activityPill.style.color = busy ? "var(--warn)" : "var(--good)";
+    restartBtn.disabled = busy;
+    updateDirty();
+  }
+
+  async function refreshStatus(){
+    if (!editorToken) return;
+    try {
+      var data = await api("status");
+      updateActivity(data.activity || {});
+    } catch(e) {
+      if (e.status === 403) lock();
+    }
+  }
+
+  function lock(){
+    editorToken = "";
+    loaded = null;
+    revision = "";
+    originalJson = "";
+    root.innerHTML = "";
+    tokenInput.value = "";
+    app.hidden = true;
+    login.hidden = false;
+    loginMessage.hidden = true;
+    tokenInput.focus();
+  }
+
+  loginForm.addEventListener("submit", async function(ev){
+    ev.preventDefault();
+    editorToken = tokenInput.value;
+    try {
+      await api("auth-check");
+      tokenInput.value = "";
+      login.hidden = true;
+      app.hidden = false;
+      await loadSettings();
+      refreshStatus();
+    } catch(e) {
+      editorToken = "";
+      loginMessage.hidden = false;
+      loginMessage.className = "status bad";
+      loginMessage.textContent = e.message;
+    }
+  });
+
+  document.getElementById("lock-btn").addEventListener("click", lock);
+  document.getElementById("reload-btn").addEventListener("click", function(){
+    if (currentJson() !== originalJson && !confirm("Discard unsaved changes and reload from disk?")) return;
+    loadSettings();
+  });
+  search.addEventListener("input", applySearch);
+
+  saveBtn.addEventListener("click", async function(){
+    if (saveBtn.disabled) return;
+    saveBtn.disabled = true;
+    setMessage("Validating and saving...", "good");
+    try {
+      var data = await api("settings", {
+        method: "PUT",
+        body: JSON.stringify({settings: loaded, revision: revision})
+      });
+      revision = data.revision;
+      originalJson = currentJson();
+      updateDirty();
+      setMessage(data.message, "good");
+    } catch(e) {
+      setMessage(e.message, e.status === 409 ? "warn" : "bad");
+      if (e.status === 409 && e.data && e.data.activity) updateActivity(e.data.activity);
+    }
+  });
+
+  restartBtn.addEventListener("click", async function(){
+    if (busy) return;
+    if (!confirm("Restart CineMate now? The web UI will disconnect briefly.")) return;
+    restartBtn.disabled = true;
+    try {
+      var data = await api("restart", {method:"POST", body:"{}"});
+      setMessage(data.message, "warn");
+    } catch(e) {
+      restartBtn.disabled = false;
+      setMessage(e.message, e.status === 409 ? "warn" : "bad");
+    }
+  });
+
+  document.getElementById("raw-btn").addEventListener("click", function(){
+    rawText.value = JSON.stringify(loaded, null, 2);
+    rawDialog.showModal();
+  });
+  document.getElementById("raw-close").addEventListener("click", function(){ rawDialog.close(); });
+
+  window.addEventListener("beforeunload", function(ev){
+    if (loaded && currentJson() !== originalJson) {
+      ev.preventDefault();
+      ev.returnValue = "";
+    }
+  });
+
+  setInterval(refreshStatus, 2500);
+  tokenInput.focus();
+})();
+</script>
+</body>
+</html>

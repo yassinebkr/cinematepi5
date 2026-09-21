@@ -1568,6 +1568,17 @@ EOF_RECOVERY
     detail "Recovery token stored in $conf_path (root-readable only)"
 }
 
+configure_settings_editor_auth() {
+    log "Configuring settings-editor authentication"
+    local tool_src="$CINEMATE_DIR/tools/cinemate-settings-editor-token.py"
+    [[ -f "$tool_src" ]] || die "Missing settings-editor token helper at $tool_src"
+    sudo install -m 755 "$tool_src" /usr/local/bin/cinemate-settings-editor-token
+    sudo /usr/local/bin/cinemate-settings-editor-token ensure --group "$PI_GROUP" >/dev/null
+    detail "Settings-editor token stored in /etc/cinemate-settings-editor.conf (root:$PI_GROUP 0640)"
+    detail "Show it locally with: cinemate-settings-editor-token show"
+    detail "Rotate it with: sudo cinemate-settings-editor-token rotate --group $PI_GROUP"
+}
+
 configure_media_permissions() {
     log "Ensuring /media permissions"
     sudo mkdir -p /media
@@ -1714,6 +1725,7 @@ main() {
     configure_media_permissions
     configure_run_wrapper
     configure_sudoers
+    configure_settings_editor_auth
     configure_audio_rtprio
     configure_logrotate
     configure_bashrc

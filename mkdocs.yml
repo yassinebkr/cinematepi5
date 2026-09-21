@@ -32,6 +32,7 @@ nav:
   - Configuring:
       - Connecting via SSH: ssh.md
       - Custom settings: settings-json.md
+      - Settings editor: settings-editor.md
       - Additional hardware: hardware-controls.md
       - Switching sensors (config.txt): config-txt.md
       - Configuring the Wi-Fi hotspot: hotspot-logic.md

@@ -113,13 +113,13 @@ The local implementation adds:
 - benign client-disconnect filtering without suppressing unrelated server faults
 - dedicated regression tests plus live Pi failure/recovery validation
 
-The recovery console is therefore no longer part of the pending upstream-feature queue; remaining work in this hardening phase is the degraded/no-camera follow-up.
+The recovery console and degraded/no-camera hardening are integrated. The current hardening focus is the authenticated strict-JSON settings editor.
 
 ## Upstream features still to evaluate
 
 | Feature family | Assessment |
 | --- | --- |
-| Settings editor | In progress: strict-JSON structural validation, fail-closed recovery validation and safe terminal editsettings are integrated; structured UI remains to evaluate. |
+| Settings editor | Integrated on the hardening branch: dedicated non-persistent token auth, structured strict-JSON form, protected-secret preservation, revision conflicts, recording/flush lockout, backups, atomic writes and guarded explicit restart. Live-camera UI validation remains before promotion. |
 | settings.jsonc preservation | Deferred. This hardening phase keeps one strict-JSON contract across runtime, recovery and terminal editing; JSONC requires a separate migration design. |
 | Web API, SSE and UDP control | Useful external-control surface; command authorization and destructive actions need review. |
 | No-camera startup follow-up | Integrated: degraded startup/state, camera-control locking, truthful local/web UI and fresh-Redis paths are covered by dedicated regression tests. |

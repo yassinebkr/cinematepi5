@@ -30,7 +30,9 @@ all: help
 # Install / update the service file
 # -------------------------------------------------------------------
 install:
-	chmod 755 tools/cinemate-edit-settings.py tools/install-editsettings-alias.sh
+	chmod 755 tools/cinemate-edit-settings.py tools/install-editsettings-alias.sh tools/cinemate-settings-editor-token.py
+	sudo install -m 755 tools/cinemate-settings-editor-token.py /usr/local/bin/cinemate-settings-editor-token
+	sudo /usr/local/bin/cinemate-settings-editor-token ensure --group "$$(id -gn)" >/dev/null
 	./tools/install-editsettings-alias.sh "$(CURDIR)"
 	sudo install -m 755 $(LOCAL_SCRIPT_FILE) $(SCRIPT_PATH)
 	sudo install -m 755 $(LOCAL_FAILURE_DISPLAY_SCRIPT) $(FAILURE_DISPLAY_SCRIPT_PATH)

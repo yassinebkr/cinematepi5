@@ -33,6 +33,27 @@ class RecoveryInstallerTests(unittest.TestCase):
     def test_config_txt_editing_stays_disabled_by_default(self):
         self.assertIn("allow_config_txt=false", INSTALLER)
 
+    def test_settings_editor_token_helper_is_installed_and_ensured(self):
+        self.assertIn(
+            'local tool_src="$CINEMATE_DIR/tools/cinemate-settings-editor-token.py"',
+            INSTALLER,
+        )
+        self.assertIn(
+            'sudo install -m 755 "$tool_src" /usr/local/bin/cinemate-settings-editor-token',
+            INSTALLER,
+        )
+        self.assertIn(
+            'cinemate-settings-editor-token ensure --group "$PI_GROUP"',
+            INSTALLER,
+        )
+
+    def test_settings_editor_token_is_group_readable_not_world_readable(self):
+        helper = (ROOT / "tools" / "cinemate-settings-editor-token.py").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("os.chmod(tmp_name, 0o640)", helper)
+
+
     def test_recovery_service_is_in_umbrella_makefile(self):
         self.assertIn("cinemate-recovery", SERVICE_MAKEFILE)
 

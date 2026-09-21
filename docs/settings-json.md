@@ -4,6 +4,8 @@ This file controls how the camera behaves and how your buttons, switches and dis
 
 For terminal editing, use editsettings rather than opening the live file directly. The helper edits a temporary copy, validates it with CineMate's real configuration loader, detects concurrent changes, creates a private backup, and only then atomically replaces the live file. Invalid edits never touch settings.json.
 
+For browser-based editing, the authenticated structured editor is available at /settings-editor/. It uses the same strict-JSON validator and safe-write rules; see [Settings editor](settings-editor.md).
+
 !!! note ""
     The prebuilt image works out of the box. You do **not** need to edit `settings.json` to start shooting. This page is a reference for when you want to customise hardware controls and behaviour.
 
