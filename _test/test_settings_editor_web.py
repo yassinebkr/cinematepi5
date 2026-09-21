@@ -114,7 +114,7 @@ class SettingsEditorRouteTests(unittest.TestCase):
             / "src/module/app/templates/settings_editor.html"
         ).read_text(encoding="utf-8")
         self.assertIn('meta.widget === "image-upload"', html)
-        self.assertIn('form.append("file", file)', html)
+        self.assertIn('form.append("file", cropped, "welcome-image-cropped.png")', html)
         self.assertIn('parent[key] = null', html)
         self.assertIn('/settings-editor/api/assets/image?path=', html)
         self.assertIn('!(options.body instanceof FormData)', html)
@@ -136,6 +136,45 @@ class SettingsEditorRouteTests(unittest.TestCase):
         ):
             self.assertIn(marker, html)
         self.assertIn('return uiMetadata[wildcard] || null;', html)
+
+    def test_startup_image_upload_uses_crop_modal_before_upload(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        for marker in (
+            'id="crop-dialog"',
+            'id="crop-canvas"',
+            'id="crop-zoom"',
+            "function configuredCropSize(",
+            "function openImageCropper(",
+            "function exportCropBlob(",
+            'cropCanvas.addEventListener("pointerdown"',
+            'cropCanvas.addEventListener("wheel"',
+            'var cropped = await openImageCropper(file);',
+            'form.append("file", cropped, "welcome-image-cropped.png");',
+        ):
+            self.assertIn(marker, html)
+
+    def test_cropper_uses_configured_hdmi_aspect_ratio(self):
+        html = (
+            ROOT / "src/module/app/templates/settings_editor.html"
+        ).read_text(encoding="utf-8")
+        self.assertIn(
+            "loaded && loaded.hdmi_display ? loaded.hdmi_display : {}",
+            html,
+        )
+        self.assertIn(
+            "previewH = Math.max(1, Math.round(previewW * target.height / target.width))",
+            html,
+        )
+        self.assertIn(
+            "out.width = cropState.targetWidth;",
+            html,
+        )
+        self.assertIn(
+            "out.height = cropState.targetHeight;",
+            html,
+        )
 
     def test_template_uses_hybrid_desktop_grid_and_mobile_collapse(self):
         html = (

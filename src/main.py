@@ -10,7 +10,7 @@ import os
 import json
 import shutil
 import socket
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 import glob
 
 from module.config_loader import SettingsLoadError, auto_storage_preroll_enabled, load_settings
@@ -481,8 +481,15 @@ def graphic_splash(text="THIS IS A COOL MACHINE", image_path=None):
 
     if image_path and os.path.exists(image_path):
         try:
-            pic = Image.open(image_path).convert("RGB")
-            pic = pic.resize((W, H))
+            with Image.open(image_path) as source:
+                pic = ImageOps.exif_transpose(source).convert("RGB")
+                resampling = getattr(Image, "Resampling", Image).LANCZOS
+                pic = ImageOps.fit(
+                    pic,
+                    (W, H),
+                    method=resampling,
+                    centering=(0.5, 0.5),
+                )
             img.paste(pic)
         except Exception as e:
             logging.error(f"Failed to load splash image: {e}")

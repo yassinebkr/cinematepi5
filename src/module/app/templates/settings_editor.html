@@ -32,8 +32,15 @@
     .secret-wrap{display:flex;gap:.4rem}.secret-wrap input{flex:1}
     .semantic-field{gap:.55rem}.semantic-title{font-weight:650}.semantic-help{font-size:.82rem;color:var(--muted);margin-top:-.15rem}.semantic-control{display:flex;gap:.45rem;align-items:center;min-width:0}.semantic-control>input,.semantic-control>select{flex:1;min-width:0}.unit{color:var(--muted);font-size:.82rem;white-space:nowrap}.path-control{font-family:ui-monospace,SFMono-Regular,monospace}.list-editor{display:flex;flex-direction:column;gap:.45rem}.list-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.4rem;align-items:center}.list-item input,.list-item select{width:100%}.list-add{align-self:flex-start}.object-list{display:flex;flex-direction:column;gap:.75rem}.object-card{border:1px solid var(--line);border-radius:8px;background:#0f1318;padding:.7rem}.object-card-head{display:flex;align-items:center;gap:.6rem;margin-bottom:.55rem}.object-card-title{font-weight:650;margin-right:auto}.action-widget{display:grid;grid-template-columns:minmax(12rem,1fr) minmax(10rem,1fr);gap:.55rem}.action-args{display:flex;flex-direction:column;gap:.35rem}.action-arg{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem}.action-buttons{display:flex;gap:.4rem;flex-wrap:wrap}.optional-number{display:flex;gap:.55rem;align-items:center}.optional-number input[type=number]{flex:1}.json-object-area{min-height:10rem}.image-widget{display:grid;grid-template-columns:minmax(9rem,14rem) minmax(0,1fr);gap:.8rem;align-items:start}.image-preview{width:100%;aspect-ratio:16/9;object-fit:contain;background:#080a0d;border:1px solid var(--line);border-radius:8px}.image-preview.empty{display:grid;place-items:center;color:var(--muted);font-size:.82rem}.image-actions{display:flex;gap:.45rem;flex-wrap:wrap}.image-path{font:12px/1.35 ui-monospace,SFMono-Regular,monospace;color:var(--muted);overflow-wrap:anywhere}.upload-busy{opacity:.6;pointer-events:none}
     .hidden-by-search{display:none!important}
-    dialog{width:min(90vw,70rem);max-height:85vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
+    dialog{width:min(90vw,70rem);max-height:90vh;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}
     dialog textarea{width:100%;height:60vh;font-family:ui-monospace,SFMono-Regular,monospace}
+    #crop-dialog{width:min(94vw,64rem)}
+    .crop-stage{display:grid;place-items:center;background:#07090c;border:1px solid var(--line);border-radius:10px;overflow:hidden;touch-action:none;user-select:none}
+    #crop-canvas{display:block;width:100%;height:auto;max-height:62vh;cursor:grab;touch-action:none}
+    #crop-canvas.dragging{cursor:grabbing}
+    .crop-controls{display:grid;grid-template-columns:auto minmax(12rem,1fr) auto;gap:.7rem;align-items:center;margin-top:.8rem}
+    .crop-controls input[type=range]{width:100%}
+    .crop-meta{color:var(--muted);font-size:.84rem;margin:.45rem 0 0}
     .pill{font-size:.82rem;border:1px solid var(--line);border-radius:999px;padding:.25rem .55rem;color:var(--muted)}
     @media(max-width:900px){.shell{width:100%;padding:.7rem}.toolbar{grid-template-columns:1fr 1fr}.toolbar input{grid-column:1/-1}#settings-root,.inside{grid-template-columns:1fr;gap:.55rem}.field,.metadata-field{grid-column:auto;display:flex;flex-direction:column;gap:.35rem;padding:.6rem 0;background:transparent;border:0;border-top:1px solid rgba(52,58,70,.55);border-radius:0}.metadata-field{border-top:0;border-bottom:1px solid var(--line);padding:.35rem 0 .7rem}.nested{grid-column:auto}.image-widget{grid-template-columns:1fr}.image-preview{max-height:13rem}.brand{width:100%}}
   </style>
@@ -82,6 +89,27 @@
   <textarea id="raw-text" readonly></textarea>
 </dialog>
 
+<dialog id="crop-dialog">
+  <div class="row">
+    <h2 style="margin-right:auto">Crop startup image</h2>
+    <button id="crop-cancel-top" type="button">Cancel</button>
+  </div>
+  <p class="muted">Drag to reposition. Use the slider or mouse wheel to zoom. The crop follows the configured HDMI aspect ratio.</p>
+  <div class="crop-stage">
+    <canvas id="crop-canvas" width="960" height="540"></canvas>
+  </div>
+  <div class="crop-controls">
+    <span>Zoom</span>
+    <input id="crop-zoom" type="range" min="1" max="4" step="0.01" value="1">
+    <button id="crop-reset" type="button">Reset</button>
+  </div>
+  <div id="crop-meta" class="crop-meta"></div>
+  <div class="row" style="justify-content:flex-end;margin-top:.8rem">
+    <button id="crop-cancel" type="button">Cancel</button>
+    <button id="crop-apply" class="primary" type="button">Apply crop</button>
+  </div>
+</dialog>
+
 <script>
 (function(){
   "use strict";
@@ -106,6 +134,14 @@
   var activityPill = document.getElementById("activity-pill");
   var rawDialog = document.getElementById("raw-dialog");
   var rawText = document.getElementById("raw-text");
+  var cropDialog = document.getElementById("crop-dialog");
+  var cropCanvas = document.getElementById("crop-canvas");
+  var cropCtx = cropCanvas.getContext("2d");
+  var cropZoom = document.getElementById("crop-zoom");
+  var cropMeta = document.getElementById("crop-meta");
+  var cropApply = document.getElementById("crop-apply");
+  var cropReset = document.getElementById("crop-reset");
+  var cropState = null;
 
   function api(path, options){
     options = options || {};
@@ -321,6 +357,219 @@
     return wrap;
   }
 
+  function configuredCropSize(){
+    var display = loaded && loaded.hdmi_display ? loaded.hdmi_display : {};
+    var width = Number(display.width) || 1920;
+    var height = Number(display.height) || 1080;
+    width = Math.max(1, Math.round(width));
+    height = Math.max(1, Math.round(height));
+    var maxPixels = 25000000;
+    if (width * height > maxPixels) {
+      var factor = Math.sqrt(maxPixels / (width * height));
+      width = Math.max(1, Math.floor(width * factor));
+      height = Math.max(1, Math.floor(height * factor));
+    }
+    return {width:width, height:height};
+  }
+
+  function cropBaseScale(){
+    if (!cropState) return 1;
+    return Math.max(
+      cropCanvas.width / cropState.image.naturalWidth,
+      cropCanvas.height / cropState.image.naturalHeight
+    );
+  }
+
+  function clampCropPan(){
+    if (!cropState) return;
+    var scale = cropBaseScale() * cropState.zoom;
+    var drawnW = cropState.image.naturalWidth * scale;
+    var drawnH = cropState.image.naturalHeight * scale;
+    var maxX = Math.max(0, (drawnW - cropCanvas.width) / 2);
+    var maxY = Math.max(0, (drawnH - cropCanvas.height) / 2);
+    cropState.panX = Math.max(-maxX, Math.min(maxX, cropState.panX));
+    cropState.panY = Math.max(-maxY, Math.min(maxY, cropState.panY));
+  }
+
+  function drawCrop(){
+    if (!cropState) return;
+    clampCropPan();
+    var scale = cropBaseScale() * cropState.zoom;
+    var drawnW = cropState.image.naturalWidth * scale;
+    var drawnH = cropState.image.naturalHeight * scale;
+    var x = (cropCanvas.width - drawnW) / 2 + cropState.panX;
+    var y = (cropCanvas.height - drawnH) / 2 + cropState.panY;
+    cropCtx.fillStyle = "#000";
+    cropCtx.fillRect(0, 0, cropCanvas.width, cropCanvas.height);
+    cropCtx.imageSmoothingEnabled = true;
+    cropCtx.imageSmoothingQuality = "high";
+    cropCtx.drawImage(cropState.image, x, y, drawnW, drawnH);
+  }
+
+  function resetCrop(){
+    if (!cropState) return;
+    cropState.zoom = 1;
+    cropState.panX = 0;
+    cropState.panY = 0;
+    cropZoom.value = "1";
+    drawCrop();
+  }
+
+  function closeCropper(result){
+    if (!cropState) return;
+    var resolve = cropState.resolve;
+    if (cropState.objectUrl) URL.revokeObjectURL(cropState.objectUrl);
+    cropState = null;
+    if (cropDialog.open) cropDialog.close();
+    resolve(result || null);
+  }
+
+  function openImageCropper(file){
+    return new Promise(function(resolve, reject){
+      var objectUrl = URL.createObjectURL(file);
+      var image = new Image();
+      image.onload = function(){
+        var target = configuredCropSize();
+        var previewW = 960;
+        var previewH = Math.max(1, Math.round(previewW * target.height / target.width));
+        if (previewH > 720) {
+          previewH = 720;
+          previewW = Math.max(1, Math.round(previewH * target.width / target.height));
+        }
+        cropCanvas.width = previewW;
+        cropCanvas.height = previewH;
+        cropState = {
+          file:file,
+          image:image,
+          objectUrl:objectUrl,
+          resolve:resolve,
+          targetWidth:target.width,
+          targetHeight:target.height,
+          zoom:1,
+          panX:0,
+          panY:0,
+          dragging:false,
+          lastX:0,
+          lastY:0
+        };
+        cropZoom.value = "1";
+        cropMeta.textContent =
+          "Output " + target.width + "×" + target.height +
+          " • source " + image.naturalWidth + "×" + image.naturalHeight;
+        drawCrop();
+        cropDialog.showModal();
+      };
+      image.onerror = function(){
+        URL.revokeObjectURL(objectUrl);
+        reject(new Error("Could not decode the selected image in the browser."));
+      };
+      image.src = objectUrl;
+    });
+  }
+
+  function exportCropBlob(){
+    return new Promise(function(resolve, reject){
+      if (!cropState) {
+        reject(new Error("Crop session is no longer active."));
+        return;
+      }
+      clampCropPan();
+      var scale = cropBaseScale() * cropState.zoom;
+      var drawnW = cropState.image.naturalWidth * scale;
+      var drawnH = cropState.image.naturalHeight * scale;
+      var x = (cropCanvas.width - drawnW) / 2 + cropState.panX;
+      var y = (cropCanvas.height - drawnH) / 2 + cropState.panY;
+      var sx = Math.max(0, -x / scale);
+      var sy = Math.max(0, -y / scale);
+      var sw = Math.min(cropState.image.naturalWidth - sx, cropCanvas.width / scale);
+      var sh = Math.min(cropState.image.naturalHeight - sy, cropCanvas.height / scale);
+
+      var out = document.createElement("canvas");
+      out.width = cropState.targetWidth;
+      out.height = cropState.targetHeight;
+      var ctx = out.getContext("2d");
+      ctx.imageSmoothingEnabled = true;
+      ctx.imageSmoothingQuality = "high";
+      ctx.drawImage(
+        cropState.image,
+        sx, sy, sw, sh,
+        0, 0, out.width, out.height
+      );
+      out.toBlob(function(blob){
+        if (!blob) {
+          reject(new Error("Could not render the cropped image."));
+          return;
+        }
+        resolve(blob);
+      }, "image/png");
+    });
+  }
+
+  cropZoom.addEventListener("input", function(){
+    if (!cropState) return;
+    cropState.zoom = Number(cropZoom.value) || 1;
+    drawCrop();
+  });
+
+  cropReset.addEventListener("click", resetCrop);
+  document.getElementById("crop-cancel").addEventListener("click", function(){
+    closeCropper(null);
+  });
+  document.getElementById("crop-cancel-top").addEventListener("click", function(){
+    closeCropper(null);
+  });
+  cropDialog.addEventListener("cancel", function(event){
+    event.preventDefault();
+    closeCropper(null);
+  });
+  cropApply.addEventListener("click", async function(){
+    try {
+      cropApply.disabled = true;
+      var blob = await exportCropBlob();
+      closeCropper(blob);
+    } catch(e) {
+      setMessage(e.message, "bad");
+    } finally {
+      cropApply.disabled = false;
+    }
+  });
+
+  cropCanvas.addEventListener("pointerdown", function(event){
+    if (!cropState) return;
+    cropState.dragging = true;
+    cropState.lastX = event.clientX;
+    cropState.lastY = event.clientY;
+    cropCanvas.classList.add("dragging");
+    cropCanvas.setPointerCapture(event.pointerId);
+  });
+  cropCanvas.addEventListener("pointermove", function(event){
+    if (!cropState || !cropState.dragging) return;
+    var rect = cropCanvas.getBoundingClientRect();
+    var scaleX = cropCanvas.width / Math.max(1, rect.width);
+    var scaleY = cropCanvas.height / Math.max(1, rect.height);
+    cropState.panX += (event.clientX - cropState.lastX) * scaleX;
+    cropState.panY += (event.clientY - cropState.lastY) * scaleY;
+    cropState.lastX = event.clientX;
+    cropState.lastY = event.clientY;
+    drawCrop();
+  });
+  function endCropDrag(event){
+    if (!cropState) return;
+    cropState.dragging = false;
+    cropCanvas.classList.remove("dragging");
+    try { cropCanvas.releasePointerCapture(event.pointerId); } catch(e) {}
+  }
+  cropCanvas.addEventListener("pointerup", endCropDrag);
+  cropCanvas.addEventListener("pointercancel", endCropDrag);
+  cropCanvas.addEventListener("wheel", function(event){
+    if (!cropState) return;
+    event.preventDefault();
+    var delta = event.deltaY < 0 ? 0.08 : -0.08;
+    cropState.zoom = Math.max(1, Math.min(4, cropState.zoom + delta));
+    cropZoom.value = String(cropState.zoom);
+    drawCrop();
+  }, {passive:false});
+
   function setManagedImagePreview(img, pathValue){
     if (!pathValue) {
       img.removeAttribute("src");
@@ -407,18 +656,24 @@
     input.addEventListener("change", async function(){
       var file = input.files && input.files[0];
       if (!file) return;
-      var form = new FormData();
-      form.append("file", file);
       widget.classList.add("upload-busy");
-      setMessage("Validating and uploading image...", "good");
+      setMessage("Choose the startup-image crop...", "good");
       try {
+        var cropped = await openImageCropper(file);
+        if (!cropped) {
+          setMessage("Image selection cancelled. No settings changed.", "good");
+          return;
+        }
+        var form = new FormData();
+        form.append("file", cropped, "welcome-image-cropped.png");
+        setMessage("Validating and uploading cropped image...", "good");
         var data = await api("assets/image", {method:"POST", body:form});
         parent[key] = data.path;
         valuePath.textContent = data.path;
         choose.textContent = "Replace image";
         clear.disabled = false;
         if (preview.dataset.objectUrl) URL.revokeObjectURL(preview.dataset.objectUrl);
-        var localUrl = URL.createObjectURL(file);
+        var localUrl = URL.createObjectURL(cropped);
         preview.dataset.objectUrl = localUrl;
         preview.src = localUrl;
         preview.classList.remove("empty");
