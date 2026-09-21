@@ -975,7 +975,10 @@ def run_application(args, log_queue):
                 join_timeout=join_timeout,
                 teardown_before_join=not shutdown_in_progress,
             )
-        if not shutdown_in_progress:
+        if not shutdown_in_progress and not running_under_systemd_service():
+            # A systemd-managed stop/restart delegates tty1 handoff to
+            # ExecStopPost. Doing it here as well can conflict with a pending
+            # restart transaction because getty@tty1 conflicts with CineMate.
             restore_local_console_prompt()
         join_thread(dmesg_monitor, "DmesgMonitor")
         join_thread(command_executor, "CommandExecutor")
