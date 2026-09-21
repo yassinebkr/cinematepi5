@@ -10,7 +10,18 @@ bits_per_pixel    assumed memory layout
 """
 
 from PIL import Image
+import glob
+import os
 import numpy
+
+# OpenCV is already part of the CineMate runtime. Its C implementation of
+# RGBA->BGR565 is far cheaper end-to-end than the previous NumPy expression
+# on Pi 5. Limit it to one worker so GUI conversion cannot steal camera cores.
+try:
+    import cv2
+    cv2.setNumThreads(1)
+except Exception:
+    cv2 = None
 
 
 def _read_and_convert_to_ints(filename):
@@ -53,12 +64,31 @@ def _converter_rgba_rgb565_numpy(image: Image):
     return flat.astype(numpy.uint16).tobytes()
 
 
+def _converter_rgba_rgb565_fast(image: Image):
+    """Pack RGBA to little-endian RGB565 using OpenCV native code.
+
+    COLOR_RGBA2BGR565 was byte-for-byte verified against the legacy NumPy
+    converter for diagnostic and random-pixel frames on this camera.
+    Returning a memoryview avoids one additional 4 MiB Python bytes allocation.
+    """
+    if cv2 is None:
+        return _converter_rgba_rgb565_numpy(image)
+    arr = numpy.asarray(image)
+    packed = cv2.cvtColor(arr, cv2.COLOR_RGBA2BGR565)
+    return memoryview(packed).cast("B")
+
+
 def _converter_no_change(image: Image):
     return image.tobytes()
 
+
+def _converter_rgba_rgb(image: Image):
+    return image.convert("RGB").tobytes()
+
 # anything that does not use numpy is hopelessly slow
 _CONVERTER = {
-    ("RGBA", 16): _converter_rgba_rgb565_numpy,
+    ("RGBA", 16): _converter_rgba_rgb565_fast,
+    ("RGBA", 24): _converter_rgba_rgb,
     ("RGB", 16): _converter_rgb565,
     ("RGB", 24): _converter_no_change,
     ("RGB", 32): _converter_argb,
@@ -83,8 +113,7 @@ class Framebuffer(object):
             self.bits_per_pixel = _read_and_convert_to_ints(
                 config_dir + "/bits_per_pixel")[0]
             assert self.stride == self.bits_per_pixel // 8 * self.size[0]
-        except FileNotFoundError:
-            print("HDMI monitor not connected")
+        except (AssertionError, FileNotFoundError, OSError, ValueError):
             self.size = (0, 0)
             self.stride = 0
             self.bits_per_pixel = 0
@@ -103,12 +132,32 @@ class Framebuffer(object):
         args = (self.path, self.size, self.stride, self.bits_per_pixel)
         return "%s  size:%s  stride:%s  bits_per_pixel:%s" % args
 
+    @property
+    def usable(self) -> bool:
+        return (
+            os.path.exists(self.path)
+            and self.size[0] > 0
+            and self.size[1] > 0
+            and self.stride > 0
+            and self.bits_per_pixel in (16, 24, 32)
+        )
+
     # Note: performance is terrible even for medium resolutions
     def show(self, image: Image):
-        converter = _CONVERTER[(image.mode, self.bits_per_pixel)]
-        assert image.size == self.size
+        if not self.usable:
+            raise RuntimeError(f"Framebuffer {self.path} is not available")
+        converter = _CONVERTER.get((image.mode, self.bits_per_pixel))
+        if converter is None:
+            raise RuntimeError(
+                f"Unsupported framebuffer format: mode={image.mode}, bpp={self.bits_per_pixel}"
+            )
+        if image.size != self.size:
+            raise ValueError(
+                f"Framebuffer image size mismatch: expected {self.size}, got {image.size}"
+            )
         out = converter(image)
-        with open(self.path, "wb") as fp:
+        # Unbuffered write: the fast path may return a zero-copy memoryview.
+        with open(self.path, "wb", buffering=0) as fp:
             fp.write(out)
 
     def on(self):
@@ -116,6 +165,34 @@ class Framebuffer(object):
 
     def off(self):
         pass
+
+
+def drm_hdmi_connected():
+    status_paths = sorted(glob.glob("/sys/class/drm/card*-HDMI-A-*/status"))
+    if not status_paths:
+        return None
+
+    for path in status_paths:
+        try:
+            with open(path, "r") as fp:
+                if fp.read().strip().lower() == "connected":
+                    return True
+        except OSError:
+            continue
+
+    return False
+
+
+def acquire_framebuffer(device_no: int):
+    fb = Framebuffer(device_no)
+    if not fb.usable:
+        return None
+
+    connected = drm_hdmi_connected()
+    if connected is False:
+        return None
+
+    return fb
 
 # if __name__ == "__main__":
 #     import time
