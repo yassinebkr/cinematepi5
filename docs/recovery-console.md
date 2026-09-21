@@ -187,3 +187,7 @@ It cannot recover a Pi that never boots far enough to start systemd, a failed bo
 Phone and browser clients can close keep-alive connections abruptly while navigating, sleeping or changing networks. The threaded recovery server suppresses only the routine ConnectionResetError and BrokenPipeError cases at the server boundary so they do not flood the journal with misleading tracebacks.
 
 Other server exceptions are not suppressed and continue through Python's normal error-reporting path.
+
+## Full settings editor hand-off
+
+The recovery navigation links to the full settings editor on port 5000. When CineMate is active, use that semantic editor for normal configuration. The recovery console deliberately keeps its own raw strict-JSON editor and does not import Flask or CineMate modules, so settings can still be repaired when the main application is broken or unavailable.

@@ -758,6 +758,45 @@ class RecoveryUiTests(unittest.TestCase):
 
 
 
+class FullEditorNavigationTests(unittest.TestCase):
+    def test_full_editor_url_uses_recovery_hostname_with_port_5000(self):
+        self.assertEqual(
+            rc.full_editor_url_from_host("cinepi.local:8080"),
+            "http://cinepi.local:5000/settings-editor/",
+        )
+        self.assertEqual(
+            rc.full_editor_url_from_host("10.42.0.1:8080"),
+            "http://10.42.0.1:5000/settings-editor/",
+        )
+
+    def test_full_editor_url_brackets_ipv6(self):
+        self.assertEqual(
+            rc.full_editor_url_from_host("[fe80::1234]:8080"),
+            "http://[fe80::1234]:5000/settings-editor/",
+        )
+
+    def test_malformed_host_falls_back_instead_of_reflecting_input(self):
+        url = rc.full_editor_url_from_host("evil.example/<script>:8080")
+        self.assertEqual(url, "http://cinepi.local:5000/settings-editor/")
+
+    def test_recovery_page_renders_server_side_link_without_javascript(self):
+        markup = rc.page(
+            "Status",
+            "<div>ok</div>",
+            cfg=None,
+            full_editor_url="http://10.42.0.1:5000/settings-editor/",
+        ).decode("utf-8")
+        self.assertIn("href='http://10.42.0.1:5000/settings-editor/'", markup)
+        self.assertNotIn("<script", markup.lower())
+        self.assertNotIn("data-full-editor", markup)
+
+    def test_recovery_keeps_raw_settings_route(self):
+        source = (SERVICE_DIR / "cinemate-recovery.py").read_text(encoding="utf-8")
+        self.assertIn('route == "/edit/settings"', source)
+        self.assertIn("Recovery settings editor", source)
+        self.assertIn("Full settings editor", source)
+
+
 class RecoveryHttpServerTests(unittest.TestCase):
     def _call_handle_error(self, exc):
         server = rc.RecoveryHTTPServer.__new__(rc.RecoveryHTTPServer)

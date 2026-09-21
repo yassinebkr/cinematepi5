@@ -1006,12 +1006,39 @@ def nav_active(active: bool) -> str:
     return " class='active' aria-current='page'" if active else ""
 
 
+def full_editor_url_from_host(host_header: str | None) -> str:
+    """Map the current recovery Host header to the full editor on port 5000.
+
+    The Host header is untrusted input. Keep only conservative DNS/IPv4 names
+    or bracketable IPv6 literals; otherwise fall back to the documented mDNS
+    hostname instead of reflecting arbitrary text into an href.
+    """
+    raw = (host_header or "").strip()
+    hostname = ""
+    if raw and not re.search(r"[\\/\s@?#]", raw):
+        try:
+            parsed = urlparse("//" + raw)
+            hostname = parsed.hostname or ""
+        except ValueError:
+            hostname = ""
+
+    if re.fullmatch(r"[A-Za-z0-9.-]{1,253}", hostname):
+        authority = hostname
+    elif ":" in hostname and re.fullmatch(r"[0-9A-Fa-f:]{2,45}", hostname):
+        authority = f"[{hostname}]"
+    else:
+        authority = "cinepi.local"
+
+    return f"http://{authority}:5000/settings-editor/"
+
+
 def page(
     title: str,
     body: str,
     *,
     banner: str = "",
     cfg: ConsoleConfig | None = None,
+    full_editor_url: str = "",
 ) -> bytes:
     content = f"{banner}{body}"
     if cfg is not None:
@@ -1031,7 +1058,13 @@ def page(
         f"<a href='/'{nav_active(title == 'Status')}>Status</a>"
         f"<a href='/why'{nav_active(title == 'Why it failed')}>Why it failed</a>"
         f"<a href='/log'{nav_active(title.startswith('Log:'))}>Log</a>"
-        f"<a href='/edit/settings'{nav_active(title == 'Edit settings.json')}>settings.json</a></nav>"
+        f"<a href='/edit/settings'{nav_active(title == 'Edit settings.json')}>settings.json</a>"
+        + (
+            f"<a href='{html.escape(full_editor_url, quote=True)}' "
+            "target='_blank' rel='noopener'>Full editor &nearr;</a>"
+            if full_editor_url else ""
+        )
+        + "</nav>"
         "</header><main>"
         f"{content}"
         "</main><footer>"
@@ -1117,6 +1150,27 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
     def _audit(self, what: str):
         log.warning("ACTION %s from %s", what, self.client_address[0])
 
+    def _full_editor_url(self) -> str:
+        headers = getattr(self, "headers", None)
+        host = headers.get("Host", "") if headers is not None else ""
+        return full_editor_url_from_host(host)
+
+    def _page(
+        self,
+        title: str,
+        body: str,
+        *,
+        banner: str = "",
+        cfg: ConsoleConfig | None = None,
+    ) -> bytes:
+        return page(
+            title,
+            body,
+            banner=banner,
+            cfg=cfg,
+            full_editor_url=self._full_editor_url(),
+        )
+
     def _banner(self) -> str:
         pending = read_pending()
         if not pending:
@@ -1150,10 +1204,10 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
                 return self._send(self.view_edit_settings())
             if route == "/edit/config":
                 return self._send(self.view_edit_config())
-            return self._send(page("Not found", "<p>No such page.</p>"), 404)
+            return self._send(self._page("Not found", "<p>No such page.</p>"), 404)
         except Exception:
             log.exception("GET %s failed", self.path)
-            return self._send(page("Error", "<p>Internal error; see journal.</p>"), 500)
+            return self._send(self._page("Error", "<p>Internal error; see journal.</p>"), 500)
 
     def do_POST(self):
         url = urlparse(self.path)
@@ -1163,7 +1217,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
 
         if not self._authorised(form, query):
             self._audit(f"DENIED {route} (bad token)")
-            return self._send(page("Denied", "<p>Invalid access token.</p>"), 403)
+            return self._send(self._page("Denied", "<p>Invalid access token.</p>"), 403)
 
         try:
             if route.startswith("/service/"):
@@ -1174,13 +1228,13 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
                 return self._send(self.act_edit_config(form))
             if route == "/confirm-config":
                 return self._send(self.act_confirm_config())
-            return self._send(page("Not found", "<p>No such action.</p>"), 404)
+            return self._send(self._page("Not found", "<p>No such action.</p>"), 404)
         except ServiceError as exc:
             self._audit(f"REFUSED {route}: {exc}")
-            return self._send(page("Refused", f"<p>{html.escape(str(exc))}</p>"), 400)
+            return self._send(self._page("Refused", f"<p>{html.escape(str(exc))}</p>"), 400)
         except Exception:
             log.exception("POST %s failed", self.path)
-            return self._send(page("Error", "<p>Internal error; see journal.</p>"), 500)
+            return self._send(self._page("Error", "<p>Internal error; see journal.</p>"), 500)
 
     # -- views -------------------------------------------------------------
 
@@ -1242,7 +1296,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
         )
         if self.config.allow_config_txt:
             body += "<div class='card'><a href='/edit/config'>Edit config.txt &rarr;</a></div>"
-        return page("Status", body, banner=self._banner(), cfg=self.config)
+        return self._page("Status", body, banner=self._banner(), cfg=self.config)
 
     def view_why(self) -> bytes:
         block = read_failure_block()
@@ -1253,7 +1307,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             )
         else:
             body = f"<pre>{ansi_to_html(block)}</pre>"
-        return page("Why it failed", body, banner=self._banner(), cfg=self.config)
+        return self._page("Why it failed", body, banner=self._banner(), cfg=self.config)
 
     def view_log(self, query: dict) -> bytes:
         service = query.get("service", ["cinemate-autostart"])[0]
@@ -1268,7 +1322,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             f"<a href='/log?service={s}'>{html.escape(s)}</a>" for s in ALLOWED_SERVICES
         )
         body = f"<div class='log-links'>{links}</div><pre>{html.escape(log_text)}</pre>"
-        return page(f"Log: {service}", body, banner=self._banner(), cfg=self.config)
+        return self._page(f"Log: {service}", body, banner=self._banner(), cfg=self.config)
 
     def view_edit_settings(self, message: str = "") -> bytes:
         try:
@@ -1279,8 +1333,23 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
                 f"<div class='banner amber'>Could not read {SETTINGS_PATH}: "
                 f"{html.escape(str(exc))}</div>"
             )
+        main_state = service_state("cinemate-autostart", runner=self.runner)
+        if main_state == "active":
+            full_editor = (
+                "<div class='card'><strong>Full settings editor</strong>"
+                "<p class='muted'>CineMate is running. Use the semantic editor "
+                "for normal configuration; this raw editor remains the recovery fallback.</p>"
+                f"<p><a href='{html.escape(self._full_editor_url(), quote=True)}' "
+                "target='_blank' rel='noopener'>Open full settings editor &rarr;</a></p></div>"
+            )
+        else:
+            full_editor = (
+                "<div class='card'><strong>Recovery settings editor</strong>"
+                "<p class='muted'>CineMate is not active, so the full semantic editor "
+                "may be unavailable. Repair the strict JSON below, then start or restart CineMate.</p></div>"
+            )
         body = (
-            f"{message}"
+            f"{message}{full_editor}"
             "<section class='section'><h2>settings.json</h2>"
             f"<textarea name='content' spellcheck='false'>{html.escape(settings_text)}</textarea>"
             "<div class='actions'>"
@@ -1288,11 +1357,11 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             "<button type='submit' formaction='/edit/settings' name='restart' value='1'>"
             "Save and restart Cinemate</button></div></section>"
         )
-        return page("Edit settings.json", body, banner=self._banner(), cfg=self.config)
+        return self._page("Edit settings.json", body, banner=self._banner(), cfg=self.config)
 
     def view_edit_config(self, message: str = "") -> bytes:
         if not self.config.allow_config_txt:
-            return page(
+            return self._page(
                 "Disabled",
                 "<div class='card'><p>config.txt editing is disabled. Set "
                 "<code>system.recovery.allow_config_txt</code> to true in "
@@ -1321,7 +1390,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             "<div class='actions'><button type='submit' formaction='/edit/config'>"
             "Save and arm revert</button></div></section>"
         )
-        return page("Edit config.txt", body, banner=self._banner(), cfg=self.config)
+        return self._page("Edit config.txt", body, banner=self._banner(), cfg=self.config)
 
     # -- actions -----------------------------------------------------------
 
@@ -1344,7 +1413,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
             + (f"<pre>{html.escape(detail)}</pre>" if detail else "")
             + "<p><a href='/'>Back to status</a></p>"
         )
-        return page("Service", body, banner=self._banner(), cfg=self.config)
+        return self._page("Service", body, banner=self._banner(), cfg=self.config)
 
     def _arm_hotspot_rearm(self):
         """Restore the AP if a hotspot restart does not bring it back (4.7)."""
@@ -1405,7 +1474,7 @@ class RecoveryHandler(http.server.BaseHTTPRequestHandler):
         body = ("<div class='banner green'>Configuration kept.</div>"
                 if cleared else
                 "<div class='banner amber'>Nothing was pending.</div>")
-        return page("Confirmed", body + "<p><a href='/'>Back to status</a></p>", cfg=self.config)
+        return self._page("Confirmed", body + "<p><a href='/'>Back to status</a></p>", cfg=self.config)
 
 
 # ---------------------------------------------------------------------------
