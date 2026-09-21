@@ -113,6 +113,13 @@ class StoragePreroll:
             )
             return False
 
+        if not force and getattr(self.sensor_detect, "camera_model", None) is None:
+            logging.info(
+                "Skipping automatic storage pre-roll (%s): no camera detected",
+                reason,
+            )
+            return False
+
         with self._active_lock:
             if self._active:
                 return False

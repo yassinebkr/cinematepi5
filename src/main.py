@@ -43,6 +43,7 @@ from module.console_display import (
     release_console_to_text,
 )
 from module.framebuffer import acquire_framebuffer
+from module.camera_presence import camera_present_from_cameras_value
 
 # Constants
 MODULES_OUTPUT_TO_SERIAL = ['cinepi_controller']
@@ -722,6 +723,10 @@ def run_application(args, log_queue):
     cinepi = CinePi(redis_controller, sensor_detect)
     cinepi.start_all(preview_enabled=not _imu_cal_active_at_startup)
 
+    camera_present = camera_present_from_cameras_value(
+        redis_controller.get_value(ParameterKey.CAMERAS.value)
+    )
+
     if _imu_cal_active_at_startup:
         logging.info(
             'IMU calibration active before initial camera launch; '
@@ -847,7 +852,7 @@ def run_application(args, log_queue):
         splash_thread.join()
         claim_console_for_framebuffer()
 
-    if restart_camera_after_startup_handoff:
+    if restart_camera_after_startup_handoff and camera_present:
         logging.info("Restarting cinepi-raw after startup handoff so preview binds above Cinemate")
         # Preserve full-screen maintenance/calibration UIs across a CineMate
         # restart. Redis survives the process restart, so an active IMU
@@ -865,6 +870,8 @@ def run_application(args, log_queue):
             logging.info(
                 'IMU calibration active at startup; keeping DRM preview disabled'
             )
+    elif restart_camera_after_startup_handoff:
+        logging.info("No camera detected -- skipping post-Plymouth preview restart")
 
     settings_cfg = settings.get("settings", {})
     redis_listener = RedisListener(
