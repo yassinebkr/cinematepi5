@@ -1,0 +1,17 @@
+{
+  "display_name": "CinePi Filmic Neutral",
+  "source": "CinePi generated",
+  "source_url": null,
+  "input_space": "CinePi Rec.709 display-referred (BT.709 primaries / BT.709 transfer)",
+  "output_space": "CinePi Rec.709 display-referred creative look",
+  "interpolation": "tetrahedral",
+  "category": "cinematic",
+  "recommended_mix_percent": 100,
+  "official_cinepi": true,
+  "redistributable_by_cinepi": true,
+  "release_license": "pending-project-license",
+  "generator": "tools/generate_cinepi_luts.py",
+  "description": "Restrained filmic contrast with very small split-tone separation.",
+  "verified": true,
+  "sha256": "1bb0264b5cb27c840d9f1e2811734c4073b15bf35ccdbcc264cf4cc42d73f963"
+}

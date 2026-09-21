@@ -1,0 +1,31 @@
+{
+  "format": 1,
+  "size": 33,
+  "looks": [
+    {
+      "file": "cinepi-rec709-reference.cube",
+      "sha256": "245ca49d08d11c2e45001fa5daea1fb860009ab8bfabef8ffee9f271237cfed2",
+      "title": "CinePi Rec.709 Reference"
+    },
+    {
+      "file": "cinepi-natural.cube",
+      "sha256": "74902deb797c234491baadd4f60f66f2f8cba92efdd389bfba71474c001912be",
+      "title": "CinePi Natural"
+    },
+    {
+      "file": "cinepi-filmic-neutral.cube",
+      "sha256": "1bb0264b5cb27c840d9f1e2811734c4073b15bf35ccdbcc264cf4cc42d73f963",
+      "title": "CinePi Filmic Neutral"
+    },
+    {
+      "file": "cinepi-cinema-warm.cube",
+      "sha256": "b5ec8766fc73f0458bd45b0ce186003426603bf7696787f89719d195c314377f",
+      "title": "CinePi Cinema Warm"
+    },
+    {
+      "file": "cinepi-soft-portrait.cube",
+      "sha256": "24a6c7add2a40bcfd99e6397f5a97518825e3250db84072713db4fa4d76e6daf",
+      "title": "CinePi Soft Portrait"
+    }
+  ]
+}

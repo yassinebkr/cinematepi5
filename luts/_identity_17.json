@@ -1,0 +1,9 @@
+{
+  "display_name": "Identity 17 (validation only)",
+  "source": "CineMate generated validation fixture",
+  "input_space": "normalized RGB",
+  "output_space": "normalized RGB",
+  "interpolation": "tetrahedral",
+  "verified": true,
+  "validation_only": true
+}

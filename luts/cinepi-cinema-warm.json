@@ -1,0 +1,17 @@
+{
+  "display_name": "CinePi Cinema Warm",
+  "source": "CinePi generated",
+  "source_url": null,
+  "input_space": "CinePi Rec.709 display-referred (BT.709 primaries / BT.709 transfer)",
+  "output_space": "CinePi Rec.709 display-referred creative look",
+  "interpolation": "tetrahedral",
+  "category": "cinematic",
+  "recommended_mix_percent": 100,
+  "official_cinepi": true,
+  "redistributable_by_cinepi": true,
+  "release_license": "pending-project-license",
+  "generator": "tools/generate_cinepi_luts.py",
+  "description": "Moderately warm cinematic rendering with controlled cool shadows.",
+  "verified": true,
+  "sha256": "b5ec8766fc73f0458bd45b0ce186003426603bf7696787f89719d195c314377f"
+}

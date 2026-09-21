@@ -1,0 +1,17 @@
+{
+  "display_name": "CinePi Rec.709 Reference",
+  "source": "CinePi generated",
+  "source_url": null,
+  "input_space": "CinePi Rec.709 display-referred (BT.709 primaries / BT.709 transfer)",
+  "output_space": "CinePi Rec.709 display-referred creative look",
+  "interpolation": "tetrahedral",
+  "category": "technical",
+  "recommended_mix_percent": 100,
+  "official_cinepi": true,
+  "redistributable_by_cinepi": true,
+  "release_license": "pending-project-license",
+  "generator": "tools/generate_cinepi_luts.py",
+  "description": "Identity reference LUT for a CinePi Rec.709 display-referred signal.",
+  "verified": true,
+  "sha256": "245ca49d08d11c2e45001fa5daea1fb860009ab8bfabef8ffee9f271237cfed2"
+}

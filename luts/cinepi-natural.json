@@ -1,0 +1,17 @@
+{
+  "display_name": "CinePi Natural",
+  "source": "CinePi generated",
+  "source_url": null,
+  "input_space": "CinePi Rec.709 display-referred (BT.709 primaries / BT.709 transfer)",
+  "output_space": "CinePi Rec.709 display-referred creative look",
+  "interpolation": "tetrahedral",
+  "category": "natural",
+  "recommended_mix_percent": 100,
+  "official_cinepi": true,
+  "redistributable_by_cinepi": true,
+  "release_license": "pending-project-license",
+  "generator": "tools/generate_cinepi_luts.py",
+  "description": "Subtle neutral monitoring look with gentle contrast and saturation.",
+  "verified": true,
+  "sha256": "74902deb797c234491baadd4f60f66f2f8cba92efdd389bfba71474c001912be"
+}

@@ -1,0 +1,17 @@
+{
+  "display_name": "CinePi Soft Portrait",
+  "source": "CinePi generated",
+  "source_url": null,
+  "input_space": "CinePi Rec.709 display-referred (BT.709 primaries / BT.709 transfer)",
+  "output_space": "CinePi Rec.709 display-referred creative look",
+  "interpolation": "tetrahedral",
+  "category": "portrait",
+  "recommended_mix_percent": 100,
+  "official_cinepi": true,
+  "redistributable_by_cinepi": true,
+  "release_license": "pending-project-license",
+  "generator": "tools/generate_cinepi_luts.py",
+  "description": "Gentle portrait rendering with softer contrast and subtly warm mids.",
+  "verified": true,
+  "sha256": "24a6c7add2a40bcfd99e6397f5a97518825e3250db84072713db4fa4d76e6daf"
+}
