@@ -3,125 +3,286 @@ import threading
 import time  
 import datetime 
 import os  
-import inspect 
 import logging  
+import select
+import sys
 
 class CommandExecutor(threading.Thread):
-    def __init__(self, cinepi_controller, system_button):
-        threading.Thread.__init__(self)  # Initialize thread
+    def __init__(self, cinepi_controller, cinepi_app, storage_preroll=None):
+        threading.Thread.__init__(self, daemon=True)  # Initialize thread
         self.cinepi_controller = cinepi_controller  # Set controller object reference
-        self.system_button = system_button  # Set button object reference
-        
-        # Define dictionary of available commands and their associated functions along with expected argument type.
-        # This allows for dynamic command calling
+        self.cinepi_app = cinepi_app
+        self.storage_preroll = storage_preroll
+        self.running = True  # Flag to control the thread's execution
+
+        # ---------------------------------------------------------------------------
+        # CLI COMMAND TABLE
+        #
+        #  key            – string the user types (case-insensitive, matched in order)
+        #  value[0]       – function to call
+        #  value[1]       – expected argument type(s)
+        #                   • None          → command takes no argument
+        #                   • int / float   → single argument converted to that type
+        #                   • [A, B, …]     → command may omit the arg OR pass one; each
+        #                                     listed type is accepted in order.
+        #
+        #  Example:
+        #     “set iso 800”    → set_iso(800)
+        #     “inc iso”        → inc_iso()
+        # ---------------------------------------------------------------------------
         self.commands = {
-            'rec': (cinepi_controller.rec_button_pushed, None),  # Record command  
-            'stop': (cinepi_controller.rec_button_pushed, None),  # Stop command 
-            'iso': (cinepi_controller.set_iso, int),  # ISO setting command 
-            'shutter_a': (cinepi_controller.set_shutter_a, float),  # Shutter_a setting command
-            'shutter_a_nom': (cinepi_controller.set_shutter_a_nom, float),  # Shutter_a_nom setting command  
-            'fps': (cinepi_controller.set_fps, int),  # FPS setting command 
-            'res': (cinepi_controller.set_resolution, int),  # Resolution setting command 
-            'unmount': (system_button.unmount_drive, None),  # Unmount command
-            'time': (self.display_time, None),  # Time display command
-            'set_rtc_time': (self.set_rtc_time, None),  # RTC time setting command
-            'space': (cinepi_controller.ssd_monitor.output_ssd_space_left, None),  # SSD space left command
-            'get': (cinepi_controller.print_settings, None),
-            'pwm': (cinepi_controller.set_pwm_mode, int),  # Ramp mode command
-            'shutter_sync': (cinepi_controller.set_shutter_a_sync, int)  # Sync shutter to fps
+            # ── Record control ────────────────────────────────────────────────────
+            'rec'                    : (cinepi_controller.rec,            None),   # toggle via edge
+            'stop'                   : (cinepi_controller.rec,            None),   # same alias
+
+            # ── ISO ───────────────────────────────────────────────────────────────
+            'set iso'                : (cinepi_controller.set_iso,        int),
+            'inc iso'                : (cinepi_controller.inc_iso,        None),
+            'dec iso'                : (cinepi_controller.dec_iso,        None),
+
+            # ── Shutter angle (actual) ────────────────────────────────────────────
+            'set shutter a'          : (cinepi_controller.set_shutter_a,  float),
+            'inc shutter a'          : (cinepi_controller.inc_shutter_a,  None),
+            'dec shutter a'          : (cinepi_controller.dec_shutter_a,  None),
+
+            # ── Shutter angle nominal (motion-blur target) ────────────────────────
+            'set shutter a nom'      : (cinepi_controller.set_shutter_a_nom, float),
+            'inc shutter a nom'      : (cinepi_controller.inc_shutter_a_nom, None),
+            'dec shutter a nom'      : (cinepi_controller.dec_shutter_a_nom, None),
+
+            # ── Frame-rate ────────────────────────────────────────────────────────
+            'set fps'                : (cinepi_controller.set_fps,        float),
+            'inc fps'                : (cinepi_controller.inc_fps,        None),
+            'dec fps'                : (cinepi_controller.dec_fps,        None),
+
+            # ── White balance (Kelvin or step) ────────────────────────────────────
+            'set wb'                 : (cinepi_controller.set_wb,         [int, None]),
+            'inc wb'                 : (cinepi_controller.inc_wb,         None),
+            'dec wb'                 : (cinepi_controller.dec_wb,         None),
+
+            # ── Resolution / anamorphic / storage ────────────────────────────────
+            'set resolution'         : (cinepi_controller.set_resolution, [int, None]),
+            'set anamorphic factor'  : (cinepi_controller.set_anamorphic_factor, [float, None]),
+            'mount'                  : (cinepi_controller.mount,          None),
+            'unmount'                : (cinepi_controller.unmount,        None),
+            'toggle mount'           : (cinepi_controller.toggle_mount,   None),
+            'erase'                  : (cinepi_controller.erase_drive,    None),
+            'format'                 : (cinepi_controller.format_drive,   [str, None]),
+            'storage preroll'        : (storage_preroll.trigger_manual,   None) if storage_preroll else None,
+
+            # ── Info / diagnostics ────────────────────────────────────────────────
+            'time'                   : (self.display_time,                None),
+            'set rtc time'           : (self.set_rtc_time,                None),
+            'space'                  : (cinepi_controller.ssd_monitor.space_left, None),
+            'get'                    : (cinepi_controller.print_settings, None),
+
+            # ── Locks & sync modes ────────────────────────────────────────────────
+            'set shutter a sync'     : (cinepi_controller.set_shutter_a_sync_mode, [int, None]),
+            'set iso lock'           : (cinepi_controller.set_iso_lock,   [int, None]),
+            'set shutter a nom lock' : (cinepi_controller.set_shutter_a_nom_lock, [int, None]),
+            'set shutter a nom fps lock': (cinepi_controller.set_shu_fps_lock, [int, None]),
+            'set fps lock'           : (cinepi_controller.set_fps_lock,   [int, None]),
+            'set all lock'           : (cinepi_controller.set_all_lock,   [int, None]),
+            'set fps double'         : (cinepi_controller.set_fps_double, [int, None]),
+
+            # ── System control ────────────────────────────────────────────────────
+            'reboot'                 : (cinepi_controller.reboot,         None),
+            'shutdown'               : (cinepi_controller.safe_shutdown,  None),
+            'restart camera'         : (cinepi_app.restart,        None),
+            'restart cinemate'       : (cinepi_controller.restart_cinemate,        None),
+
+            # ── Free-mode toggles ────────────────────────────────────────────────
+            'set iso free'           : (cinepi_controller.set_iso_free,   [int, str]),
+            'set shutter a free'     : (cinepi_controller.set_shutter_a_free, [int, str]),
+            'set fps free'           : (cinepi_controller.set_fps_free,   [int, str]),
+            'set wb free'            : (cinepi_controller.set_wb_free,    [int, str]),
+
+            # ── Sensor-specific ──────────────────────────────────────────────────
+            'set filter'             : (cinepi_controller.set_filter,     [int]), #Toggle IR-cut filter on StarlightEye sensors
+
+            # ── Preview ZOOM ─────────────────────────────────────────────────────────
+            'set zoom' : (cinepi_controller.set_zoom, [float, None]),  # toggle when arg omitted
+            'inc zoom' : (cinepi_controller.inc_zoom,  None),
+            'dec zoom' : (cinepi_controller.dec_zoom,  None),
         }
 
-    def is_valid_arg(self, arg, expected_type):
-        if expected_type == int:
-            return arg.isdigit()
-        elif expected_type == float:
-            try:
-                float(arg)
-                parts = arg.split(".")
-                # Check if it has only one decimal point or none and at most one digit after the decimal point
-                return len(parts) <= 2 and (len(parts) == 1 or len(parts[1]) <= 1)
-            except ValueError:
-                return False
-        elif expected_type == str:
-            return True
-        else:
-            return expected_type is None
+        # Remove commands that were conditionally set to None
+        self.commands = {
+            name: action for name, action in self.commands.items() if action is not None
+        }
 
-    
-    # Function to get expected data type for a given command
-    def get_expected_type_for_command(self, command_name):
-        if command_name in self.commands:  
-            return self.commands[command_name][1]  # Return the second element (expected type) of the tuple
-        else:
-            return None
-    
-    # Function to handle received data
-    def handle_received_data(self, data):
-        logging.info(f"Received: {data}")  # Log the received data
-        input_command = data.split()  # Split the input into command and arguments
 
-        if len(input_command) == 0 or not input_command[0]:
-            return  # If there's no command provided
-        
-        command_name = input_command[0]  # Extract the command name from the input
-        
-        if command_name in self.commands:
-            func, expected_type = self.commands[command_name]  # Extract function and expected type from commands dictionary
-            arg_spec = inspect.getfullargspec(func)  # Get list of arguments that func takes 
-            is_bound_method = inspect.ismethod(func)  # Check if func is bound method
-            num_args = len(arg_spec.args) - 1 if is_bound_method else len(arg_spec.args)  # Get number of required arguments for the function
-            
-            if len(input_command) > 1:  # If command has arguments
-                command_args = input_command[1]  # Extract command arguments from the input
 
-                # Check if the argument is "inc" or "dec" (increase, decrease), 
-                # and corresponding method is available in cinepi_controller.
-                # If available, execute the function. If not, continue to other checks.
-                if command_args.lower() == "inc" and hasattr(self.cinepi_controller, f"inc_{command_name}"):
-                    getattr(self.cinepi_controller, f"inc_{command_name}")()
-                    return
-                elif command_args.lower() == "dec" and hasattr(self.cinepi_controller, f"dec_{command_name}"):
-                    getattr(self.cinepi_controller, f"dec_{command_name}")()
-                    return
-                # If the input command needs extra argument and the type of the argument is correct, call the command with the argument.
-                elif num_args > 0 and expected_type and self.is_valid_arg(command_args, expected_type):
-                    func(expected_type(command_args))
-                    return
-                else:
-                    # If command does not take parameters or if an improper parameter type is specify a message will be logged and the function will return.
-                    logging.info(f"Command '{command_name}' does not take parameters or invalid parameter type")
-                    return
-            else:
-                # If no argument is provided and the command requires at least one argument
-                if num_args > 0:
-                    logging.info(f"Command '{command_name}' missing required parameter")
-                else:
-                    # if operration does not require parameters, then call the operation directly
-                    func()
-        else:
-            logging.info(f"Command '{command_name}' not found")
-    
-    # Function to display system time and RTC time
     def display_time(self):
+        """Displays the current system and RTC time."""
         logging.info(f"System Time: {datetime.datetime.now()}")  # Display current system time
         try:
             rtc_time = os.popen('hwclock -r').read().strip()  # Try to read RTC time
             logging.info(f"RTC Time:    {rtc_time}")  # Display the RTC time
         except:
-            logging.info("Unable to read RTC time.")  # If unable to read RTC time, log error 
-            
-    # Function to set the RTC time using the system time
+            logging.info("Unable to read RTC time.")  # If unable to read RTC time, log error
+
     def set_rtc_time(self):
+        """Sets the RTC time using the system time."""
         try:
             os.system('sudo hwclock --systohc')  # Try to sync RTC time with system time
             logging.info("RTC Time has been set to System Time")  # Log success
         except:
             logging.info("Unable to set the RTC time.")  # If unable to set RTC time, log error
-        
-    # Thread run function where data is continuously received and processed
+
+    def is_valid_arg(self, arg, expected_type):
+        """Validate arguments against expected types."""
+        try:
+            if expected_type == int:
+                int(arg)
+                return True
+            elif expected_type == float:
+                float(arg)
+                return True
+            elif expected_type == str:
+                return True  # Strings are always valid
+            else:
+                return expected_type is None  # None means no argument is expected
+        except ValueError:
+            return False
+
+    def handle_received_data(self, data):
+        """Handles received input data and executes corresponding commands."""
+        logging.info(f"Received: {data.strip()}")  # Log the received data
+        input_command = data.strip().split()  # Split the input into parts
+
+        if not input_command:
+            return  # If there's no input, just return
+
+        # Reconstruct the full command name by trying all possible matches
+        command_name = None
+        command_args = []
+
+        # Start with the longest possible command name and reduce until match is found
+        for i in range(len(input_command), 0, -1):
+            potential_command = ' '.join(input_command[:i])
+            if potential_command in self.commands:
+                command_name = potential_command
+                command_args = input_command[i:]
+                break
+
+        if not command_name:
+            logging.info(f"Command '{data.strip()}' not found")
+            return
+
+        func, expected_types = self.commands[command_name]
+
+        if command_name == 'rec':
+            self.handle_rec_command(command_args)
+            return
+
+        # Handle commands with arguments or those that can be called without arguments
+        if isinstance(expected_types, list):  # If the command can take multiple types
+            if command_args:  # Arguments provided
+                arg = command_args[0]
+                for expected_type in filter(None, expected_types):
+                    if self.is_valid_arg(arg, expected_type):
+                        func(expected_type(arg))  # Call function with converted argument
+                        return
+                logging.info(f"Invalid argument type for command '{command_name}'")
+            else:
+                func()  # Call the function without arguments
+        else:  # Single expected type or no argument
+            if command_args:  # Arguments provided
+                arg = command_args[0]
+                if self.is_valid_arg(arg, expected_types):
+                    func(expected_types(arg))  # Call function with converted argument
+                    return
+                logging.info(f"Invalid argument type for command '{command_name}'")
+            else:
+                if expected_types is None:  # No arguments expected
+                    func()  # Call the function without arguments
+                else:
+                    logging.info(f"Command '{command_name}' requires an argument")
+
+    def stop(self):
+
+        """Stops the command executor thread."""
+        logging.info("Stopping CommandExecutor thread.")
+        self.running = False
+
+    def handle_rec_command(self, args):
+        """Handle recording command with optional timed arguments."""
+        if not args:
+            self.cinepi_controller.rec()
+            return
+
+        mode = args[0].lower()
+
+        if mode in {"s", "sec", "secs", "second", "seconds"}:
+            if len(args) < 2:
+                logging.info("Timed recording in seconds requires a duration argument.")
+                return
+            try:
+                seconds = float(args[1])
+            except ValueError:
+                logging.info("Invalid seconds value for timed recording.")
+                return
+            self.cinepi_controller.rec(mode, seconds)
+            return
+
+        if mode in {"f", "frame", "frames"}:
+            if len(args) < 2:
+                logging.info("Timed recording in frames requires a frame count.")
+                return
+            try:
+                frames = int(args[1])
+            except ValueError:
+                logging.info("Invalid frame count for timed recording.")
+                return
+            self.cinepi_controller.rec(mode, frames)
+            return
+
+        logging.info("Unknown rec mode. Use 's' for seconds or 'f' for frames.")
+
     def run(self):
-        while True:  # Infinite loop
-            time.sleep(0.1)  # Pause for 100 ms
-            data = input("\n> ")  # Read the input as a single string
-            if data.strip():  # Proceed only if there is some non-whitespace input
-                self.handle_received_data(data)  # Directly handle the received data
+            """Thread run function to continuously process input commands."""
+            stdin = sys.stdin
+            if stdin is None:
+                logging.info("CLI input unavailable; CommandExecutor thread idling")
+                while self.running:
+                    time.sleep(0.1)
+                return
+
+            prompt_shown = False
+            while self.running:
+                if not prompt_shown and stdin.isatty():
+                    try:
+                        sys.stdout.write("\n> ")
+                        sys.stdout.flush()
+                    except Exception:
+                        pass
+                    prompt_shown = True
+
+                try:
+                    ready, _, _ = select.select([stdin], [], [], 0.1)
+                except (OSError, ValueError) as e:
+                    logging.info(f"CLI input interrupted: {e}")
+                    self.running = False
+                    break
+
+                if not self.running:
+                    break
+                if not ready:
+                    continue
+
+                try:
+                    data = stdin.readline()
+                except KeyboardInterrupt as e:
+                    logging.info(f"CLI input interrupted: {e}")
+                    self.running = False
+                    break
+
+                if data == "":
+                    logging.info("CLI input closed")
+                    self.running = False
+                    break
+
+                prompt_shown = False
+                if data.strip():  # Proceed only if there is some non-whitespace input
+                    self.handle_received_data(data)  # Directly handle the received data
