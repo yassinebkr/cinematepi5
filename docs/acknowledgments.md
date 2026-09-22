@@ -1,5 +1,7 @@
 # Acknowledgements
 
+This repository began as a fork of [**CineMate by Tiramisioux**](https://github.com/Tiramisioux/cinemate) and continues to use upstream work as an important reference. The Pi 5 / IMX283 fork has since developed its own architecture, hardening, tooling and operator workflow; downstream changes should not be read as upstream-supported behavior.
+
 The [**Cinemate**](https://github.com/Tiramisioux/cinemate) stack is built on several open-source projects. Special thanks to all authors!
 
 - [**CinePi-raw**](https://github.com/cinepi/cinepi-raw) – Csaba Nagy
