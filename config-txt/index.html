@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/config-txt/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Switching sensors (config.txt) - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Switching sensors (config.txt)";
+        var mkdocs_page_input_path = "config-txt.md";
+        var mkdocs_page_url = "/cinematepi5/config-txt/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Switching sensors (config.txt)</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#adjusting-configtxt-for-different-sensors">Adjusting config.txt for different sensors:</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#example-configtxt">Example config.txt</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#icm-42688-1-khz-i2c-bandwidth">ICM-42688 1 kHz I2C bandwidth</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Configuring</li>
+      <li class="breadcrumb-item active">Switching sensors (config.txt)</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/config-txt.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="modifying-configtxt">Modifying config.txt<a class="headerlink" href="#modifying-configtxt" title="Permanent link">#</a></h1>
+<h2 id="adjusting-configtxt-for-different-sensors">Adjusting config.txt for different sensors:<a class="headerlink" href="#adjusting-configtxt-for-different-sensors" title="Permanent link">#</a></h2>
+<div class="admonition tip">
+<p>For easy editing of <code>config.txt</code> on the preinstalled image file, type <code>editboot</code> anywhere in Raspberry Pi terminal.</p>
+</div>
+<p>If using a manual install without the above alias, type:</p>
+<div class="highlight"><pre><span></span><code>sudo nano /boot/firmware/config.txt
+</code></pre></div>
+<p>Uncomment the section for the sensor being used, and make sure to comment out the others. The clean-install default is <code>imx477</code> on <code>cam0</code>. For IMX296, IMX283, or IMX585, uncomment that sensor section and set the camera port to the physical connector you are using. Reboot the Pi for changes to take effect.</p>
+<h3 id="example-configtxt">Example config.txt<a class="headerlink" href="#example-configtxt" title="Permanent link">#</a></h3>
+<div class="highlight"><pre><span></span><code><span class="c1"># &gt;&gt;&gt; cinemate-install &gt;&gt;&gt;</span>
+<span class="c1"># Managed by cinemate-install.sh</span>
+<span class="c1"># For more options and information see</span>
+<span class="c1"># http://rptl.io/configtxt</span>
+<span class="c1"># Some settings may impact device functionality. See link above for details</span>
+
+<span class="c1"># Uncomment some or all of these to enable the optional hardware interfaces</span>
+<span class="nv">dtparam</span><span class="o">=</span><span class="nv">i2c_arm</span><span class="o">=</span>on
+<span class="c1">#dtparam=i2s=on</span>
+<span class="c1">#dtparam=spi=on</span>
+
+<span class="c1"># Enable audio (loads snd_bcm2835)</span>
+<span class="nv">dtparam</span><span class="o">=</span><span class="nv">audio</span><span class="o">=</span>on
+
+<span class="c1"># ---- Camera section ----</span>
+
+<span class="c1"># Raspberry Pi HQ camera (IMX477, clean-install default on cam0)</span>
+<span class="nv">camera_auto_detect</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">dtoverlay</span><span class="o">=</span>imx477,cam0
+
+<span class="c1"># Raspberry Pi GS camera (IMX296, 10-bit RAW)</span>
+<span class="c1">#camera_auto_detect=1</span>
+<span class="c1">#dtoverlay=imx296,cam0</span>
+
+<span class="c1"># OneInchEye (IMX283)</span>
+<span class="c1">#camera_auto_detect=0</span>
+<span class="c1">#dtoverlay=imx283,cam0</span>
+
+<span class="c1"># StarlightEye color (IMX585)</span>
+<span class="c1">#camera_auto_detect=0</span>
+<span class="c1">#dtoverlay=imx585,cam0</span>
+
+<span class="c1"># StarlightEye Mono (IMX585 mono)</span>
+<span class="c1">#camera_auto_detect=0</span>
+<span class="c1">#dtoverlay=imx585,cam1,mono</span>
+
+<span class="c1"># ---- End camera section ----</span>
+
+<span class="c1"># Automatically load overlays for detected DSI displays</span>
+<span class="nv">display_auto_detect</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Automatically load initramfs files, if found</span>
+<span class="nv">auto_initramfs</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Enable DRM VC4 V3D driver</span>
+<span class="nv">dtoverlay</span><span class="o">=</span>vc4-kms-v3d
+<span class="nv">max_framebuffers</span><span class="o">=</span><span class="m">2</span>
+
+<span class="c1"># Don't have the firmware create an initial video= setting in cmdline.txt.</span>
+<span class="c1"># Use the kernel's default instead.</span>
+<span class="nv">disable_fw_kms_setup</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Run in 64-bit mode</span>
+<span class="nv">arm_64bit</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Disable compensation for displays with overscan</span>
+<span class="nv">disable_overscan</span><span class="o">=</span><span class="m">1</span>
+
+<span class="c1"># Run as fast as firmware / board allows</span>
+<span class="nv">arm_boost</span><span class="o">=</span><span class="m">1</span>
+
+<span class="o">[</span>cm4<span class="o">]</span>
+<span class="c1"># Enable host mode on the 2711 built-in XHCI USB controller.</span>
+<span class="c1"># This line should be removed if the legacy DWC2 controller is required</span>
+<span class="c1"># (e.g. for USB device mode) or if USB support is not required.</span>
+<span class="nv">otg_mode</span><span class="o">=</span><span class="m">1</span>
+
+<span class="o">[</span>cm5<span class="o">]</span>
+<span class="nv">dtoverlay</span><span class="o">=</span>dwc2,dr_mode<span class="o">=</span>host
+
+<span class="c1"># CFE Hat PCIe 3.0</span>
+<span class="nv">dtparam</span><span class="o">=</span>pciex1
+<span class="nv">dtparam</span><span class="o">=</span><span class="nv">pciex1_gen</span><span class="o">=</span><span class="m">3</span>
+
+<span class="o">[</span>all<span class="o">]</span>
+<span class="nv">dtparam</span><span class="o">=</span><span class="nv">i2c_arm_baudrate</span><span class="o">=</span><span class="m">400000</span>
+<span class="nv">auto_initramfs</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">avoid_warnings</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">disable_splash</span><span class="o">=</span><span class="m">1</span>
+<span class="nv">dtparam</span><span class="o">=</span><span class="nv">i2c1</span><span class="o">=</span>on
+<span class="nv">dtoverlay</span><span class="o">=</span>disable-bt
+<span class="c1"># &lt;&lt;&lt; cinemate-install &lt;&lt;&lt;</span>
+</code></pre></div>
+<p>Exit the editor by pressing Ctrl+X.</p>
+<h2 id="icm-42688-1-khz-i2c-bandwidth">ICM-42688 1 kHz I2C bandwidth<a class="headerlink" href="#icm-42688-1-khz-i2c-bandwidth" title="Permanent link">#</a></h2>
+<p>The local Pi 5 IMX283 camera uses an ICM-42688 FIFO at 1 kHz. The default 100 kHz I2C1 bus was too slow for the FIFO payload and produced approximately 200 ms blocking transactions and only about 5 live IMU updates per second.</p>
+<p>The validated local configuration is:</p>
+<div class="codehilite"><pre><span></span><code>dtparam=i2c_arm_baudrate=400000
+</code></pre></div>
+
+<p>Place it under the all section and reboot.</p>
+<p>Verify the live Pi 5 RP1 I2C1 clock with:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">od</span><span class="w"> </span><span class="o">-</span><span class="n">An</span><span class="w"> </span><span class="o">-</span><span class="n">tu4</span><span class="w"> </span><span class="o">-</span><span class="n">N4</span><span class="w"> </span><span class="o">--</span><span class="n">endian</span><span class="o">=</span><span class="n">big</span><span class="w"> </span><span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">device</span><span class="o">-</span><span class="n">tree</span><span class="o">/</span><span class="n">axi</span><span class="o">/</span><span class="n">pcie</span><span class="mi">@1000120000</span><span class="o">/</span><span class="n">rp1</span><span class="o">/</span><span class="n">i2c</span><span class="mi">@74000</span><span class="o">/</span><span class="n">clock</span><span class="o">-</span><span class="n">frequency</span>
+</code></pre></div>
+
+<p>Expected output is 400000.</p>
+<p>At 400 kHz, measured live IMU publication is approximately 30.5 Hz. This matches the 30 FPS HDMI HUD well, so the current camera deliberately does not use the less conservative 1 MHz setting.</p>
+<p>See <a href="../imu-calibration-and-live-hud/">IMU calibration, HDMI preview and live HUD</a>.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../hardware-controls/" class="btn btn-neutral float-left" title="Additional hardware"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../hotspot-logic/" class="btn btn-neutral float-right" title="Configuring the Wi-Fi hotspot">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../hardware-controls/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../hotspot-logic/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

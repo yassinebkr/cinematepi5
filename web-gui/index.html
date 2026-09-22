@@ -1,0 +1,536 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/web-gui/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Web GUI - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Web GUI";
+        var mkdocs_page_input_path = "web-gui.md";
+        var mkdocs_page_url = "/cinematepi5/web-gui/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Web GUI</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#imu-calibration-controls">IMU calibration controls</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#responsive-web-application-shell-local-2026-09-20">Responsive web application shell - local 2026-09-20</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#live-camera-layout">Live camera layout</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clips-orientation-behavior">Clips orientation behavior</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#offload-orientation-behavior">Offload orientation behavior</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fullscreen">Fullscreen</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pwa-home-screen">PWA / Home Screen</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#validated-web-preview-quality-profile">Validated web preview quality profile</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#responsive-live-ui-pwa-state-local-2026-09-20">Responsive live UI / PWA state (local 2026-09-20)</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#live-camera-layout_1">Live camera layout</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#pwa-fullscreen">PWA / fullscreen</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#web-preview-quality-profile">Web preview quality profile</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#responsive-pwa-local-camera-ui">Responsive / PWA local camera UI</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#recording-state-synchronization">Recording-state synchronization</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#clips-rec-timer-format">Clips REC timer format</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#clips-timer-race-protection-and-mobile-control-placement">Clips timer race protection and mobile control placement</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#clips-proxy-progress-and-independent-clip-lut">Clips proxy progress and independent clip LUT</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Using the camera</li>
+      <li class="breadcrumb-item active">Web GUI</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/web-gui.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="web-gui">Web GUI<a class="headerlink" href="#web-gui" title="Permanent link">#</a></h1>
+<p>Cinemate includes a small Flask + Socket.IO web interface that mirrors the live preview and exposes the main camera controls in a browser.</p>
+<ul>
+<li>the control UI listens on port <code>5000</code>, with the URL <code>http://cinepi.local:5000/</code>.</li>
+<li>the clean MJPEG preview stream is available on port <code>8000</code> with the URL <code>http://cinepi.local:8000/stream</code>.</li>
+</ul>
+<p>The browser UI exposes:</p>
+<ul>
+<li>ISO, shutter angle, FPS, white balance, and resolution selectors</li>
+<li>live preview from the MJPEG stream</li>
+<li>tap/click on the preview area to toggle REC</li>
+<li>storage unmount button</li>
+<li>fullscreen toggle</li>
+<li>live stats such as free space, write speed, buffered frames, buffer size, CPU load, RAM load, temperature, and exposure time</li>
+</ul>
+<div class="admonition note">
+<p>When using dual sensors, the second camera's preview stream is served on port <code>8001</code>. The control UI stays on port <code>5000</code>.</p>
+</div>
+<h2 id="imu-calibration-controls">IMU calibration controls<a class="headerlink" href="#imu-calibration-controls" title="Permanent link">#</a></h2>
+<p>The LEVEL panel on the local camera also contains the guided IMU calibration controls.</p>
+<ul>
+<li>IMU CALIBRATION starts the HDMI full-screen wizard.</li>
+<li>CONTINUE advances the active stage.</li>
+<li>CANCEL exits without replacing the saved calibration.</li>
+<li>set zero changes only the operator horizon reference; it does not rewrite the physical IMU calibration.</li>
+</ul>
+<p>The control UI is plain HTTP. Use http://cinepi.local:5000/ or the Pi IP with port 5000. Do not use HTTPS on this port.</p>
+<p>When calibration is active, the cinepi-raw DRM preview plane is forcibly disabled so it cannot cover the full-screen calibration framebuffer. This rule is enforced centrally in CinePiManager and therefore also applies after restarts.</p>
+<h2 id="responsive-web-application-shell-local-2026-09-20">Responsive web application shell - local 2026-09-20<a class="headerlink" href="#responsive-web-application-shell-local-2026-09-20" title="Permanent link">#</a></h2>
+<p>The local IMX283/Pi 5 camera now uses a common responsive shell for the live camera, Clips and Offload pages.</p>
+<p>Shared assets:</p>
+<div class="codehilite"><pre><span></span><code>src/module/app/static/css/cinemate-responsive.css
+src/module/app/static/js/cinemate-app.js
+src/module/app/static/manifest.webmanifest
+src/module/app/static/sw.js
+</code></pre></div>
+
+<p>All pages use viewport-fit=cover and CSS safe-area insets for notched iPhones/iPads.</p>
+<h3 id="live-camera-layout">Live camera layout<a class="headerlink" href="#live-camera-layout" title="Permanent link">#</a></h3>
+<p>The live view now adapts to the viewport instead of assuming a desktop canvas.</p>
+<p>Desktop / wide landscape:</p>
+<ul>
+<li>camera tools remain in a vertical rail</li>
+<li>the preview uses the remaining width</li>
+<li>top and bottom status bars remain compact</li>
+</ul>
+<p>Phone/tablet portrait or narrow landscape:</p>
+<ul>
+<li>preview uses the full available width</li>
+<li>camera tools become a horizontal scrollable monitor bar</li>
+<li>bottom telemetry uses a responsive grid</li>
+<li>dynamic viewport units and safe-area insets are used</li>
+<li>the page should not require manual browser zoom-out</li>
+</ul>
+<p>The MJPEG URL now uses the same hostname/IP used by the browser. Opening the UI by IP therefore produces an IP-based stream URL instead of forcing cinepi.local.</p>
+<h3 id="clips-orientation-behavior">Clips orientation behavior<a class="headerlink" href="#clips-orientation-behavior" title="Permanent link">#</a></h3>
+<p>Clips is deliberately orientation-aware.</p>
+<p>Landscape / desktop:</p>
+<ul>
+<li>proxy player and clip list are side by side</li>
+</ul>
+<p>Portrait / narrow tablet:</p>
+<ul>
+<li>the proxy player uses the full width with a 16:9 aspect ratio</li>
+<li>the clip list moves below it</li>
+<li>thumbnails become larger relative to the screen</li>
+<li>metadata/actions wrap below the clip title instead of forcing a wide row</li>
+<li>filters and header controls wrap to available width</li>
+</ul>
+<p>This makes reviewing previous takes particularly comfortable in portrait while retaining an efficient landscape layout.</p>
+<h3 id="offload-orientation-behavior">Offload orientation behavior<a class="headerlink" href="#offload-orientation-behavior" title="Permanent link">#</a></h3>
+<p>Offload also changes layout according to orientation.</p>
+<p>Portrait:</p>
+<ul>
+<li>header controls wrap into touch-friendly rows</li>
+<li>each clip becomes a compact two-row grid</li>
+<li>name/size stay readable without horizontal page zoom</li>
+<li>backup state is displayed below the main clip row</li>
+</ul>
+<p>Landscape/desktop keeps the denser horizontal list.</p>
+<h3 id="fullscreen">Fullscreen<a class="headerlink" href="#fullscreen" title="Permanent link">#</a></h3>
+<p>The old implementation fired both touchstart and click and also attempted delayed requestFullscreen calls. Those paths were removed.</p>
+<p>The common implementation now:</p>
+<ul>
+<li>invokes fullscreen from one direct click gesture</li>
+<li>awaits the standard Fullscreen API when available</li>
+<li>supports webkit fullscreen where exposed</li>
+<li>tracks real fullscreen state through fullscreenchange</li>
+<li>does not attempt delayed automatic re-entry</li>
+<li>falls back to Home Screen instructions when browser fullscreen is unavailable</li>
+</ul>
+<p>Clips and Offload now expose the same fullscreen control as the live page.</p>
+<h3 id="pwa-home-screen">PWA / Home Screen<a class="headerlink" href="#pwa-home-screen" title="Permanent link">#</a></h3>
+<p>The local UI now includes:</p>
+<ul>
+<li>web app manifest</li>
+<li>192 px and 512 px icons</li>
+<li>Apple touch icon</li>
+<li>display=fullscreen with standalone fallback</li>
+<li>orientation=any</li>
+<li>Apple mobile web app metadata</li>
+<li>root-scope service-worker route</li>
+</ul>
+<p>iOS/iPadOS can use the Home Screen web-app metadata for a browserless launch.</p>
+<p>Important: Android installability as a true PWA still requires a secure context. The current LAN UI is plain HTTP, so the manifest/shell is ready but a trusted local HTTPS endpoint is still required to guarantee a standalone installed PWA on Android/Chromium-family browsers.</p>
+<p>Do not silently replace port 5000 with TLS: the MJPEG stream on port 8000 also has to be placed behind the same trusted HTTPS origin to avoid mixed-content blocking. A reverse proxy is the appropriate future architecture.</p>
+<h2 id="validated-web-preview-quality-profile">Validated web preview quality profile<a class="headerlink" href="#validated-web-preview-quality-profile" title="Permanent link">#</a></h2>
+<p>The original web preview was:</p>
+<ul>
+<li>1302 x 720</li>
+<li>JPEG quality hardcoded at 60</li>
+<li>approximately 50 kB/frame</li>
+<li>approximately 13.3 Mbit/s</li>
+<li>approximately 33 FPS</li>
+</ul>
+<p>The MJPEG quality is now configurable in settings.json and passed through post-processing JSON to cinepi-raw.</p>
+<p>Two higher profiles were rejected after RAW stress testing:</p>
+<ul>
+<li>1732 x 958 / Q85: visually high quality but caused camera-frame drops during full-resolution RAW recording</li>
+<li>approximately 1598 x 884 / Q80: much better, but still produced one drop in the 12-second stress test</li>
+</ul>
+<p>Validated production profile:</p>
+<ul>
+<li>1446 x 800</li>
+<li>JPEG quality 78</li>
+<li>approximately 33.08 FPS idle</li>
+<li>approximately 118 kB/frame in the measured scene</li>
+<li>approximately 31.2 Mbit/s in the measured scene</li>
+</ul>
+<p>A 12-second 3936 x 2176 12-bit RAW recording with a real MJPEG client connected measured:</p>
+<ul>
+<li>RAW cadence approximately 32.9998 FPS</li>
+<li>0 dropped camera frames</li>
+<li>0 write failures</li>
+<li>max recording bufferSize 5</li>
+<li>max bufferSizeMax 6</li>
+<li>max framesInFlight 8</li>
+<li>minimum MemAvailable approximately 2.97 GiB</li>
+<li>maximum temperature approximately 58.4 C</li>
+<li>get_throttled remained 0x0</li>
+</ul>
+<p>The web profile must remain subordinate to RAW reliability. Any future increase in quality/resolution requires the same simultaneous RAW + MJPEG stress test.</p>
+<h2 id="responsive-live-ui-pwa-state-local-2026-09-20">Responsive live UI / PWA state (local 2026-09-20)<a class="headerlink" href="#responsive-live-ui-pwa-state-local-2026-09-20" title="Permanent link">#</a></h2>
+<p>The local IMX283/Pi 5 camera UI now uses a shared responsive shell for the live camera, Clips and Offload pages.</p>
+<h3 id="live-camera-layout_1">Live camera layout<a class="headerlink" href="#live-camera-layout_1" title="Permanent link">#</a></h3>
+<p>Desktop:</p>
+<ul>
+<li>the MJPEG image owns the full preview canvas width</li>
+<li>the monitor/tool rail overlays the image rather than subtracting a fixed 136 px from the preview</li>
+<li>the top and bottom information bars remain compact</li>
+<li>Fullscreen API uses a single user-gesture handler</li>
+<li>a floating Exit Fullscreen control is created while browser fullscreen is active</li>
+</ul>
+<p>Portrait phone/tablet:</p>
+<ul>
+<li>camera preview is kept at its natural wide aspect near the top</li>
+<li>the remaining black area below the image is used by monitor tools instead of leaving a large dead gap</li>
+<li>LOOK/HIST/WAVE/VECT/ZEBRA/PEAK/LEVEL/TAG controls wrap instead of being truncated</li>
+<li>status controls use a responsive grid</li>
+<li>LEVEL overlay geometry is re-centered from the actual stream element after resize/orientation changes</li>
+</ul>
+<p>Landscape phone/tablet:</p>
+<ul>
+<li>the camera image occupies the entire viewport</li>
+<li>controls are collapsed by default</li>
+<li>a small UI button toggles translucent top/tool/bottom overlays</li>
+<li>this avoids losing a large fraction of the picture to permanent control bars</li>
+</ul>
+<p>Clips:</p>
+<ul>
+<li>landscape uses a video/list split</li>
+<li>portrait stacks filters, video preview and clip list</li>
+<li>portrait thumbnails grow for easier review and metadata/actions wrap below them</li>
+</ul>
+<p>Offload:</p>
+<ul>
+<li>controls wrap in portrait</li>
+<li>each clip becomes a compact two-row grid with name/size/status</li>
+<li>landscape retains the denser desktop list</li>
+</ul>
+<h3 id="pwa-fullscreen">PWA / fullscreen<a class="headerlink" href="#pwa-fullscreen" title="Permanent link">#</a></h3>
+<p>Shared assets:</p>
+<div class="codehilite"><pre><span></span><code>src/module/app/static/manifest.webmanifest
+src/module/app/static/sw.js
+src/module/app/static/js/cinemate-app.js
+src/module/app/static/css/cinemate-responsive.css
+</code></pre></div>
+
+<p>The manifest uses a fullscreen/standalone display profile and includes 192 px, 512 px and Apple touch icons.</p>
+<p>On iPhone/iPad, arbitrary page fullscreen is not treated as a dependable control path. The button therefore explains that the correct browserless mode is Add to Home Screen. When launched from the Home Screen, the redundant fullscreen button is hidden.</p>
+<p>On browsers that expose the Fullscreen API, Enter Fullscreen is triggered only from the direct click gesture. While fullscreen is active, a floating Exit Fullscreen button remains accessible.</p>
+<p>Old click/touchstart double-handlers and delayed automatic re-entry hacks were removed.</p>
+<p>The UI is still served over plain HTTP on port 5000. Android PWA install behavior may therefore vary by browser because full installability normally expects HTTPS.</p>
+<h3 id="web-preview-quality-profile">Web preview quality profile<a class="headerlink" href="#web-preview-quality-profile" title="Permanent link">#</a></h3>
+<p>The MJPEG lores size and quality are configurable through:</p>
+<div class="codehilite"><pre><span></span><code>src/settings.json
+</code></pre></div>
+
+<p>Current validated profile:</p>
+<div class="codehilite"><pre><span></span><code>preview.lores_max_height = 800
+preview.mjpeg_quality = 80
+</code></pre></div>
+
+<p>With the current 3936 x 2176 IMX283 mode this produces:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">1446</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mf">800</span>
+<span class="n">approximately</span><span class="w"> </span><span class="mf">33</span><span class="w"> </span><span class="n">FPS</span>
+<span class="n">approximately</span><span class="w"> </span><span class="mf">131</span><span class="w"> </span><span class="n">kB</span><span class="o">/</span><span class="n">JPEG</span><span class="w"> </span><span class="kr">for</span><span class="w"> </span><span class="n">the</span><span class="w"> </span><span class="n">test</span><span class="w"> </span><span class="n">scene</span>
+<span class="n">approximately</span><span class="w"> </span><span class="mf">34.7</span><span class="w"> </span><span class="n">Mbit</span><span class="o">/</span><span class="n">s</span>
+</code></pre></div>
+
+<p>This is intentionally lower than the maximum profile tested.</p>
+<p>Rejected stress-test profiles:</p>
+<ul>
+<li>1732 x 958, JPEG Q85: approximately 65.8 Mbit/s; too little real-time margin under simultaneous RAW + MJPEG load</li>
+<li>1534 x 848, JPEG Q82: improved substantially but was not retained as the conservative production setting</li>
+</ul>
+<p>Final reset-aware RAW stress validation for 1446 x 800 Q80:</p>
+<ul>
+<li>RAW: 3936 x 2176, 12-bit, approximately 33 FPS</li>
+<li>MJPEG client actively consuming the web stream</li>
+<li>10 seconds measured after explicit per-take counter reset</li>
+<li>331 RAW frame-stat samples</li>
+<li>frame rate mean: approximately 33.000 FPS</li>
+<li>droppedFrames remained exactly 0</li>
+<li>writeFailures remained exactly 0</li>
+<li>disk buffer depth peak: 3</li>
+<li>frames in flight peak: 5</li>
+<li>approximately 3.0 GiB MemAvailable after test</li>
+<li>temperature approximately 56 C</li>
+<li>get_throttled = 0x0</li>
+</ul>
+<p>RAW recording reliability has priority over web-preview resolution/quality. Any future quality increase must pass the same simultaneous RAW + active-MJPEG stress test.</p>
+<h2 id="responsive-pwa-local-camera-ui">Responsive / PWA local camera UI<a class="headerlink" href="#responsive-pwa-local-camera-ui" title="Permanent link">#</a></h2>
+<p>The local IMX283/Pi 5 camera now uses a shared responsive web shell for Camera, Clips and Offload.</p>
+<p>Current web-preview profile:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">1446</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mf">800</span>
+<span class="n">JPEG</span><span class="w"> </span><span class="n">quality</span><span class="w"> </span><span class="mf">80</span>
+<span class="n">approximately</span><span class="w"> </span><span class="mf">33</span><span class="w"> </span><span class="n">fps</span>
+</code></pre></div>
+
+<p>Camera controls adapt to desktop, portrait phone/tablet and compact landscape. Compact landscape uses retractable overlays so monitoring controls do not permanently consume the image area.</p>
+<p>Fullscreen behavior is browser-capability aware. Desktop/compatible browsers use the Fullscreen API with explicit Enter/Exit controls. On iPhone/iPad the reliable browserless workflow is Add to Home Screen; the PWA manifest requests fullscreen/standalone display.</p>
+<p>Clips now shows a REC indicator/timecode during recording and automatically reloads its clip list only after the take has fully finalized and all write/buffer flags have cleared.</p>
+<p>The Clips page does not currently embed live camera preview.</p>
+<p>See <a href="../web-preview-responsive-pwa/">Web preview, responsive UI, PWA and Clips live state</a> for implementation details and long stress-test results.</p>
+<h2 id="recording-state-synchronization">Recording-state synchronization<a class="headerlink" href="#recording-state-synchronization" title="Permanent link">#</a></h2>
+<p>The Camera and Clips web pages now share the same canonical REC state, is_recording.</p>
+<p>The Camera page receives the state in its initial Socket.IO payload, receives start/stop pushes through recording_state, and also polls /recording-state once per second as a recovery mechanism.</p>
+<p>This fixes the previous case where a take could be started while viewing Clips and the Camera page would fail to show recording state after navigation.</p>
+<p>The old red page/border treatment was removed. Camera now uses a small blinking red REC dot with responsive placement:</p>
+<ul>
+<li>desktop: aligned to the right side of the actual displayed image</li>
+<li>portrait mobile/tablet: top-right of the image</li>
+<li>compact landscape: top-left, away from the retractable controls button</li>
+</ul>
+<p>The HDMI GUI uses the same is_recording state for its own blinking REC dot.</p>
+<h3 id="clips-rec-timer-format">Clips REC timer format<a class="headerlink" href="#clips-rec-timer-format" title="Permanent link">#</a></h3>
+<p>The Clips recording badge displays elapsed duration as M:SS rather than HH:MM:SS:FF.</p>
+<p>The source is recording_time, the floating-point elapsed-seconds value from /recording-state. The API still exposes the complete frame timecode for diagnostics, but frames are intentionally hidden from the Clips badge because they update too rapidly to be useful to an operator.</p>
+<p>The state poll remains at 500 ms for responsive REC state changes; the displayed timer only changes once per elapsed second.</p>
+<h3 id="clips-timer-race-protection-and-mobile-control-placement">Clips timer race protection and mobile control placement<a class="headerlink" href="#clips-timer-race-protection-and-mobile-control-placement" title="Permanent link">#</a></h3>
+<p>The Clips REC timer now guards against the previous take duration remaining temporarily in recording_time when a new recording starts.</p>
+<p>On an observed recording start edge, the badge shows 0:00 until the new take timer is detected near zero. After that, the visible M:SS counter is monotonic and cannot jump backwards during the same take. Opening Clips during an already-running take still shows the current elapsed duration.</p>
+<p>Portrait Camera layout also now places LOOK/LUT selection in the top area immediately left of Clips. TAG occupies the former LUT position in the tool row and matches the other monitoring-tool buttons more closely.</p>
+<p>The portrait REC dot is positioned from the actual image rectangle. Compact-landscape Clips is offset left of the retractable controls button to prevent overlap.</p>
+<h2 id="clips-proxy-progress-and-independent-clip-lut">Clips proxy progress and independent clip LUT<a class="headerlink" href="#clips-proxy-progress-and-independent-clip-lut" title="Permanent link">#</a></h2>
+<p>Clips proxy generation now runs in the background and reports progress inside the corresponding clip row instead of using a blocking player overlay.</p>
+<p>The visible states are queued, rendering percentage, paused during recording, verifying, ready and error. When a clip finishes encoding, its row changes to proxy ready without interrupting whatever clip is currently playing.</p>
+<p>The Clips player has a separate look selector. It stores per-clip choices under clipLuts and is intentionally isolated from the Camera live-preview LUT preference.</p>
+<p>The live MJPEG Camera stream is rebuilt from window.location.hostname and port 8000, which prevents iPhone/PWA navigation from accidentally targeting localhost after returning from Clips.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../simple-gui/" class="btn btn-neutral float-left" title="Reading the camera screen"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../3d-luts/" class="btn btn-neutral float-right" title="Real 3D LUTs">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../simple-gui/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../3d-luts/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

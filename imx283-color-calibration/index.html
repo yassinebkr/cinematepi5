@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/imx283-color-calibration/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>IMX283 colour calibration - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "IMX283 colour calibration";
+        var mkdocs_page_input_path = "imx283-color-calibration.md";
+        var mkdocs_page_url = "/cinematepi5/imx283-color-calibration/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">IMX283 colour calibration</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#current-cinemate-imx283-state">Current CineMate IMX283 state</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#important-upstream-finding">Important upstream finding</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-ct_curve-actually-contains">What ct_curve actually contains</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#why-low-k-shadows-can-turn-green">Why low-K shadows can turn green</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#existing-dark-cal-experiment">Existing Dark cal experiment</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#improved-dark-calibration-plan">Improved dark calibration plan</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#calibrating-ct_curve-without-an-expensive-colour-chart">Calibrating ct_curve without an expensive colour chart</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#illuminant-caveat">Illuminant caveat</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ccm-calibration-is-a-different-problem">CCM calibration is a different problem</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#about-published-imx283-spectral-response-claims">About published IMX283 spectral-response claims</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#current-calibration-strategy">Current calibration strategy</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#primary-references">Primary references</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Advanced</li>
+      <li class="breadcrumb-item active">IMX283 colour calibration</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/imx283-color-calibration.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="imx283-colour-calibration">IMX283 colour calibration<a class="headerlink" href="#imx283-colour-calibration" title="Permanent link">#</a></h1>
+<p>This document separates sensor/ISP calibration from creative LUT work.</p>
+<p>A 3D creative LUT cannot repair a badly calibrated RAW-to-display pipeline.
+The intended order is:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">sensor</span><span class="w"> </span><span class="n">RAW</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">black</span><span class="o">-</span><span class="n">level</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">defect</span><span class="w"> </span><span class="n">correction</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">lens</span><span class="w"> </span><span class="n">shading</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">white</span><span class="w"> </span><span class="n">balance</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">colour</span><span class="w"> </span><span class="n">correction</span><span class="w"> </span><span class="n">matrix</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">tone</span><span class="o">/</span><span class="n">gamma</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">display</span><span class="w"> </span><span class="n">encoding</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">optional</span><span class="w"> </span><span class="n">creative</span><span class="w"> </span><span class="n">display</span><span class="w"> </span><span class="n">LUT</span>
+</code></pre></div>
+
+<h2 id="current-cinemate-imx283-state">Current CineMate IMX283 state<a class="headerlink" href="#current-cinemate-imx283-state" title="Permanent link">#</a></h2>
+<p>The running Pi explicitly uses:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="k">pi</span><span class="o">/</span><span class="n">libcamera</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ipa</span><span class="o">/</span><span class="n">rpi</span><span class="o">/</span><span class="n">pisp</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">imx283</span><span class="o">.</span><span class="n">json</span>
+</code></pre></div>
+
+<p>As of 2026-09-20, the previous compact experimental tuning has been replaced
+with the full IMX283 PiSP tuning tracked by the <strong>same local libcamera checkout
+used by this camera build</strong>.</p>
+<p>The experimental file was preserved byte-for-byte at:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/imx283-tuning-backups/imx283-experimental-20260920-231603.json
+</code></pre></div>
+
+<p>The active baseline contains:</p>
+<ul>
+<li>black_level 3200</li>
+<li>bayes-enabled AWB</li>
+<li>16 ct_curve points in this local libcamera revision</li>
+<li>19 temperature-dependent CCM entries</li>
+<li>the additional sensor/ISP tuning blocks that had been removed by the
+  experimental file</li>
+</ul>
+<p>CineMate successfully reads that ct_curve at startup and now generates its
+manual Kelvin WB gains from the sensor tuning instead of the fallback table.</p>
+<p>At the current 3300 K setting the active values are:</p>
+<div class="codehilite"><pre><span></span><code>wb_user = 3300
+cg_rb   = 1.3,2.5
+</code></pre></div>
+
+<p>and cinepi-raw was verified running with:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">--</span><span class="n">awbgains</span><span class="w"> </span><span class="mf">1.3</span><span class="p">,</span><span class="mf">2.5</span>
+<span class="o">--</span><span class="n">tuning</span><span class="o">-</span><span class="n">file</span><span class="w"> </span><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="k">pi</span><span class="o">/</span><span class="n">libcamera</span><span class="o">/</span><span class="n">src</span><span class="o">/</span><span class="n">ipa</span><span class="o">/</span><span class="n">rpi</span><span class="o">/</span><span class="n">pisp</span><span class="o">/</span><span class="n">data</span><span class="o">/</span><span class="n">imx283</span><span class="o">.</span><span class="n">json</span>
+</code></pre></div>
+
+<p>This file is a <strong>baseline</strong>, not a claim that the particular IMX283 module and
+optical stack are fully colour-calibrated.</p>
+<h2 id="important-upstream-finding">Important upstream finding<a class="headerlink" href="#important-upstream-finding" title="Permanent link">#</a></h2>
+<p>The current public raspberrypi/libcamera repository already contains a
+substantially fuller <strong>PiSP IMX283 tuning file</strong>, including:</p>
+<ul>
+<li>calibrated rpi.awb.ct_curve</li>
+<li>AWB priors and modes</li>
+<li>multiple CCMs across colour temperature</li>
+<li>ALSC calibration</li>
+<li>noise, GEQ, denoise and other PiSP blocks</li>
+</ul>
+<p>Source:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">https</span><span class="err">:</span><span class="c1">//github.com/raspberrypi/libcamera/blob/main/src/ipa/rpi/pisp/data/imx283.json</span>
+</code></pre></div>
+
+<p>Its current PiSP ct_curve is:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">2500</span><span class="p">,</span><span class="w"> </span><span class="mf">0.9437</span><span class="p">,</span><span class="w"> </span><span class="mf">0.2866</span>
+<span class="mf">2820</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8496</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3541</span>
+<span class="mf">2830</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8309</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3681</span>
+<span class="mf">2885</span><span class="p">,</span><span class="w"> </span><span class="mf">0.8183</span><span class="p">,</span><span class="w"> </span><span class="mf">0.3778</span>
+<span class="mf">3601</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6946</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4786</span>
+<span class="mf">3615</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6929</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4801</span>
+<span class="mf">3622</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6905</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4821</span>
+<span class="mf">4345</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6012</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5628</span>
+<span class="mf">4410</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5956</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5682</span>
+<span class="mf">4486</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5892</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5743</span>
+<span class="mf">4576</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5794</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5837</span>
+<span class="mf">5672</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5232</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6392</span>
+<span class="mf">5710</span><span class="p">,</span><span class="w"> </span><span class="mf">0.5188</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6436</span>
+<span class="mf">6850</span><span class="p">,</span><span class="w"> </span><span class="mf">0.4862</span><span class="p">,</span><span class="w"> </span><span class="mf">0.6773</span>
+</code></pre></div>
+
+<p>This gives us a credible sensor-specific baseline without buying a colour
+target first.</p>
+<p>It must still be validated on the actual camera module because the IR-cut
+filter, cover glass, lens shading and other optical-stack differences affect
+colour response.</p>
+<h2 id="what-ct_curve-actually-contains">What ct_curve actually contains<a class="headerlink" href="#what-ct_curve-actually-contains" title="Permanent link">#</a></h2>
+<p>Raspberry Pi's AWB tuning defines the curve as triples:</p>
+<div class="codehilite"><pre><span></span><code>[T, r, b]
+</code></pre></div>
+
+<p>where:</p>
+<ul>
+<li>T is colour temperature in kelvin;</li>
+<li>r is the red neutral-response coordinate used by AWB;</li>
+<li>b is the blue neutral-response coordinate used by AWB.</li>
+</ul>
+<p>In libcamera's AWB implementation, manually setting a colour temperature uses:</p>
+<div class="codehilite"><pre><span></span><code>red_gain   = 1 / r(T)
+green_gain = 1
+blue_gain  = 1 / b(T)
+</code></pre></div>
+
+<p>This is also how CineMate currently interprets the curve.</p>
+<p>For practical neutral-target measurements, the values correspond to the
+sensor's approximately normalised neutral RAW response:</p>
+<div class="codehilite"><pre><span></span><code>r ~= R / G
+b ~= B / G
+</code></pre></div>
+
+<p>after black subtraction and before white-balance gains.</p>
+<p>Example from the current upstream PiSP IMX283 curve:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">CCT</th>
+<th style="text-align: right;">r</th>
+<th style="text-align: right;">b</th>
+<th style="text-align: right;">red gain ~= 1/r</th>
+<th style="text-align: right;">blue gain ~= 1/b</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">2500 K</td>
+<td style="text-align: right;">0.9437</td>
+<td style="text-align: right;">0.2866</td>
+<td style="text-align: right;">1.06</td>
+<td style="text-align: right;">3.49</td>
+</tr>
+<tr>
+<td style="text-align: right;">2885 K</td>
+<td style="text-align: right;">0.8183</td>
+<td style="text-align: right;">0.3778</td>
+<td style="text-align: right;">1.22</td>
+<td style="text-align: right;">2.65</td>
+</tr>
+<tr>
+<td style="text-align: right;">3601 K</td>
+<td style="text-align: right;">0.6946</td>
+<td style="text-align: right;">0.4786</td>
+<td style="text-align: right;">1.44</td>
+<td style="text-align: right;">2.09</td>
+</tr>
+<tr>
+<td style="text-align: right;">4410 K</td>
+<td style="text-align: right;">0.5956</td>
+<td style="text-align: right;">0.5682</td>
+<td style="text-align: right;">1.68</td>
+<td style="text-align: right;">1.76</td>
+</tr>
+<tr>
+<td style="text-align: right;">5672 K</td>
+<td style="text-align: right;">0.5232</td>
+<td style="text-align: right;">0.6392</td>
+<td style="text-align: right;">1.91</td>
+<td style="text-align: right;">1.56</td>
+</tr>
+<tr>
+<td style="text-align: right;">6850 K</td>
+<td style="text-align: right;">0.4862</td>
+<td style="text-align: right;">0.6773</td>
+<td style="text-align: right;">2.06</td>
+<td style="text-align: right;">1.48</td>
+</tr>
+</tbody>
+</table>
+<p>These are <strong>not spectral-sensitivity curves</strong>. They are a compact calibration
+of where neutral illuminants fall in the camera's red/green and blue/green
+response space.</p>
+<h2 id="why-low-k-shadows-can-turn-green">Why low-K shadows can turn green<a class="headerlink" href="#why-low-k-shadows-can-turn-green" title="Permanent link">#</a></h2>
+<p>Several mechanisms can combine:</p>
+<ol>
+<li>At low colour temperature the blue channel needs a large gain.</li>
+<li>Shadows sit only slightly above the sensor black floor.</li>
+<li>A small R/Gr/Gb/B black-offset error becomes a large fraction of the
+   remaining signal.</li>
+<li>A strong CCM can amplify the residual channel error.</li>
+<li>The active baseline now has temperature-dependent CCMs, so the earlier
+   single-4000 K experimental matrix is no longer the expected cause.</li>
+<li>The active baseline also contains a ct_curve and CineMate derives manual
+   Kelvin gains from it, so the earlier fallback-table limitation no longer
+   applies.</li>
+</ol>
+<p>For this reason a green cast that grows in the shadows is not good evidence
+that "green gain is wrong". It may be a black-offset + WB + CCM interaction.</p>
+<h2 id="existing-dark-cal-experiment">Existing Dark cal experiment<a class="headerlink" href="#existing-dark-cal-experiment" title="Permanent link">#</a></h2>
+<p>The current Dark cal button captures a short capped-lens RAW clip and runs:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/darkcal/darkcal.py
+</code></pre></div>
+
+<p>The saved result from 2026-07-10 reports:</p>
+<div class="codehilite"><pre><span></span><code>frames:     10
+size:       3936 x 2176
+black:      197.8
+noise MAD:  1.48
+threshold:  257.8
+candidates: 5418
+</code></pre></div>
+
+<p>The DNG data is 12-bit. Raspberry Pi's SensorBlackLevels convention and tuning
+black levels are represented on a 16-bit scale. Therefore:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">197.8</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mf">16</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mf">3164.8</span>
+</code></pre></div>
+
+<p>which is close to the configured value of 3200.</p>
+<p>So the existing dark calibration is <strong>not useless or obviously bad</strong>. It
+actually supports the current global black-level order of magnitude.</p>
+<p>However, it is insufficient for colour calibration because it currently
+computes one median over the whole Bayer mosaic.</p>
+<p>It does not yet measure separately:</p>
+<div class="codehilite"><pre><span></span><code>R, Gr, Gb, B
+</code></pre></div>
+
+<p>and it does not build a black-level model versus analogue gain / ISO or sensor
+temperature.</p>
+<p>That matters because a per-channel residual of only a few 12-bit code values
+can become visible after large low-K blue gains and a strong CCM.</p>
+<p>The current hot-pixel list is also strongly concentrated in some edge columns,
+for example x around 80-87. Active-area/optical-black boundaries and
+packing/crop geometry should therefore be excluded before interpreting every
+candidate as a real defective photosite.</p>
+<h2 id="improved-dark-calibration-plan">Improved dark calibration plan<a class="headerlink" href="#improved-dark-calibration-plan" title="Permanent link">#</a></h2>
+<p><strong>Status:</strong> deferred for now. The existing Dark cal remains available and its
+saved result is preserved. When sensor calibration work resumes, this pipeline
+should be enhanced rather than replaced by ad-hoc visual black-level tuning.</p>
+<p>The next dark-calibration revision should:</p>
+<ol>
+<li>Capture multiple dark RAW frames with the lens fully capped.</li>
+<li>Record exposure, analogue gain/ISO and sensor temperature.</li>
+<li>Exclude non-active border/optical-black regions.</li>
+<li>Split the Bayer mosaic into R, Gr, Gb and B planes.</li>
+<li>Reject hot pixels before estimating the black floor.</li>
+<li>Store per-plane median and robust noise statistics.</li>
+<li>Repeat at several gains/ISOs.</li>
+<li>Verify whether one 3200 tuning value is adequate or whether remaining
+   per-channel offsets need handling elsewhere in the RAW/DNG pipeline.</li>
+</ol>
+<p>The first useful outputs should look like:</p>
+<div class="codehilite"><pre><span></span><code>ISO/gain, temperature,
+black_R, black_Gr, black_Gb, black_B,
+noise_R, noise_Gr, noise_Gb, noise_B
+</code></pre></div>
+
+<p>This requires no colour chart.</p>
+<h2 id="calibrating-ct_curve-without-an-expensive-colour-chart">Calibrating ct_curve without an expensive colour chart<a class="headerlink" href="#calibrating-ct_curve-without-an-expensive-colour-chart" title="Permanent link">#</a></h2>
+<p>A 24-patch or 140-patch colour target is <strong>not required</strong> to measure ct_curve.</p>
+<p>The CT curve only needs a spectrally neutral target under illuminants with
+known colour temperature.</p>
+<p>A practical workflow is:</p>
+<ol>
+<li>Start with the official upstream IMX283 PiSP curve.</li>
+<li>Use a reasonably neutral matte grey/white reference.</li>
+<li>Illuminate it uniformly.</li>
+<li>Capture RAW, not the processed preview.</li>
+<li>Subtract the per-channel black levels.</li>
+<li>Average a large central region for each Bayer plane.</li>
+<li>
+<p>Compute:</p>
+<p>G = mean(Gr, Gb)
+   r = R / G
+   b = B / G</p>
+</li>
+<li>
+<p>Record [actual_CCT, r, b].</p>
+</li>
+<li>Repeat at several temperatures.</li>
+<li>Fit/interpolate a smooth curve.</li>
+</ol>
+<p>Three to five good illuminants are already useful for validation. More points
+improve interpolation.</p>
+<h3 id="illuminant-caveat">Illuminant caveat<a class="headerlink" href="#illuminant-caveat" title="Permanent link">#</a></h3>
+<p>The number printed on a cheap LED lamp is not a laboratory CCT reference.
+LED spectral power distributions can be spiky and two lamps with the same CCT
+can produce different camera RGB ratios.</p>
+<p>For inexpensive experiments:</p>
+<ul>
+<li>tungsten/incandescent sources are useful at low CCT because their spectra
+  are close to a Planckian radiator;</li>
+<li>natural daylight can provide a useful high-CCT point when conditions are
+  stable;</li>
+<li>high-quality photographic LEDs can be used for intermediate checks, but
+  nominal CCT should not be treated as metrology.</li>
+</ul>
+<p>Because we already have an official IMX283 PiSP curve, the immediate goal
+should be <strong>validation</strong>, not rebuilding the curve from zero.</p>
+<h2 id="ccm-calibration-is-a-different-problem">CCM calibration is a different problem<a class="headerlink" href="#ccm-calibration-is-a-different-problem" title="Permanent link">#</a></h2>
+<p>A colour correction matrix maps the camera's device RGB response toward a
+target colour space.</p>
+<p>Unlike ct_curve, a good CCM needs chromatic information. A neutral grey card
+cannot solve a full 3x3 CCM.</p>
+<p>Without a measured colour target, the safest path is:</p>
+<ol>
+<li>Use the current official Raspberry Pi IMX283 CCM set as the baseline.</li>
+<li>Validate neutrals and common colours.</li>
+<li>Do not fit a new matrix from visually chosen colours.</li>
+<li>Later, if necessary, borrow or buy a measured target and run a repeatable
+   calibration.</li>
+</ol>
+<p>A printed home/office chart is not a trustworthy CCM reference because printer
+inks and paper have unknown spectral reflectance. A phone/monitor RGB chart is
+also not a full substitute: display primaries are narrow-band emitters and can
+produce metameric camera responses unlike real objects.</p>
+<h2 id="about-published-imx283-spectral-response-claims">About published IMX283 spectral-response claims<a class="headerlink" href="#about-published-imx283-spectral-response-claims" title="Permanent link">#</a></h2>
+<p>Do not use an unsourced "exact IMX283 spectral table" as a direct tuning input.</p>
+<p>Sony public sensor documentation does not expose enough CFA spectral data to
+justify treating a reconstructed table from related 1-inch sensors as exact.
+Even sensors with similar photodiodes can differ because of CFA dyes,
+microlenses, cover glass and the module's IR-cut filter.</p>
+<p>More importantly, even a correct sensor QE/CFA spectral curve would not by
+itself give a production CCM. A spectral calibration also needs the optical
+stack, illuminant spectra, target reflectance spectra and the intended colour
+space.</p>
+<p>For CineMate, the libcamera IMX283 ct_curve and CCM tuning data are much more
+directly relevant than guessed wavelength peaks.</p>
+<h2 id="current-calibration-strategy">Current calibration strategy<a class="headerlink" href="#current-calibration-strategy" title="Permanent link">#</a></h2>
+<p>For now:</p>
+<ol>
+<li>Use the full local-libcamera IMX283 PiSP tuning as the camera baseline.</li>
+<li>Keep LOOK: none as the neutral monitoring reference.</li>
+<li>Treat the official CinePi LUT pack as creative Rec.709 looks, not sensor
+   calibration.</li>
+<li>Defer Dark cal changes while preserving the existing result and script.</li>
+<li>Later, enhance Dark cal to per-Bayer-channel and multi-gain measurements.</li>
+<li>For final CCM work, use a genuinely measured high-quality colour target
+   rather than a cheap printed clone or an improvised screen target.</li>
+<li>Treat the libcamera IMX283 AWB/CCM data as a strong starting point but not
+   as a substitute for module-specific calibration of the actual sensor,
+   IR-cut/cover-glass stack and lens system.</li>
+</ol>
+<p>This keeps the camera on a defensible known baseline while leaving the full
+calibration pipeline for a dedicated later phase.</p>
+<h2 id="primary-references">Primary references<a class="headerlink" href="#primary-references" title="Permanent link">#</a></h2>
+<p>Raspberry Pi Camera Algorithm and Tuning Guide:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">https</span><span class="err">:</span><span class="c1">//datasheets.raspberrypi.com/camera/raspberry-pi-camera-guide.pdf</span>
+</code></pre></div>
+
+<p>Current Raspberry Pi libcamera PiSP IMX283 tuning:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">https</span><span class="err">:</span><span class="c1">//github.com/raspberrypi/libcamera/blob/main/src/ipa/rpi/pisp/data/imx283.json</span>
+</code></pre></div>
+
+<p>Raspberry Pi libcamera AWB implementation:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">https</span><span class="err">:</span><span class="c1">//github.com/raspberrypi/libcamera/blob/main/src/ipa/rpi/controller/rpi/awb.cpp</span>
+</code></pre></div>
+
+<p>Related CineMate documentation:</p>
+<ul>
+<li><a href="../3d-luts/">Real 3D LUTs in CineMate</a></li>
+<li><a href="../web-preview-responsive-pwa/">Web preview, responsive UI, PWA and Clips live state</a></li>
+</ul>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../audio-sync/" class="btn btn-neutral float-left" title="Audio sync & drift"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../simple-gui-refresh-tuning/" class="btn btn-neutral float-right" title="Simple GUI refresh tuning">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../audio-sync/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../simple-gui-refresh-tuning/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

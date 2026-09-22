@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/recovery-console/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Recovery console - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Recovery console";
+        var mkdocs_page_input_path = "recovery-console.md";
+        var mkdocs_page_url = "/cinematepi5/recovery-console/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Recovery console</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#what-it-is-for">What it is for</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#opening-the-console">Opening the console</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#responsive-interface">Responsive interface</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#read-only-diagnostics">Read-only diagnostics</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#write-protection-and-recovery-token">Write protection and recovery token</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#service-allowlist">Service allowlist</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#editing-settingsjson">Editing settings.json</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#atomic-writes-and-backups">Atomic writes and backups</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#editing-configtxt">Editing config.txt</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#configuration-fallback">Configuration fallback</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#systemd-service">systemd service</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#installing-manually">Installing manually</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#failure-boundaries">Failure boundaries</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#http-failure-logging">HTTP failure logging</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#full-settings-editor-hand-off">Full settings editor hand-off</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Install & maintenance</li>
+      <li class="breadcrumb-item active">Recovery console</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/recovery-console.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="recovery-console">Recovery console<a class="headerlink" href="#recovery-console" title="Permanent link">#</a></h1>
+<p>The recovery console is a small standalone web service on port <strong>8080</strong> for situations where the main CineMate application cannot start.</p>
+<p>It deliberately does not depend on Flask, Redis, the CineMate virtual environment or cinemate-autostart.service. It uses the system Python standard library and runs as its own systemd service, so a failure in the main camera application does not remove the diagnostic interface.</p>
+<h2 id="what-it-is-for">What it is for<a class="headerlink" href="#what-it-is-for" title="Permanent link">#</a></h2>
+<p>The recovery console provides a limited maintenance surface from a phone or computer connected to the camera:</p>
+<ul>
+<li>current service states and system facts</li>
+<li>the most recent CineMate startup-failure message</li>
+<li>recent service logs</li>
+<li>editing and validating src/settings.json</li>
+<li>optional editing of /boot/firmware/config.txt</li>
+<li>controlled restart actions for an explicit service allowlist</li>
+</ul>
+<p>It is not a replacement for the normal CineMate web interface. Use it when the normal interface on port 5000 is unavailable or the camera application fails early during startup.</p>
+<h2 id="opening-the-console">Opening the console<a class="headerlink" href="#opening-the-console" title="Permanent link">#</a></h2>
+<p>On the camera hotspot, browse to:</p>
+<div class="codehilite"><pre><span></span><code>http://10.42.0.1:8080
+</code></pre></div>
+
+<p>When mDNS is available, the same service can normally be reached at:</p>
+<div class="codehilite"><pre><span></span><code>http://cinepi.local:8080
+</code></pre></div>
+
+<p>The recovery service is intentionally independent of cinemate-autostart.service. Restarting or crashing CineMate therefore does not stop the recovery web server.</p>
+<h2 id="responsive-interface">Responsive interface<a class="headerlink" href="#responsive-interface" title="Permanent link">#</a></h2>
+<p>The recovery UI is intentionally self-contained: its HTML and CSS are emitted by the standard-library service and do not require JavaScript, a frontend bundle, Flask or the CineMate virtual environment.</p>
+<p>The status page adapts to the device instead of assuming a fixed viewport:</p>
+<ul>
+<li>desktop uses a near-full-width dashboard with compact service rows and a separate system-status panel</li>
+<li>tablet collapses the dashboard to a single main column where necessary</li>
+<li>phone uses stacked controls with full-width touch targets</li>
+<li>phone landscape has a dedicated compact-height layout</li>
+<li>navigation shows the active page explicitly</li>
+</ul>
+<p>The desktop shell is capped at 112 rem to use normal monitors efficiently without stretching the dashboard indefinitely on ultrawide displays.</p>
+<h2 id="read-only-diagnostics">Read-only diagnostics<a class="headerlink" href="#read-only-diagnostics" title="Permanent link">#</a></h2>
+<p>The diagnostic pages remain reachable without the recovery token:</p>
+<table>
+<thead>
+<tr>
+<th>Page</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>/</td>
+<td>Service states, uptime, storage information and recovery configuration state</td>
+</tr>
+<tr>
+<td>/health</td>
+<td>Lightweight health endpoint</td>
+</tr>
+<tr>
+<td>/why</td>
+<td>Last persisted CineMate startup-failure message</td>
+</tr>
+<tr>
+<td>/log</td>
+<td>Recent journal entries for allowlisted CineMate services</td>
+</tr>
+</tbody>
+</table>
+<p>Keeping these pages readable without authentication means a lost token does not prevent diagnosis.</p>
+<h2 id="write-protection-and-recovery-token">Write protection and recovery token<a class="headerlink" href="#write-protection-and-recovery-token" title="Permanent link">#</a></h2>
+<p>Anything that changes the system requires the recovery token.</p>
+<p>The installer generates a random token with Python's secrets module and stores it in:</p>
+<div class="codehilite"><pre><span></span><code>/etc/cinemate-recovery.conf
+</code></pre></div>
+
+<p>The file is owned by root and installed with mode 0600.</p>
+<p>To view the token locally over SSH:</p>
+<div class="codehilite"><pre><span></span><code>sudo awk -F= '$1 == "token" {print $2}' /etc/cinemate-recovery.conf
+</code></pre></div>
+
+<p>The console presents <strong>one page-level access-token field</strong> for privileged actions. The same field is used by every mutating control on that page, including service restarts and configuration saves.</p>
+<p>The token is deliberately not stored in cookies, localStorage or sessionStorage. Navigating to another page or reloading the current page clears it and requires re-entry. This keeps the recovery surface stateless and avoids leaving a privileged token behind in the browser.</p>
+<p>If no token is configured, the console becomes <strong>read-only</strong>. Mutating requests are denied instead of becoming unauthenticated.</p>
+<p>A reinstall preserves an existing non-empty token rather than silently rotating it.</p>
+<h2 id="service-allowlist">Service allowlist<a class="headerlink" href="#service-allowlist" title="Permanent link">#</a></h2>
+<p>The console does not pass arbitrary service names to systemctl. Only these services are accepted:</p>
+<ul>
+<li>cinemate-autostart</li>
+<li>wifi-hotspot</li>
+<li>storage-automount</li>
+</ul>
+<p>At the server boundary, only start, stop and restart are accepted actions. The web interface intentionally exposes <strong>Restart</strong> only; it does not surface generic Start/Stop controls.</p>
+<p>The hotspot has additional protection: even if a stop request is sent directly, the recovery console refuses it. This avoids cutting off the operator's only connection to the camera.</p>
+<h2 id="editing-settingsjson">Editing settings.json<a class="headerlink" href="#editing-settingsjson" title="Permanent link">#</a></h2>
+<p>The recovery editor works on the configuration actually used by this branch:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/cinemate/src/settings.json
+</code></pre></div>
+
+<p>A save uses a fail-closed validation ladder:</p>
+<ol>
+<li>run CineMate's own config_loader against the candidate; syntax, UTF-8, root shape and known runtime structure must pass</li>
+<li>if that validator exits unexpectedly, run the same validator against a known-good empty object</li>
+<li>only when the known-good self-test also fails is the CineMate validator considered unavailable, allowing fallback to Python's strict standard-library JSON parser</li>
+</ol>
+<p>A candidate-specific loader failure is therefore rejected rather than silently downgraded to syntax-only validation. The fallback remains available when CineMate's interpreter/import path is genuinely broken, which preserves the recovery console's independence.</p>
+<p>This branch uses strict JSON everywhere. Comments and trailing commas are rejected by normal startup, the recovery editor and the terminal editsettings helper.</p>
+<h2 id="atomic-writes-and-backups">Atomic writes and backups<a class="headerlink" href="#atomic-writes-and-backups" title="Permanent link">#</a></h2>
+<p>Configuration writes use a temporary file in the destination directory, flush the data, replace the target atomically, and fsync the directory where possible.</p>
+<p>Before replacing an existing configuration file, the console writes a backup under:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">/</span><span class="k">var</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">cinemate</span><span class="o">/</span><span class="n">backups</span><span class="o">/</span>
+</code></pre></div>
+
+<p>Backup retention preserves the oldest known backup and the most recent generations. Two writes in the same second receive unique backup names.</p>
+<h2 id="editing-configtxt">Editing config.txt<a class="headerlink" href="#editing-configtxt" title="Permanent link">#</a></h2>
+<p>Editing /boot/firmware/config.txt is disabled by default.</p>
+<p>The fallback configuration contains:</p>
+<div class="codehilite"><pre><span></span><code>allow_config_txt=false
+</code></pre></div>
+
+<p>Enable this capability only when it is actually required.</p>
+<p>When config.txt editing is enabled, a save creates a backup and arms a confirm-or-revert timer. After rebooting, confirm the new configuration from the recovery console. If the change is not confirmed before the timeout, the previous config is restored and the Pi is rebooted.</p>
+<p>This protects against changes that allow Linux to boot but leave the camera unusable.</p>
+<p>It cannot recover a change that prevents the Pi from reaching userspace at all. In that case the boot medium must be repaired externally.</p>
+<h2 id="configuration-fallback">Configuration fallback<a class="headerlink" href="#configuration-fallback" title="Permanent link">#</a></h2>
+<p>Recovery configuration is resolved independently of the main camera process.</p>
+<p>The service reads system.recovery from src/settings.json when that file is valid. Values present there override the installer fallback; omitted values, including the token, can be inherited from:</p>
+<div class="codehilite"><pre><span></span><code>/etc/cinemate-recovery.conf
+</code></pre></div>
+
+<p>If settings.json is malformed or missing, the fallback file becomes the complete recovery configuration. If neither source is usable, built-in defaults keep the diagnostic pages available but mutating actions remain locked because no token is available.</p>
+<p>This avoids a circular dependency where a broken or older settings file would prevent access to the service intended to repair it.</p>
+<h2 id="systemd-service">systemd service<a class="headerlink" href="#systemd-service" title="Permanent link">#</a></h2>
+<p>The service is:</p>
+<div class="codehilite"><pre><span></span><code>cinemate-recovery.service
+</code></pre></div>
+
+<p>Useful service commands are:</p>
+<div class="codehilite"><pre><span></span><code>sudo systemctl status cinemate-recovery
+sudo systemctl restart cinemate-recovery
+journalctl -u cinemate-recovery -f
+</code></pre></div>
+
+<p>It runs as root because its restricted maintenance functions include service control and optional config.txt writes. The HTTP handler compensates for that privilege with a small standard-library-only runtime, a fixed service/action allowlist, token checks on mutating requests, atomic writes and action logging.</p>
+<h2 id="installing-manually">Installing manually<a class="headerlink" href="#installing-manually" title="Permanent link">#</a></h2>
+<p>The normal CineMate installer enables the recovery service by default. It can be disabled during installation with:</p>
+<div class="codehilite"><pre><span></span><code>ENABLE_RECOVERY_CONSOLE_SERVICE=0
+</code></pre></div>
+
+<p>On an existing checkout, install and enable only this service with:</p>
+<div class="codehilite"><pre><span></span><code>sudo make -C /home/pi/cinemate/services enable-cinemate-recovery
+</code></pre></div>
+
+<p>A valid /etc/cinemate-recovery.conf should be present before enabling write actions.</p>
+<h2 id="failure-boundaries">Failure boundaries<a class="headerlink" href="#failure-boundaries" title="Permanent link">#</a></h2>
+<p>The recovery console is designed to survive failures in:</p>
+<ul>
+<li>CineMate application startup</li>
+<li>Redis</li>
+<li>Flask and other CineMate Python packages</li>
+<li>the CineMate virtual environment</li>
+<li>malformed settings.json</li>
+</ul>
+<p>It cannot recover a Pi that never boots far enough to start systemd, a failed boot device, or a network failure that prevents all access to the Pi.</p>
+<h2 id="http-failure-logging">HTTP failure logging<a class="headerlink" href="#http-failure-logging" title="Permanent link">#</a></h2>
+<p>Phone and browser clients can close keep-alive connections abruptly while navigating, sleeping or changing networks. The threaded recovery server suppresses only the routine ConnectionResetError and BrokenPipeError cases at the server boundary so they do not flood the journal with misleading tracebacks.</p>
+<p>Other server exceptions are not suppressed and continue through Python's normal error-reporting path.</p>
+<h2 id="full-settings-editor-hand-off">Full settings editor hand-off<a class="headerlink" href="#full-settings-editor-hand-off" title="Permanent link">#</a></h2>
+<p>The recovery navigation links to the full settings editor on port 5000. When CineMate is active, use that semantic editor for normal configuration. The recovery console deliberately keeps its own raw strict-JSON editor and does not import Flask or CineMate modules, so settings can still be repaired when the main application is broken or unavailable.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../system-services/" class="btn btn-neutral float-left" title="System services"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../storage-preroll/" class="btn btn-neutral float-right" title="Storage pre-roll warm-up">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../system-services/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../storage-preroll/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

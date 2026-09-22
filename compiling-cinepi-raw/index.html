@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/compiling-cinepi-raw/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Recompiling cinepi-raw - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Recompiling cinepi-raw";
+        var mkdocs_page_input_path = "compiling-cinepi-raw.md";
+        var mkdocs_page_url = "/cinematepi5/compiling-cinepi-raw/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Recompiling cinepi-raw</a>
+    <ul class="current">
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Advanced</li>
+      <li class="breadcrumb-item active">Recompiling cinepi-raw</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/compiling-cinepi-raw.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="recompiling-cinepi-raw">Recompiling cinepi-raw<a class="headerlink" href="#recompiling-cinepi-raw" title="Permanent link">#</a></h1>
+<p>For easy later rebuilding and installation of <code>cinepi-raw</code> you can create a reusable <code>compile-raw.sh</code> helper. It reuses the existing Meson build directory by default, falls back to <code>--wipe</code> only when the build directory is not reusable, and still lets you force a clean setup when you need one.</p>
+<p>On boards with less than 4 GB RAM (1 GB / 2 GB models) the script automatically adds a temporary compressed-RAM (zram) swap for the build and removes it afterwards, so <code>cinepi_raw.cpp</code> doesn't run the compiler out of memory. It's still faster on a 4 GB+ model.</p>
+<div class="highlight"><pre><span></span><code>cat<span class="w"> </span>&gt;<span class="w"> </span>/home/pi/compile-raw.sh<span class="w"> </span><span class="s">&lt;&lt;'EOF'</span>
+<span class="s">#!/usr/bin/env bash</span>
+<span class="s">set -Eeuo pipefail</span>
+
+<span class="s">CINEPI_RAW_DIR="${CINEPI_RAW_DIR:-/home/pi/cinepi-raw}"</span>
+<span class="s">CPP_MJPEG_STREAMER_DIR="${CPP_MJPEG_STREAMER_DIR:-/home/pi/cpp-mjpeg-streamer}"</span>
+<span class="s">BUILD_JOBS="${BUILD_JOBS:-$(c=$(nproc 2&gt;/dev/null || echo 4); mb=$(awk '/^MemTotal:/{print int($2/1024); exit}' /proc/meminfo 2&gt;/dev/null || echo 0); j=$c; if [ "$mb" -gt 0 ] &amp;&amp; [ "$mb" -lt 3000 ]; then j=$(( mb / 1536 )); if [ "$j" -lt 1 ]; then j=1; fi; if [ "$j" -gt "$c" ]; then j=$c; fi; fi; echo "$j")}"</span>
+<span class="s">BUILD_DIR="${BUILD_DIR:-$CINEPI_RAW_DIR/build}"</span>
+<span class="s">PKG_CONFIG_PATH="$CPP_MJPEG_STREAMER_DIR/build:${PKG_CONFIG_PATH:-}"</span>
+<span class="s">export PKG_CONFIG_PATH</span>
+<span class="s">FORCE_WIPE="${FORCE_WIPE:-0}"</span>
+
+<span class="s">is_true() {</span>
+<span class="s">    case "${1,,}" in</span>
+<span class="s">        1|true|yes|on) return 0 ;;</span>
+<span class="s">        *) return 1 ;;</span>
+<span class="s">    esac</span>
+<span class="s">}</span>
+
+<span class="s">build_dir_has_entries() {</span>
+<span class="s">    [[ -d "$1" ]] || return 1</span>
+<span class="s">    find "$1" -mindepth 1 -maxdepth 1 -print -quit | grep -q .</span>
+<span class="s">}</span>
+
+<span class="s"># Temporary build swap for 1-2 GB boards: cinepi_raw.cpp needs ~2 GB at -O3 and</span>
+<span class="s"># OOM-kills cc1plus. Use compressed RAM (zram) -- no SD/eMMC writes -- removed on</span>
+<span class="s"># exit, so the running camera never swaps. Skipped when swap is already active</span>
+<span class="s"># or on boards with 4 GB+ RAM (&gt;= 3000 MB).</span>
+<span class="s">CR_ZRAM_DEV=""</span>
+<span class="s">cr_cleanup_zram() {</span>
+<span class="s">    [[ -n "${CR_ZRAM_DEV:-}" ]] || return 0</span>
+<span class="s">    sudo swapoff "$CR_ZRAM_DEV" 2&gt;/dev/null || true</span>
+<span class="s">    sudo zramctl --reset "$CR_ZRAM_DEV" 2&gt;/dev/null || true</span>
+<span class="s">    CR_ZRAM_DEV=""</span>
+<span class="s">}</span>
+<span class="s">trap cr_cleanup_zram EXIT</span>
+<span class="s">cr_mem_mb=$(awk '/^MemTotal:/{print int($2/1024); exit}' /proc/meminfo 2&gt;/dev/null || echo 0)</span>
+<span class="s">cr_swap_lines=$(wc -l &lt; /proc/swaps 2&gt;/dev/null || echo 1)</span>
+<span class="s">if [[ "$cr_mem_mb" -gt 0 &amp;&amp; "$cr_mem_mb" -lt 3000 &amp;&amp; "$cr_swap_lines" -le 1 ]]; then</span>
+<span class="s">    sudo modprobe zram 2&gt;/dev/null || true</span>
+<span class="s">    CR_ZRAM_DEV=$(sudo zramctl --find --size 4G --algorithm zstd 2&gt;/dev/null || sudo zramctl --find --size 4G 2&gt;/dev/null || true)</span>
+<span class="s">    if [[ -n "$CR_ZRAM_DEV" ]] &amp;&amp; sudo mkswap "$CR_ZRAM_DEV" &gt;/dev/null 2&gt;&amp;1 &amp;&amp; sudo swapon -p 100 "$CR_ZRAM_DEV" 2&gt;/dev/null; then</span>
+<span class="s">        printf '[compile-raw] Low-RAM board (%s MB): added 4 GB zram build swap on %s (removed on exit)\n' "$cr_mem_mb" "$CR_ZRAM_DEV"</span>
+<span class="s">    else</span>
+<span class="s">        [[ -n "$CR_ZRAM_DEV" ]] &amp;&amp; sudo zramctl --reset "$CR_ZRAM_DEV" 2&gt;/dev/null || true</span>
+<span class="s">        CR_ZRAM_DEV=""</span>
+<span class="s">        printf '[compile-raw] WARNING: could not set up zram build swap; low-RAM build may OOM\n'</span>
+<span class="s">    fi</span>
+<span class="s">fi</span>
+
+<span class="s">printf '[compile-raw] Source: %s\n' "$CINEPI_RAW_DIR"</span>
+<span class="s">printf '[compile-raw] Build directory: %s\n' "$BUILD_DIR"</span>
+<span class="s">printf '[compile-raw] Using PKG_CONFIG_PATH=%s\n' "$PKG_CONFIG_PATH"</span>
+<span class="s">if is_true "$FORCE_WIPE"; then</span>
+<span class="s">    printf '[compile-raw] FORCE_WIPE requested; running meson setup --wipe\n'</span>
+<span class="s">    meson setup "$BUILD_DIR" "$CINEPI_RAW_DIR" --wipe</span>
+<span class="s">elif [[ -f "$BUILD_DIR/build.ninja" || -f "$BUILD_DIR/meson-private/coredata.dat" ]]; then</span>
+<span class="s">    printf '[compile-raw] Reusing existing Meson build directory with --reconfigure\n'</span>
+<span class="s">    if ! meson setup "$BUILD_DIR" "$CINEPI_RAW_DIR" --reconfigure; then</span>
+<span class="s">        printf '[compile-raw] Reconfigure failed; retrying with --wipe\n'</span>
+<span class="s">        meson setup "$BUILD_DIR" "$CINEPI_RAW_DIR" --wipe</span>
+<span class="s">    fi</span>
+<span class="s">elif build_dir_has_entries "$BUILD_DIR"; then</span>
+<span class="s">    printf '[compile-raw] Build directory is non-empty but not reusable; running meson setup --wipe\n'</span>
+<span class="s">    meson setup "$BUILD_DIR" "$CINEPI_RAW_DIR" --wipe</span>
+<span class="s">else</span>
+<span class="s">    printf '[compile-raw] Running initial meson setup\n'</span>
+<span class="s">    meson setup "$BUILD_DIR" "$CINEPI_RAW_DIR"</span>
+<span class="s">fi</span>
+<span class="s">printf '[compile-raw] Building with ninja (%s jobs)\n' "$BUILD_JOBS"</span>
+<span class="s">ninja -C "$BUILD_DIR" -j "$BUILD_JOBS"</span>
+<span class="s">printf '[compile-raw] Installing cinepi-raw\n'</span>
+<span class="s">sudo env PKG_CONFIG_PATH="$PKG_CONFIG_PATH" meson install -C "$BUILD_DIR"</span>
+<span class="s">printf '[compile-raw] Refreshing linker cache\n'</span>
+<span class="s">sudo ldconfig</span>
+<span class="s">EOF</span>
+chmod<span class="w"> </span>+x<span class="w"> </span>/home/pi/compile-raw.sh
+</code></pre></div>
+<p>Now run it:</p>
+<div class="highlight"><pre><span></span><code>/home/pi/compile-raw.sh
+</code></pre></div>
+<p>If you need a fully clean Meson rebuild, run:</p>
+<div class="highlight"><pre><span></span><code><span class="nv">FORCE_WIPE</span><span class="o">=</span><span class="m">1</span><span class="w"> </span>/home/pi/compile-raw.sh
+</code></pre></div>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../installation-steps/" class="btn btn-neutral float-left" title="Installation & building from source"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../audio-sync/" class="btn btn-neutral float-right" title="Audio sync & drift">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../installation-steps/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../audio-sync/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="470" viewBox="0 0 1200 470">
+<rect width="1200" height="470" fill="#101010"/>
+<g font-family="sans-serif" fill="#eee">
+<text x="35" y="42" font-size="25" font-weight="bold">How to read the three CinePi scopes</text>
+<text x="55" y="86" font-size="18" font-weight="bold">Histogram</text>
+<text x="435" y="86" font-size="18" font-weight="bold">Waveform</text>
+<text x="820" y="86" font-size="18" font-weight="bold">Vectorscope</text>
+</g>
+<rect x="45" y="110" width="300" height="220" fill="#090909" stroke="#555"/>
+<path d="M50,320 C90,318 95,250 135,272 C170,292 190,140 225,180 C260,220 284,200 340,245" fill="none" stroke="#eee" stroke-width="3"/>
+<path d="M50,323 C90,320 100,275 140,285 C175,296 205,165 235,196 C270,230 292,212 340,256" fill="none" stroke="#f55"/>
+<path d="M50,326 C95,323 108,288 145,297 C185,304 210,180 244,207 C278,240 300,225 340,267" fill="none" stroke="#5f6"/>
+<path d="M50,329 C100,326 115,299 150,306 C190,313 218,193 250,218 C285,250 305,237 340,278" fill="none" stroke="#58f"/>
+<text x="47" y="355" fill="#bbb" font-family="sans-serif" font-size="14">shadows</text><text x="276" y="355" fill="#bbb" font-family="sans-serif" font-size="14">highlights</text>
+<rect x="420" y="110" width="320" height="220" fill="#090909" stroke="#555"/>
+<g stroke="#3d6449"><line x1="420" y1="132" x2="740" y2="132"/><line x1="420" y1="176" x2="740" y2="176"/><line x1="420" y1="220" x2="740" y2="220"/><line x1="420" y1="286" x2="740" y2="286"/></g>
+<path d="M425,285 C450,265 465,276 485,235 C510,200 530,255 552,160 C570,132 590,155 612,185 C640,225 665,158 688,128 C708,160 720,175 735,140" fill="none" stroke="#eee" stroke-width="3"/>
+<g fill="#bbb" font-family="sans-serif" font-size="13"><text x="745" y="137">100</text><text x="745" y="181">90</text><text x="745" y="225">70</text><text x="745" y="291">50</text></g>
+<rect x="805" y="110" width="320" height="300" fill="#090909" stroke="#555"/>
+<circle cx="965" cy="260" r="120" fill="none" stroke="#666"/><line x1="845" y1="260" x2="1085" y2="260" stroke="#444"/><line x1="965" y1="140" x2="965" y2="380" stroke="#444"/>
+<line x1="965" y1="260" x2="905" y2="158" stroke="#d8a76d" stroke-width="2"/>
+<path d="M965,260 C942,247 930,236 918,218 C909,203 900,198 892,190" fill="none" stroke="#e5c462" stroke-width="10" opacity=".75"/>
+<g font-family="sans-serif" font-size="14" fill="#ddd"><text x="1090" y="265">B</text><text x="825" y="265">Y</text><text x="960" y="132">R</text><text x="960" y="400">C</text></g>
+<g font-family="sans-serif" font-size="16" fill="#ddd">
+<text x="45" y="405">Left/right = dark/bright.</text><text x="45" y="430">RGB piles at right edge → channel clipping.</text>
+<text x="420" y="405">Horizontal position follows the image.</text><text x="420" y="430">Vertical position = brightness in IRE.</text>
+<text x="805" y="435">Angle = hue · radius = saturation · centre = neutral.</text>
+</g>
+</svg>

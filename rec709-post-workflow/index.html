@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/rec709-post-workflow/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Rec.709 and post workflow - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Rec.709 and post workflow";
+        var mkdocs_page_input_path = "rec709-post-workflow.md";
+        var mkdocs_page_url = "/cinematepi5/rec709-post-workflow/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Rec.709 and post workflow</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#reference-signal">Reference signal</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#live-camera-preview">Live Camera preview</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#reference-clips-proxy">Reference Clips proxy</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#regenerated-legacy-proxy">Regenerated legacy proxy</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#official-cinepi-luts">Official CinePi LUTs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#third-party-lut-isolation">Third-party LUT isolation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#davinci-resolve-reference-proxy-workflow">DaVinci Resolve: reference-proxy workflow</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#cinemadng-workflow">CinemaDNG workflow</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-rec709-means-here">What Rec.709 means here</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#distribution-and-licensing">Distribution and licensing</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Using the camera</li>
+      <li class="breadcrumb-item active">Rec.709 and post workflow</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/rec709-post-workflow.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="cinepi-rec709-and-post-production-workflow">CinePi Rec.709 and post-production workflow<a class="headerlink" href="#cinepi-rec709-and-post-production-workflow" title="Permanent link">#</a></h1>
+<p>This document defines the current CinePi reference display pipeline and how the
+official CinePi .cube looks are intended to move between CineMate and post
+software such as DaVinci Resolve.</p>
+<h2 id="reference-signal">Reference signal<a class="headerlink" href="#reference-signal" title="Permanent link">#</a></h2>
+<p>The live CinePi camera configuration requests a libcamera video stream with:</p>
+<ul>
+<li>BT.709 / Rec.709 primaries</li>
+<li>BT.709 transfer function</li>
+<li>BT.709 YCbCr encoding</li>
+<li>PiSP full-range YCbCr processing</li>
+</ul>
+<p>The current 3936x2176 RAW mode aliases the configured low-resolution
+1446x800 YUV420 stream as the live preview source.</p>
+<p>The important code paths are:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/cinepi-raw/core/rpicam_app.cpp
+/home/pi/cinepi-raw/cinepi/mjpegPreviewStage.cpp
+</code></pre></div>
+
+<p>The PiSP backend deliberately uses its rec709_full YCbCr matrix for this
+buffer.</p>
+<h2 id="live-camera-preview">Live Camera preview<a class="headerlink" href="#live-camera-preview" title="Permanent link">#</a></h2>
+<p>The 1446x800 YUV420 ISP stream is JPEG-compressed for the HTTP MJPEG preview.
+The RGB/YUV values originate from the libcamera IMX283 tuning and Rec.709 ISP
+pipeline.</p>
+<p>Current limitation: the MJPEG JPEG files are JFIF and do not yet carry an ICC
+profile. Browsers therefore apply their normal untagged-JPEG display behaviour.
+This does not change the numeric input expected by the CinePi .cube shader, but
+it means the web UI is not yet a substitute for a calibrated reference
+monitor.</p>
+<h2 id="reference-clips-proxy">Reference Clips proxy<a class="headerlink" href="#reference-clips-proxy" title="Permanent link">#</a></h2>
+<p>New recordings use the record-time proxy writer in cinepi-raw.</p>
+<p>The writer takes the same ordered libcamera YUV420 frames used for preview and
+feeds them directly to x264. No second RAW development step is performed.</p>
+<p>As of 2026-09-21 those files are explicitly tagged:</p>
+<div class="codehilite"><pre><span></span><code>color_primaries = bt709
+color_transfer  = bt709
+color_space     = bt709
+color_range     = pc / full
+</code></pre></div>
+
+<p>A successful reference proxy also writes:</p>
+<div class="codehilite"><pre><span></span><code><span class="na">.proxy.json</span>
+</code></pre></div>
+
+<p>with:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">pipeline</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">libcamera</span><span class="o">-</span><span class="n">rec709</span><span class="o">-</span><span class="n">realtime</span>
+<span class="n">reference_color</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="k">true</span>
+</code></pre></div>
+
+<p>This is the preferred CineMate Clips source when comparing a CinePi look with
+post-production software.</p>
+<h2 id="regenerated-legacy-proxy">Regenerated legacy proxy<a class="headerlink" href="#regenerated-legacy-proxy" title="Permanent link">#</a></h2>
+<p>If a proxy has been deleted, the current background proxy generator can rebuild
+one from the CinemaDNG sequence. That path uses the lightweight dng2rgb tool.</p>
+<p>At present dng2rgb performs:</p>
+<ul>
+<li>RAW unpack/decompression</li>
+<li>ActiveArea crop</li>
+<li>black subtraction</li>
+<li>AsShotNeutral white balance</li>
+<li>half-resolution RGGB superpixel demosaic</li>
+<li>simple gamma 2.2 encoding</li>
+</ul>
+<p>It does <strong>not</strong> reproduce the complete libcamera CCM/tone/ISP pipeline.</p>
+<p>Regenerated proxies therefore write .proxy.json with:</p>
+<div class="codehilite"><pre><span></span><code>pipeline = dng2rgb-fallback-v1
+reference_color = false
+</code></pre></div>
+
+<p>They are playback convenience proxies, not colour-reference proxies.</p>
+<p>A future calibration phase may replace this fallback with a fuller
+libcamera/DNG colour-development path.</p>
+<h2 id="official-cinepi-luts">Official CinePi LUTs<a class="headerlink" href="#official-cinepi-luts" title="Permanent link">#</a></h2>
+<p>Top-level luts/cinepi-*.cube files are generated entirely by:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">tools</span><span class="o">/</span><span class="n">generate_cinepi_luts</span><span class="o">.</span><span class="n">py</span>
+</code></pre></div>
+
+<p>Current first-party looks:</p>
+<ul>
+<li>CinePi Rec.709 Reference</li>
+<li>CinePi Natural</li>
+<li>CinePi Filmic Neutral</li>
+<li>CinePi Cinema Warm</li>
+<li>CinePi Soft Portrait</li>
+</ul>
+<p>The reference LUT is an identity transform. Its purpose is to establish and
+test the Rec.709 input contract.</p>
+<p>The creative looks all take CinePi Rec.709 display-referred RGB as input and
+return the same signal domain with a creative transform.</p>
+<p>The generator is deterministic and the SHA-256 values are stored in:</p>
+<div class="codehilite"><pre><span></span><code>luts/cinepi-official-manifest.json
+</code></pre></div>
+
+<h2 id="third-party-lut-isolation">Third-party LUT isolation<a class="headerlink" href="#third-party-lut-isolation" title="Permanent link">#</a></h2>
+<p>Downloaded development LUTs are stored under:</p>
+<div class="codehilite"><pre><span></span><code>luts/third_party_dev/
+</code></pre></div>
+
+<p>The CineMate API intentionally scans only top-level luts/*.cube. Therefore
+third-party development assets do not appear in the normal Camera/Clips LUT
+menu and are not part of the official CinePi pack.</p>
+<h2 id="davinci-resolve-reference-proxy-workflow">DaVinci Resolve: reference-proxy workflow<a class="headerlink" href="#davinci-resolve-reference-proxy-workflow" title="Permanent link">#</a></h2>
+<p>For the closest current Camera -&gt; Clips -&gt; Resolve comparison:</p>
+<ol>
+<li>Record a <strong>new</strong> CinePi clip after the Rec.709 proxy update.</li>
+<li>Use its record-time proxy, not a regenerated fallback proxy.</li>
+<li>Import proxy.mp4 into Resolve.</li>
+<li>Confirm Resolve sees BT.709 metadata and Full data levels. If automatic
+   interpretation is wrong, set the clip Data Levels to Full manually.</li>
+<li>Use a normal SDR Rec.709 monitoring/output setup.</li>
+<li>Install the same cinepi-*.cube file used in CineMate.</li>
+<li>Apply that LUT to the clip without an additional input transform in front of
+   it.</li>
+</ol>
+<p>The same .cube data is then being applied to the same Rec.709 display-referred
+signal domain.</p>
+<p>For a strict numeric A/B test, avoid adding automatic colour-space transforms,
+contrast nodes or output-look nodes ahead of the CinePi LUT.</p>
+<h2 id="cinemadng-workflow">CinemaDNG workflow<a class="headerlink" href="#cinemadng-workflow" title="Permanent link">#</a></h2>
+<p>CinemaDNG is the camera negative, not the already-developed Rec.709 preview.</p>
+<p>Resolve must first develop the RAW data. CinePi DNG files contain sensor
+black/white metadata, AsShotNeutral and colour-matrix data derived from camera
+metadata, but Resolve's RAW development is not the same code path as the
+libcamera PiSP ISP.</p>
+<p>Therefore:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">DNG</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">Resolve</span><span class="w"> </span><span class="n">RAW</span><span class="w"> </span><span class="n">development</span><span class="w"> </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CinePi</span><span class="w"> </span><span class="n">LUT</span>
+</code></pre></div>
+
+<p>can use the exact same creative LUT, but the pre-LUT image is not yet
+guaranteed pixel-identical to:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">IMX283</span><span class="w"> </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">libcamera</span><span class="w"> </span><span class="n">PiSP</span><span class="w"> </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">CinePi</span><span class="w"> </span><span class="n">LUT</span>
+</code></pre></div>
+
+<p>That final RAW-development parity is a separate future colour-calibration
+project. It must not be falsely solved by baking an arbitrary correction into
+the creative LUT.</p>
+<h2 id="what-rec709-means-here">What Rec.709 means here<a class="headerlink" href="#what-rec709-means-here" title="Permanent link">#</a></h2>
+<p>Rec.709 is the technical interchange/reference signal used by the CinePi
+monitoring path. It is not itself a cinematic look.</p>
+<p>The official CinePi creative LUTs sit <em>after</em> that technical baseline:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">IMX283</span><span class="w"> </span><span class="n">RAW</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">libcamera</span><span class="w"> </span><span class="n">IMX283</span><span class="w"> </span><span class="n">tuning</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="n">ISP</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">CinePi</span><span class="w"> </span><span class="n">Rec</span><span class="o">.</span><span class="mi">709</span><span class="w"> </span><span class="n">reference</span><span class="w"> </span><span class="k">signal</span>
+<span class="w">  </span><span class="o">-&gt;</span><span class="w"> </span><span class="n">optional</span><span class="w"> </span><span class="n">CinePi</span><span class="w"> </span><span class="n">creative</span><span class="w"> </span><span class="o">.</span><span class="n">cube</span>
+</code></pre></div>
+
+<p>This separation is what makes the creative files portable to post software.</p>
+<h2 id="distribution-and-licensing">Distribution and licensing<a class="headerlink" href="#distribution-and-licensing" title="Permanent link">#</a></h2>
+<p>The official cinepi-*.cube files contain no downloaded third-party LUT data.</p>
+<p>The CineMate repository currently has no top-level public software licence.
+Consequently the LUT metadata currently says pending-project-license. Before a
+public/open-source release, choose the project licence deliberately and update
+the LUT release metadata.</p>
+<p>Do not ship luts/third_party_dev as first-party CinePi assets.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../3d-luts/" class="btn btn-neutral float-left" title="Real 3D LUTs"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../monitoring-tools-user-guide/" class="btn btn-neutral float-right" title="Monitoring tools — operator guide">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../3d-luts/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../monitoring-tools-user-guide/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

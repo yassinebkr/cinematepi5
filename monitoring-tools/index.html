@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/monitoring-tools/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Monitoring tools — implementation - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Monitoring tools \u2014 implementation";
+        var mkdocs_page_input_path = "monitoring-tools.md";
+        var mkdocs_page_url = "/cinematepi5/monitoring-tools/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Monitoring tools — implementation</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#measurement-domain-and-luts">Measurement domain and LUTs</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#signal-range">Signal range</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#zebra">Zebra</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#focus-peaking">Focus Peaking</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#histogram">Histogram</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#waveform">Waveform</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vectorscope">Vectorscope</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ettr-advisor">ETTR advisor</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level">LEVEL</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#performance">Performance</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Using the camera</li>
+      <li class="breadcrumb-item active">Monitoring tools — implementation</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/monitoring-tools.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="cinepi-monitoring-tools">CinePi monitoring tools<a class="headerlink" href="#cinepi-monitoring-tools" title="Permanent link">#</a></h1>
+<p>For camera-operation instructions, examples and visual guides, see <a href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>.</p>
+<p>CineMate provides lightweight on-camera exposure, colour, focus and orientation
+aids derived from the live libcamera Rec.709 preview.</p>
+<h2 id="measurement-domain-and-luts">Measurement domain and LUTs<a class="headerlink" href="#measurement-domain-and-luts" title="Permanent link">#</a></h2>
+<p>The exposure/focus analysis uses the source CinePi Rec.709 preview.</p>
+<p>When a creative 3D LUT is selected, Zebra and Focus Peaking are composited
+above the LUT canvas so they remain visible. Their measurements intentionally
+remain source-referred: a creative LUT must not hide source clipping or change
+which source edges are judged in focus.</p>
+<p>Histogram, Waveform, Vectorscope and ETTR likewise describe the source preview.</p>
+<p>A future optional SOURCE / DISPLAY-LUT analysis mode can be added for users
+who want scopes to inspect the graded display image.</p>
+<h2 id="signal-range">Signal range<a class="headerlink" href="#signal-range" title="Permanent link">#</a></h2>
+<p>PiSP supplies the CinePi Rec.709 preview as full-range YCbCr internally. After
+JPEG/browser decode the monitoring code receives full-range RGB values in
+0..255.</p>
+<p>Monitoring v2 therefore computes BT.709 luma directly from RGB:</p>
+<div class="codehilite"><pre><span></span><code>Y' ~= 0.2126 R' + 0.7152 G' + 0.0722 B'
+</code></pre></div>
+
+<p>The old code incorrectly remapped this RGB-derived value as if it were still
+limited-range 16..235. That made highlight thresholds and ETTR too aggressive.</p>
+<h2 id="zebra">Zebra<a class="headerlink" href="#zebra" title="Permanent link">#</a></h2>
+<p>Current default:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">95</span><span class="w"> </span><span class="n">IRE</span>
+</code></pre></div>
+
+<p>Behaviour:</p>
+<ul>
+<li>striped red: source luma &gt;= 95 IRE</li>
+<li>solid red: one or more source RGB channels &gt;= 254</li>
+</ul>
+<p>The separate solid clipping state is important because a saturated colour can
+clip one channel before luma reaches the zebra threshold.</p>
+<p>Possible future control: selectable 70 / 90 / 95 / 100 IRE thresholds.</p>
+<h2 id="focus-peaking">Focus Peaking<a class="headerlink" href="#focus-peaking" title="Permanent link">#</a></h2>
+<p>Peaking v2 no longer uses a simple two-pixel difference.</p>
+<p>Pipeline:</p>
+<ol>
+<li>BT.709 luma</li>
+<li>separable 3x3 Gaussian denoise</li>
+<li>Sobel horizontal + vertical gradient</li>
+<li>estimate an image noise floor from the gradient distribution</li>
+<li>derive an adaptive threshold</li>
+<li>local-maximum suppression</li>
+<li>cyan one-pixel contour overlay, scaled with the preview</li>
+</ol>
+<p>This is substantially less sensitive to high-ISO pixel noise and generates
+thinner contours around genuinely high-frequency detail.</p>
+<p>The computed threshold/noise floor is exposed in the PEAK button tooltip for
+diagnostics.</p>
+<h2 id="histogram">Histogram<a class="headerlink" href="#histogram" title="Permanent link">#</a></h2>
+<p>The histogram now shows:</p>
+<ul>
+<li>red channel</li>
+<li>green channel</li>
+<li>blue channel</li>
+<li>white BT.709 luma</li>
+</ul>
+<p>It uses 128 bins and logarithmic vertical scaling so sparse highlight/shadow
+information remains visible instead of being crushed by a large midtone peak.</p>
+<h2 id="waveform">Waveform<a class="headerlink" href="#waveform" title="Permanent link">#</a></h2>
+<p>The waveform uses full-range BT.709 luma and a logarithmic density display.</p>
+<p>Reference guides are drawn at:</p>
+<ul>
+<li>0 IRE</li>
+<li>18 IRE</li>
+<li>50 IRE</li>
+<li>70 IRE</li>
+<li>90 IRE</li>
+<li>100 IRE</li>
+</ul>
+<p>The backing store was increased from 120x80 to 160x100 while retaining the
+compact UI display size.</p>
+<h2 id="vectorscope">Vectorscope<a class="headerlink" href="#vectorscope" title="Permanent link">#</a></h2>
+<p>Vectorscope v2 derives chroma using Rec.709 Y'CbCr coefficients instead of the
+previous approximate red/blue deltas.</p>
+<p>It adds:</p>
+<ul>
+<li>centre cross</li>
+<li>nominal chroma circle</li>
+<li>R, Y, G, C, B and M targets</li>
+<li>an approximate 123-degree skin-tone guide</li>
+<li>logarithmic density rendering</li>
+</ul>
+<p>The scope remains a compact monitoring aid, not a laboratory compliance
+instrument.</p>
+<h2 id="ettr-advisor">ETTR advisor<a class="headerlink" href="#ettr-advisor" title="Permanent link">#</a></h2>
+<p>ETTR now evaluates the brightest RGB channel, not only luma.</p>
+<p>If any sampled pixel reaches &gt;=254 in R, G or B it reports the percentage of
+sampled pixels with channel clipping.</p>
+<p>Otherwise it estimates headroom from the 99.9th percentile of the maximum RGB
+channel and reports the approximate remaining exposure in EV.</p>
+<p>This makes saturated-colour clipping visible earlier and avoids the previous
+limited-range luma error.</p>
+<h2 id="level">LEVEL<a class="headerlink" href="#level" title="Permanent link">#</a></h2>
+<p>The web LEVEL HUD now consumes both calibrated roll and pitch from the IMU.</p>
+<ul>
+<li>roll rotates the horizon</li>
+<li>pitch moves the horizon vertically</li>
+<li>+/-5-degree pitch references are shown</li>
+<li>green level state requires both roll and pitch within 0.7 degrees</li>
+<li>shake/angular-rate meter is retained</li>
+</ul>
+<p>set zero already calibrates both roll and pitch.</p>
+<h2 id="performance">Performance<a class="headerlink" href="#performance" title="Permanent link">#</a></h2>
+<p>Image-analysis runs on a 480x270 working frame rather than the full preview.
+This keeps browser CPU use bounded while the actual camera stream and 3D LUT
+continue at display resolution.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../monitoring-tools-user-guide/" class="btn btn-neutral float-left" title="Monitoring tools — operator guide"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../sensors/" class="btn btn-neutral float-right" title="Camera sensors and frame rates">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../monitoring-tools-user-guide/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../sensors/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

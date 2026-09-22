@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/settings-editor/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Settings editor - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Settings editor";
+        var mkdocs_page_input_path = "settings-editor.md";
+        var mkdocs_page_url = "/cinematepi5/settings-editor/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Settings editor</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#open-the-editor">Open the editor</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#if-you-forget-the-token">If you forget the token</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#semantic-widgets">Semantic widgets</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#what-the-page-shows">What the page shows</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#save-discipline">Save discipline</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#restart-cinemate">Restart CineMate</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#strict-json">Strict JSON</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#recovery-boundary">Recovery boundary</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#operator-oriented-presentation">Operator-oriented presentation</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Configuring</li>
+      <li class="breadcrumb-item active">Settings editor</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/settings-editor.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="settings-editor">Settings editor<a class="headerlink" href="#settings-editor" title="Permanent link">#</a></h1>
+<p>The structured settings editor is a browser UI for the same strict JSON file used by CineMate:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/cinemate/src/settings.json
+</code></pre></div>
+
+<p>It does not edit config.txt, storage, takes, playback, or I2C hardware. Those remain separate workflows. This narrower scope is intentional during hardening.</p>
+<h2 id="open-the-editor">Open the editor<a class="headerlink" href="#open-the-editor" title="Permanent link">#</a></h2>
+<p>Use:</p>
+<div class="codehilite"><pre><span></span><code>http://cinepi.local:5000/settings-editor/
+</code></pre></div>
+
+<p>The page itself is only a locked shell. It does not contain settings data.</p>
+<p>The settings API requires a dedicated settings-editor token. The browser keeps the token only in JavaScript memory for the current page. It is not written to cookies, localStorage, sessionStorage, the URL, or settings.json.</p>
+<p>Reloading or navigating away locks the editor again.</p>
+<h2 id="if-you-forget-the-token">If you forget the token<a class="headerlink" href="#if-you-forget-the-token" title="Permanent link">#</a></h2>
+<p>On the Pi:</p>
+<div class="codehilite"><pre><span></span><code><span class="nv">cinemate</span><span class="o">-</span><span class="nv">settings</span><span class="o">-</span><span class="nv">editor</span><span class="o">-</span><span class="nv">token</span><span class="w"> </span><span class="k">show</span>
+</code></pre></div>
+
+<p>To replace it:</p>
+<div class="codehilite"><pre><span></span><code>sudo cinemate-settings-editor-token rotate --group pi
+</code></pre></div>
+
+<p>Rotation takes effect immediately because the web editor reads the token configuration for each authenticated request.</p>
+<p>The credential is stored at:</p>
+<div class="codehilite"><pre><span></span><code>/etc/cinemate-settings-editor.conf
+</code></pre></div>
+
+<p>The installer creates it as root:pi mode 0640, generates a cryptographically random token when none exists, and preserves an existing token across installs and updates.</p>
+<p>The settings-editor token is deliberately separate from the recovery-console token.</p>
+<h2 id="semantic-widgets">Semantic widgets<a class="headerlink" href="#semantic-widgets" title="Permanent link">#</a></h2>
+<p>The editor can use optional x-cinemate-ui metadata from settings.schema.json to select controls that understand the meaning of a setting. These annotations affect presentation only; config_loader remains the runtime validation authority and the generic JSON-type renderer remains the fallback.</p>
+<p>welcome_image is the reference semantic widget. Choosing an image opens a crop dialog using the configured HDMI aspect ratio. The operator can drag to reposition and use the zoom slider or mouse wheel before applying the crop. The cropped image is then validated through Pillow, applies EXIF orientation server-side, normalizes to RGB PNG, and stores the content-addressed asset under ~/.local/share/cinemate/settings-assets/. Uploading does not modify settings.json; the new path remains a pending editor change until Save changes is used. At startup CineMate uses an aspect-preserving cover fit against the actual framebuffer as a final safeguard, so splash images are never stretched.</p>
+<p>Only files inside that managed asset directory can be previewed through the editor API. Existing external image paths remain valid settings but are not exposed through the preview endpoint.</p>
+<p>After validating the image widget, the same semantic metadata layer was extended across the current settings file. Primitive preset arrays use structured list editors; hardware button/switch/encoder arrays use repeatable object cards; controller actions have method/argument controls; ADC channels, policies and fixed choices use selects; server-side resource locations use explicit path controls; and advanced free-form objects such as custom sensor modes retain a deliberate JSON-object editor. Every current settings path has semantic metadata, while unknown future keys still fall back to the generic renderer.</p>
+<h2 id="what-the-page-shows">What the page shows<a class="headerlink" href="#what-the-page-shows" title="Permanent link">#</a></h2>
+<p>After authentication, the current strict JSON document is rendered as nested sections:</p>
+<ul>
+<li>booleans as switches</li>
+<li>numbers as numeric inputs</li>
+<li>strings as text inputs</li>
+<li>password fields as masked inputs</li>
+<li>arrays as strict-JSON array editors</li>
+<li>nested objects as collapsible groups</li>
+</ul>
+<p>The search field filters by settings path.</p>
+<p>The View JSON action shows the editor state that would be submitted. Protected key names containing token, secret, or credential are never sent to the browser. If such keys exist in the file, the server preserves them during saves.</p>
+<h2 id="save-discipline">Save discipline<a class="headerlink" href="#save-discipline" title="Permanent link">#</a></h2>
+<p>Saving is fail-closed.</p>
+<p>The server:</p>
+<ol>
+<li>verifies the settings-editor token with a constant-time comparison</li>
+<li>refuses the save while CineMate is recording, writing, draining buffered frames, or buffering</li>
+<li>verifies that the file revision still matches the revision the browser loaded</li>
+<li>merges the submitted settings over the raw file on disk so fields the page did not render survive</li>
+<li>renders strict JSON</li>
+<li>validates the candidate through CineMate's hardened config_loader</li>
+<li>re-checks camera/storage activity and the on-disk file immediately before writing</li>
+<li>creates a private backup</li>
+<li>atomically replaces settings.json and fsyncs the directory</li>
+</ol>
+<p>If another writer changes settings.json while the page is open, Save returns a conflict and asks the operator to reload instead of overwriting the newer file.</p>
+<p>Backups created by the web editor are stored under:</p>
+<div class="codehilite"><pre><span></span><code>~/.local/state/cinemate/settings-backups/
+</code></pre></div>
+
+<p>The current editor does not auto-restart CineMate after Save. This avoids a delayed restart racing a newly started take. Save reports that a restart is still needed.</p>
+<h2 id="restart-cinemate">Restart CineMate<a class="headerlink" href="#restart-cinemate" title="Permanent link">#</a></h2>
+<p>Restart CineMate is a separate action.</p>
+<p>It is disabled while the form contains unsaved edits and is refused whenever any of these runtime states is active:</p>
+<ul>
+<li>recording</li>
+<li>writing</li>
+<li>buffered-frame writing</li>
+<li>buffering</li>
+</ul>
+<p>The server checks activity again at the timer boundary immediately before invoking the restart. If activity starts after the button was pressed, the restart is cancelled rather than interrupting the take.</p>
+<p>Restart is systemd-managed. The web process never execs itself in place and is not granted general sudo access. A root-owned /usr/local/bin/cinemate-restart-service helper can only validate its installation or queue a restart of cinemate-autostart.service; sudoers grants the CineMate service user permission to invoke only that helper.</p>
+<h2 id="strict-json">Strict JSON<a class="headerlink" href="#strict-json" title="Permanent link">#</a></h2>
+<p>The structured editor uses the same strict-JSON contract as normal CineMate startup, the terminal editsettings helper, and the recovery console.</p>
+<p>Comments and trailing commas are rejected.</p>
+<p>settings.schema.json is still incomplete and is not treated as the runtime authority. The hardened config_loader validates known runtime container shapes and values while preserving compatibility with unknown future keys.</p>
+<h2 id="recovery-boundary">Recovery boundary<a class="headerlink" href="#recovery-boundary" title="Permanent link">#</a></h2>
+<p>If the live settings file is already malformed or structurally unsafe, the normal settings editor refuses to edit it. Use the independent recovery console on port 8080 or the local editsettings helper instead.</p>
+<p>The recovery console remains intentionally independent of the main Flask app and has its own credential.</p>
+<h2 id="operator-oriented-presentation">Operator-oriented presentation<a class="headerlink" href="#operator-oriented-presentation" title="Permanent link">#</a></h2>
+<p>The editor groups settings by operator task instead of exposing the raw top-level JSON order: Look &amp; feel, Cameras, Timing, Exposure &amp; steps, Recording &amp; monitoring, Physical controls, and Advanced. Value-step arrays use compact chip editors and booleans use switch controls. The presentation follows the useful grouping/control ideas in upstream CineMate while keeping this branch's existing settings model.</p>
+<p>A Recovery link opens the independent recovery console on port 8080.</p>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../settings-json/" class="btn btn-neutral float-left" title="Custom settings"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../hardware-controls/" class="btn btn-neutral float-right" title="Additional hardware">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../settings-json/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../hardware-controls/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

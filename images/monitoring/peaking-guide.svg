@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="350" viewBox="0 0 1100 350">
+<rect width="1100" height="350" fill="#111"/>
+<text x="40" y="42" fill="#fff" font-family="sans-serif" font-size="25" font-weight="bold">Focus peaking: what cyan means</text>
+<rect x="50" y="85" width="450" height="200" fill="#c4a66c" stroke="#666"/>
+<rect x="220" y="85" width="16" height="200" fill="#333"/>
+<line x1="217" y1="85" x2="217" y2="285" stroke="#00ffff" stroke-width="3" stroke-dasharray="6,5"/>
+<line x1="239" y1="85" x2="239" y2="285" stroke="#00ffff" stroke-width="3" stroke-dasharray="6,5"/>
+<text x="80" y="320" fill="#ddd" font-family="sans-serif" font-size="17">Thin cyan contour on a real edge → strong local high-frequency detail.</text>
+<rect x="600" y="85" width="450" height="200" fill="#3c3c3c" stroke="#666"/>
+<g fill="#888"><circle cx="660" cy="130" r="2"/><circle cx="710" cy="210" r="2"/><circle cx="815" cy="155" r="2"/><circle cx="920" cy="235" r="2"/><circle cx="990" cy="120" r="2"/></g>
+<path d="M640,220 C700,218 735,218 800,220 C850,222 900,219 1010,220" fill="none" stroke="#00ffff" stroke-width="2" stroke-dasharray="5,7"/>
+<text x="615" y="320" fill="#ddd" font-family="sans-serif" font-size="17">Adaptive denoise suppresses ISO texture, but peaking is still an aid—not autofocus truth.</text>
+</svg>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/development/upstream-integration-plan/" />
+      <link rel="shortcut icon" href="../../img/favicon.ico" />
+    <title>Upstream integration plan - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../../css/theme.css" />
+    <link rel="stylesheet" href="../../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../../templates/styles.scss" rel="stylesheet" />
+        <link href="../../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Upstream integration plan";
+        var mkdocs_page_input_path = "development/upstream-integration-plan.md";
+        var mkdocs_page_url = "/cinematepi5/development/upstream-integration-plan/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href="../.." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="../.." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">Upstream integration plan</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/development/upstream-integration-plan.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="upstream-integration-plan">Upstream integration plan<a class="headerlink" href="#upstream-integration-plan" title="Permanent link">#</a></h1>
+<p>This document tracks selective integration from the current upstream CineMate repository:</p>
+<div class="codehilite"><pre><span></span><code>https://github.com/Tiramisioux/cinemate
+</code></pre></div>
+
+<p>The Pi 5 branch has substantial independent work, so upstream is integrated feature by feature rather than through a bulk merge or rebase.</p>
+<h2 id="repository-relationship">Repository relationship<a class="headerlink" href="#repository-relationship" title="Permanent link">#</a></h2>
+<p>At the beginning of the hardening pass:</p>
+<ul>
+<li>local target repository: <strong>yassinebkr/cinematepi5</strong></li>
+<li>review branch: <strong>integration/cinematepi5-hardening</strong></li>
+<li>review branch base: <strong>6043e0f</strong></li>
+<li>upstream repository: <strong>Tiramisioux/cinemate</strong></li>
+</ul>
+<p>The running Pi tree and current upstream have both moved far beyond the old fork base. A direct merge would mix unrelated UI, sensor, settings and service changes in one conflict set.</p>
+<h2 id="integration-rules">Integration rules<a class="headerlink" href="#integration-rules" title="Permanent link">#</a></h2>
+<p>For each upstream feature:</p>
+<ol>
+<li>identify the upstream commits and dependencies</li>
+<li>compare the upstream implementation with the running Pi implementation</li>
+<li>back up every file that will be modified</li>
+<li>adapt the feature to the current Pi 5 architecture rather than blindly cherry-picking it</li>
+<li>add or adapt regression tests, including failure paths</li>
+<li>test the integration branch</li>
+<li>when appropriate, test the same change on the running camera</li>
+<li>commit the feature as a small reviewable unit</li>
+<li>keep camera-facing enhancements on the review branch until field-tested</li>
+</ol>
+<p>Hardware- or sensor-specific upstream behaviour is not enabled unless it matches the actual camera stack.</p>
+<h2 id="integrated-upstream-derived-work">Integrated upstream-derived work<a class="headerlink" href="#integrated-upstream-derived-work" title="Permanent link">#</a></h2>
+<h3 id="custom-tuning-file-validation">Custom tuning-file validation<a class="headerlink" href="#custom-tuning-file-validation" title="Permanent link">#</a></h3>
+<p>Status: integrated and tested.</p>
+<p>A configured tuning override is validated before it is passed to CinePi RAW. Missing files, invalid UTF-8, malformed JSON, VC4/Pi 4 target files and structurally invalid PiSP tuning files fall back to the detected sensor tuning instead of preventing camera startup.</p>
+<p>The regression suite also verifies that the launch command receives the valid override only when validation succeeds.</p>
+<h3 id="degradedno-camera-startup">Degraded/no-camera startup<a class="headerlink" href="#degradedno-camera-startup" title="Permanent link">#</a></h3>
+<p>Status: integration in progress; core safeguards integrated.</p>
+<p>The first two parts of upstream's degraded-boot work have been adapted:</p>
+<ul>
+<li>automatic storage pre-roll is skipped when no camera exists</li>
+<li>post-Plymouth camera restart is skipped when discovery reports no camera</li>
+<li>stored sensor mode and dynamic-resolution intent are not overwritten by fabricated fallback values</li>
+<li>an absent camera does not write a fake FPS ceiling</li>
+<li>recording requests are ignored when there is no usable mode table</li>
+<li>resolution commands return safely instead of raising out of the command thread</li>
+<li>white-balance tables still receive a usable fallback curve</li>
+<li>HDMI free-space display does not divide by a zero frame size</li>
+</ul>
+<p>These behaviours have dedicated no-camera regression tests.</p>
+<p>Camera discovery deliberately retains a <strong>10-second retry window</strong> with one-second polling. This is not a generic delay to optimize away: the IMX283 can take several seconds after boot before it becomes visible to the system. CineMate therefore treats absence as authoritative only after that grace window expires.</p>
+<p>If discovery still finds no camera after the full window, CineMate clears only the active runtime sensor identity and mode table (camera_model and res_modes). The reusable sensor database/cache and persisted operator state such as sensor mode, dynamic-resolution intent and FPS ceiling are preserved so the next healthy boot can restore the previous configuration without trusting stale hardware capabilities in the meantime.</p>
+<p>The controller follows the same rule for frame rate during degraded startup. With no active camera mode table it selects a usable in-memory FPS from FPS_USER, then FPS, then FPS_LAST, falling back to the configured FPS steps if necessary. It does not publish that fallback through the normal set_fps path, so a no-camera boot cannot rewrite the operator's persisted FPS/FPS_USER values. Normal detected-camera startup keeps the existing reconciliation behaviour.</p>
+<p>Storage events also remain camera-independent in degraded mode. A mount or filesystem-profile change may refresh storage/FPS-derived in-memory state, but when no active sensor table exists it does not automatically restart cinepi-raw or start another camera-discovery cycle. The recorder-profile marker is updated in memory and the next explicit or normal camera start uses the current storage profile.</p>
+<p>CSI sensor hot-plugging is intentionally unsupported. The camera ribbon and sensor board must only be connected or disconnected with the Pi powered off. After CineMate exhausts the IMX283-aware discovery window and enters degraded/no-camera mode, a camera-only restart is refused; recovery is to restart CineMate or reboot with the sensor already connected. Normal camera-only restart remains available while an active sensor table is present, for example to recover the camera process or rebind preview without changing hardware.</p>
+<p>The local GUI also avoids camera-derived capacity math while degraded. If storage is mounted but no usable frame size/FPS exists, the recording-capacity field shows NO CAM instead of dividing by zero or inventing a minutes estimate. NO DISK remains reserved for absent/unmounted storage, and measured storage write speed can still be displayed independently.</p>
+<p>A first boot with an empty Redis database follows the same non-mutating rule. Missing FPS state is resolved in memory from the configured conform frame rate (25 fps in the current project settings), snapped to the nearest configured FPS step when needed. Missing shutter state uses 180 degrees in memory. These fallbacks keep the controller and GUI operational but do not seed FPS, FPS_USER, FPS_LAST, SHUTTER_A, sensor-mode or geometry keys into Redis without a working camera.</p>
+<p>The local camera-status display is also strict about runtime truth. When CAMERAS is empty, remembered/default camera geometry is not presented as active hardware: the RES field shows NO CAM, resolution/aspect and camera-derived ISO/shutter/WB/exposure readouts show --, and any displayed resolution-switching state is suppressed. Persisted operator values remain untouched and are available again on the next healthy camera boot.</p>
+<p>Camera controls are read-only while degraded. ISO, shutter angle (including nominal shutter), FPS, white balance, FPS-double and their increment/decrement paths are rejected before reading or writing camera-control Redis state. This applies uniformly to web, CLI, keyboard and analog/rotary callers because the guard lives in CinePiController. Non-camera controls such as storage, system actions and zoom remain available. Normal camera-control behavior is unchanged when an active sensor mode table exists.</p>
+<p>Camera-control modes follow the same degraded lock: shutter-sync, ISO/shutter/FPS/WB free-mode toggles, and combined free-mode configuration are ignored while no active sensor table exists. The IMU calibration confirm routing that shares the shutter-sync control remains available before this guard, so degraded camera state does not break the independent calibration UI.</p>
+<p>The web control surface mirrors the controller lock instead of acknowledging rejected commands. When degraded, ISO/shutter/FPS/WB/resolution Socket.IO handlers return before parsing camera-derived Redis state or emitting parameter changes, the initial payload clears remembered camera-control selections, and those selectors are disabled with a NO CAM placeholder. This prevents both fresh-Redis float(None) failures and UI state that falsely suggests a rejected setting was applied.</p>
+<p>Internal camera-state paths obey the same invariant: direct FPS correction, nominal-shutter updates, and delayed shutter-transient completion cannot write camera state once the active sensor table is gone. The anamorphic preview factor remains a display preference that may be changed while degraded, but its camera-process restart is skipped until a healthy camera start.</p>
+<h3 id="recovery-console">Recovery console<a class="headerlink" href="#recovery-console" title="Permanent link">#</a></h3>
+<p>Status: integrated, hardened and live-tested.</p>
+<p>The upstream recovery idea has been adapted as an independent cinemate-recovery.service on port 8080. It remains usable when the main CineMate application, Redis, Flask or the CineMate virtual environment is unavailable.</p>
+<p>The local implementation adds:</p>
+<ul>
+<li>strict-JSON validation aligned with this branch's settings.json contract</li>
+<li>installer-generated fallback credentials with blank-token mode locked read-only</li>
+<li>one non-persistent page-level token field for privileged actions</li>
+<li>atomic configuration writes and retained backups</li>
+<li>confirm-or-revert protection for optional config.txt edits</li>
+<li>an explicit service/action allowlist with hotspot-stop protection</li>
+<li>responsive desktop, tablet, phone and phone-landscape layouts</li>
+<li>benign client-disconnect filtering without suppressing unrelated server faults</li>
+<li>dedicated regression tests plus live Pi failure/recovery validation</li>
+</ul>
+<p>The recovery console and degraded/no-camera hardening are integrated. The current hardening focus is the authenticated strict-JSON settings editor.</p>
+<h2 id="upstream-features-still-to-evaluate">Upstream features still to evaluate<a class="headerlink" href="#upstream-features-still-to-evaluate" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Feature family</th>
+<th>Assessment</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Settings editor</td>
+<td>Integrated and live backend-validated on the hardening branch: dedicated non-persistent token auth, strict-JSON safe writes, protected-secret preservation, revision conflicts, recording/write/buffer/pre-roll lockout, backups, atomic writes, narrowly authorized systemd restart, responsive hybrid layout, and semantic controls across all current settings paths. The startup image flow now includes drag/zoom cropping at the configured HDMI aspect ratio plus an aspect-preserving framebuffer cover fit so images are never stretched. The full semantic registry is live with the IMX283 healthy and settings.json unchanged; final operator visual review remains before promotion.</td>
+</tr>
+<tr>
+<td>settings.jsonc preservation</td>
+<td>Deferred. This hardening phase keeps one strict-JSON contract across runtime, recovery and terminal editing; JSONC requires a separate migration design.</td>
+</tr>
+<tr>
+<td>Web API, SSE and UDP control</td>
+<td>Useful external-control surface; command authorization and destructive actions need review.</td>
+</tr>
+<tr>
+<td>No-camera startup follow-up</td>
+<td>Integrated: degraded startup/state, camera-control locking, truthful local/web UI and fresh-Redis paths are covered by dedicated regression tests.</td>
+</tr>
+<tr>
+<td>DNG thumbnails</td>
+<td>Useful for RAW inspection and playback; must coexist with current proxy Clips workflow.</td>
+</tr>
+<tr>
+<td>Playback pane</td>
+<td>Reconcile with the existing proxy-based Clips interface rather than replacing it.</td>
+</tr>
+<tr>
+<td>CineMate Log</td>
+<td>Relevant to IMX283 but requires dedicated CinemaDNG and Resolve validation.</td>
+</tr>
+<tr>
+<td>Dynamic resolution v2</td>
+<td>Current branch already contains independent dynamic-resolution work; compare policy by policy.</td>
+</tr>
+<tr>
+<td>Dual sensors</td>
+<td>Large hardware-dependent feature; test only with suitable dual-camera hardware.</td>
+</tr>
+<tr>
+<td>IMX585 ClearHDR</td>
+<td>IMX585-specific. Do not enable on the current IMX283 build.</td>
+</tr>
+<tr>
+<td>Storage hot-swap safeguards</td>
+<td>Compare against the current automount/write-failure implementation.</td>
+</tr>
+<tr>
+<td>Frame-rate/audio synchronization</td>
+<td>Important; compare against the local CinePi RAW phase-lock and audio work.</td>
+</tr>
+<tr>
+<td>Hardware controls and I2C panes</td>
+<td>Integrate selectively around attached hardware.</td>
+</tr>
+<tr>
+<td>Live log</td>
+<td>Useful diagnostics feature with relatively low camera-path risk.</td>
+</tr>
+<tr>
+<td>Release-image tooling</td>
+<td>Important before distributing a complete camera image.</td>
+</tr>
+<tr>
+<td>Regression suite expansion</td>
+<td>Continue importing useful upstream test ideas with every feature.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="sensor-database-caution">Sensor database caution<a class="headerlink" href="#sensor-database-caution" title="Permanent link">#</a></h2>
+<p>Current upstream IMX283 metadata represents a newer driver contract than the proven camera configuration on this Pi. In particular, current upstream includes different full-width modes and packing assumptions.</p>
+<p>The review branch therefore retains the locally proven IMX283 mode/packing contract until the newer driver path is validated end to end on the actual sensor. Sensor metadata is treated as executable configuration, not documentation.</p>
+<h2 id="ui-integration-caution">UI integration caution<a class="headerlink" href="#ui-integration-caution" title="Permanent link">#</a></h2>
+<p>The Camera and Clips pages in this branch contain substantial independent work:</p>
+<ul>
+<li>responsive mobile and desktop layouts</li>
+<li>real WebGL2 3D LUT rendering</li>
+<li>Camera/Clips LUT state</li>
+<li>Histogram, Waveform and Vectorscope</li>
+<li>adjustable Zebra</li>
+<li>adaptive focus Peaking</li>
+<li>IMU Level overlay</li>
+<li>proxy provenance and playback changes</li>
+</ul>
+<p>Upstream live-view changes are therefore mined for individual fixes rather than merged wholesale. Camera-facing UI changes remain on the review branch until manual testing is complete.</p>
+<h2 id="completion-criteria-for-an-upstream-port">Completion criteria for an upstream port<a class="headerlink" href="#completion-criteria-for-an-upstream-port" title="Permanent link">#</a></h2>
+<p>An upstream-derived feature is considered integrated only when:</p>
+<ul>
+<li>its dependencies are explicit</li>
+<li>its expected failure modes have tests</li>
+<li>the normal camera path still passes regression tests</li>
+<li>relevant live-camera behaviour has been checked</li>
+<li>user documentation reflects the actual implementation</li>
+<li>the change has its own reviewable commit</li>
+</ul>
+</div>
+
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script src="../../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "../..";</script>
+    <script src="../../js/theme_extra.js"></script>
+    <script src="../../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../../js/ko-fi-widget.js"></script>
+      <script src="../../js/copybutton-init.js"></script>
+      <script src="../../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/monitoring-tools-user-guide/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Monitoring tools — operator guide - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Monitoring tools \u2014 operator guide";
+        var mkdocs_page_input_path = "monitoring-tools-user-guide.md";
+        var mkdocs_page_url = "/cinematepi5/monitoring-tools-user-guide/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Monitoring tools — operator guide</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#a-practical-starting-point">A practical starting point</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#zebra">Zebra</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#controls">Controls</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#reading-the-overlay">Reading the overlay</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#exposure-workflow">Exposure workflow</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#what-zebra-cannot-tell-you">What Zebra cannot tell you</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#focus-peaking">Focus Peaking</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#how-to-use-it">How to use it</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#high-iso">High ISO</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#histogram">Histogram</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#what-to-look-for">What to look for</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#waveform">Waveform</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#exposure-workflow_1">Exposure workflow</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vectorscope">Vectorscope</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#level-and-shake">Level and shake</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#ettr-advisor">ETTR advisor</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#mobile-and-landscape-use">Mobile and landscape use</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#luts-and-monitoring">LUTs and monitoring</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#accuracy-and-limitations">Accuracy and limitations</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#quick-reference">Quick reference</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Using the camera</li>
+      <li class="breadcrumb-item active">Monitoring tools — operator guide</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/monitoring-tools-user-guide.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="monitoring-tools-operator-guide">Monitoring tools: operator guide<a class="headerlink" href="#monitoring-tools-operator-guide" title="Permanent link">#</a></h1>
+<p>CineMate provides a set of live monitoring tools for exposure, focus, colour and camera orientation. This page explains what each tool shows, how to read it and which combinations are useful while shooting.</p>
+<p>The monitoring tools analyse the camera's Rec.709 preview signal. A creative LUT can change the displayed picture, but the scopes continue to analyse the underlying source preview so a look cannot hide clipping or change what counts as a focus edge.</p>
+<p><img alt="Actual CineMate monitoring interface" src="../images/monitoring/web-ui-monitoring-overview.png" /></p>
+<p><em>Actual CineMate web interface with Histogram, Waveform and Vectorscope visible beside the live preview.</em></p>
+<h2 id="a-practical-starting-point">A practical starting point<a class="headerlink" href="#a-practical-starting-point" title="Permanent link">#</a></h2>
+<p>For general handheld shooting, start with <strong>Z 90 + PEAK + LEVEL</strong>. This gives a quick highlight warning, focus assistance and camera orientation without filling the screen with every scope.</p>
+<p>For careful exposure work, use <strong>WAVE + Z 90 + HIST</strong>. Waveform shows where exposure levels occur in the frame, Zebra overlays the affected image areas, and the RGB histogram helps identify channel-specific clipping.</p>
+<p>For colour checks, use <strong>VECT + HIST</strong> with LOOK: none or CinePi Rec.709 Reference.</p>
+<h2 id="zebra">Zebra<a class="headerlink" href="#zebra" title="Permanent link">#</a></h2>
+<p>Zebra answers a simple question: <strong>which parts of the image are at or above the selected brightness threshold?</strong></p>
+<p>CineMate uses BT.709 luma for the striped Zebra warning and checks the individual RGB channels separately for near clipping.</p>
+<h3 id="controls">Controls<a class="headerlink" href="#controls" title="Permanent link">#</a></h3>
+<p>A short click or tap toggles Zebra on or off.</p>
+<p>Hold the Zebra button for about <strong>0.55 seconds</strong> on desktop or touch devices to choose a threshold. The available levels are:</p>
+<table>
+<thead>
+<tr>
+<th style="text-align: right;">Setting</th>
+<th>Typical use</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: right;">70 IRE</td>
+<td>Skin/exposure reference in workflows that use 70 IRE</td>
+</tr>
+<tr>
+<td style="text-align: right;">80 IRE</td>
+<td>Bright faces and light surfaces</td>
+</tr>
+<tr>
+<td style="text-align: right;">85 IRE</td>
+<td>Bright diffuse highlights</td>
+</tr>
+<tr>
+<td style="text-align: right;"><strong>90 IRE</strong></td>
+<td>CineMate default; practical highlight warning</td>
+</tr>
+<tr>
+<td style="text-align: right;">95 IRE</td>
+<td>Very bright highlight protection</td>
+</tr>
+<tr>
+<td style="text-align: right;">100 IRE</td>
+<td>Top-end check</td>
+</tr>
+</tbody>
+</table>
+<p>When Zebra is active, the button shows the selected level, for example <strong>Z 90</strong>.</p>
+<h3 id="reading-the-overlay">Reading the overlay<a class="headerlink" href="#reading-the-overlay" title="Permanent link">#</a></h3>
+<p><strong>Striped red</strong> means luma is at or above the selected Zebra level.</p>
+<p><strong>Solid red</strong> means at least one 8-bit preview RGB channel has reached 250/255 or higher. Treat this as a stronger near-clipping warning.</p>
+<p><img alt="Actual CineMate Zebra example" src="../images/monitoring/zebra-live.png" /></p>
+<p><em>Actual CineMate web interface with Zebra enabled at the default 90 IRE threshold.</em></p>
+<p>The earlier 95 IRE-only behaviour was too conservative for practical exposure work. During threshold validation, a deliberately bright test frame produced the following preview distribution:</p>
+<table>
+<thead>
+<tr>
+<th>Measurement</th>
+<th style="text-align: right;">Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Pixels at or above 90 IRE</td>
+<td style="text-align: right;">33.296%</td>
+</tr>
+<tr>
+<td>Pixels at or above 92 IRE</td>
+<td style="text-align: right;">0.702%</td>
+</tr>
+<tr>
+<td>Pixels at or above 95 IRE</td>
+<td style="text-align: right;">0.004%</td>
+</tr>
+<tr>
+<td>Pixels with any RGB channel at or above 250</td>
+<td style="text-align: right;">0.015%</td>
+</tr>
+<tr>
+<td>Maximum RGB code value</td>
+<td style="text-align: right;">255</td>
+</tr>
+</tbody>
+</table>
+<p>This is why the default is now 90 IRE. A frame can look obviously too bright while almost nothing exceeds 95 IRE.</p>
+<h3 id="exposure-workflow">Exposure workflow<a class="headerlink" href="#exposure-workflow" title="Permanent link">#</a></h3>
+<p>Start at <strong>Z 90</strong>. Raise exposure until important highlights begin to stripe, then reduce exposure until only highlights you are willing to sacrifice remain above the threshold. Check the RGB histogram afterwards to make sure one colour channel is not reaching the right edge much earlier than the others.</p>
+<p>A 70 IRE setting can be useful for skin references, but it is not a universal target. Skin brightness varies with complexion, lighting, camera calibration and creative intent.</p>
+<h3 id="what-zebra-cannot-tell-you">What Zebra cannot tell you<a class="headerlink" href="#what-zebra-cannot-tell-you" title="Permanent link">#</a></h3>
+<p>Zebra sees the processed 8-bit Rec.709 preview, not the 12-bit Bayer photosites. It is therefore a field exposure aid, not a direct RAW sensor clipping meter.</p>
+<p><img alt="Zebra threshold diagram" src="../images/monitoring/zebra-levels.svg" /></p>
+<p><em>Diagram of the selectable Zebra thresholds and the separate near-clipping warning.</em></p>
+<h2 id="focus-peaking">Focus Peaking<a class="headerlink" href="#focus-peaking" title="Permanent link">#</a></h2>
+<p>Peaking highlights fine local detail in cyan. It is intended to make manual focus faster without turning every high-contrast region into a thick outline.</p>
+<p>The current detector uses BT.709 luminance, a small Gaussian denoise, Sobel gradients, an image-derived noise estimate, an adaptive threshold and local-maximum thinning.</p>
+<p><img alt="Actual CineMate focus peaking" src="../images/monitoring/focus-peaking-live.png" /></p>
+<p><em>Actual CineMate preview with the current cyan focus-peaking overlay.</em></p>
+<h3 id="how-to-use-it">How to use it<a class="headerlink" href="#how-to-use-it" title="Permanent link">#</a></h3>
+<p>Choose a detailed feature on the intended focus plane: eyes, eyelashes, lettering, fabric texture or a sharp object boundary. Rotate focus through the subject and watch for the cyan contour to become strongest and most coherent at the desired plane.</p>
+<p>Thin continuous contours on real edges are more meaningful than isolated cyan dots.</p>
+<h3 id="high-iso">High ISO<a class="headerlink" href="#high-iso" title="Permanent link">#</a></h3>
+<p>Noise contains high-frequency detail too. CineMate estimates a noise floor for each analysed frame and increases the peaking threshold in noisier scenes, but no preview-based detector can remove every false edge.</p>
+<p>At high ISO, trust coherent contours on real objects more than scattered cyan speckles.</p>
+<p>Peaking does not measure optical MTF, depth of field, motion blur or autofocus confidence. It is a manual focus aid.</p>
+<p><img alt="Focus peaking diagram" src="../images/monitoring/peaking-guide.svg" /></p>
+<p><em>Diagram showing the kind of thin coherent edge Peaking is intended to highlight.</em></p>
+<h2 id="histogram">Histogram<a class="headerlink" href="#histogram" title="Permanent link">#</a></h2>
+<p>The Histogram shows how much of the image falls into each brightness range. CineMate plots four traces:</p>
+<ul>
+<li>white: BT.709 luma</li>
+<li>red: red channel</li>
+<li>green: green channel</li>
+<li>blue: blue channel</li>
+</ul>
+<p>The left side represents shadows and the right side represents highlights. Vertical height represents the number of sampled pixels in that range. Logarithmic scaling keeps small highlight and shadow populations visible.</p>
+<h3 id="what-to-look-for">What to look for<a class="headerlink" href="#what-to-look-for" title="Permanent link">#</a></h3>
+<p>A trace piled against the <strong>right edge</strong> indicates possible highlight or channel clipping.</p>
+<p>If only the red trace reaches the right edge, red-channel detail can be lost before overall luma appears clipped.</p>
+<p>A trace piled against the <strong>left edge</strong> means much of the image is close to black. That can be intentional, but at high ISO it may also indicate noisy underexposure.</p>
+<p>On a genuinely neutral grey or white target, strong separation between the RGB traces can indicate a white-balance, lighting-spectrum, IR contamination or colour-calibration issue.</p>
+<p>The histogram has no spatial information. It can tell you that clipping exists, but not where it is. Use Waveform or Zebra to locate it.</p>
+<h2 id="waveform">Waveform<a class="headerlink" href="#waveform" title="Permanent link">#</a></h2>
+<p>Waveform preserves horizontal image position. The horizontal axis corresponds approximately to left-to-right position in the image, while vertical position represents brightness.</p>
+<p>CineMate displays guides at 0, 18, 50, 70, 90 and 100 IRE.</p>
+<p>A bright window on the right side of the image therefore appears on the right side of the waveform and rises toward the upper IRE guides. This makes Waveform one of the most useful tools for controlled exposure.</p>
+<h3 id="exposure-workflow_1">Exposure workflow<a class="headerlink" href="#exposure-workflow_1" title="Permanent link">#</a></h3>
+<p>Enable Waveform, identify the subject's horizontal position, then find the corresponding structure in the scope. Check important highlights against the 90 and 100 IRE guides and check important shadows near the bottom. Use Zebra as an image-space confirmation.</p>
+<p>Waveform and Zebra together usually provide more useful exposure information than Histogram alone.</p>
+<h2 id="vectorscope">Vectorscope<a class="headerlink" href="#vectorscope" title="Permanent link">#</a></h2>
+<p>Vectorscope shows hue and saturation.</p>
+<p>The centre represents neutral or very low chroma. Distance from the centre represents saturation, and the angular direction represents hue. CineMate includes the standard R, Y, G, C, B and M directions plus an approximate skin-tone guide.</p>
+<p>A trace concentrated near the centre indicates a mostly neutral or desaturated image. A trace stretching strongly toward one direction indicates significant colour saturation in that hue.</p>
+<p>If a known neutral grey or white target sits well away from the centre, investigate white balance, lighting spectrum, IR contamination and sensor/CCM calibration.</p>
+<p>The skin-tone line is a directional reference rather than a single correct point. Different complexions and saturation levels occupy different distances from the centre, and lighting or grading can move the trace.</p>
+<p><img alt="Scope interpretation diagram" src="../images/monitoring/scopes-reading.svg" /></p>
+<p><em>Diagram showing the basic reading direction of Histogram, Waveform and Vectorscope.</em></p>
+<h2 id="level-and-shake">Level and shake<a class="headerlink" href="#level-and-shake" title="Permanent link">#</a></h2>
+<p>LEVEL uses the calibrated ICM-42688 IMU to show roll, pitch and camera motion.</p>
+<p>Roll rotates the artificial horizon. Pitch moves it vertically. The display can show values such as <strong>R +0.6°  P +3.3°</strong> and changes to the level state when both axes are close to the configured tolerance.</p>
+<p><strong>set zero</strong> makes the current framing the operator reference without replacing the physical IMU calibration.</p>
+<p>The live Level tool is separate from post-production stabilization. Each recorded take can also contain the raw 1 kHz IMU stream in <strong>gyro.gcsv</strong> for Gyroflow-based stabilization.</p>
+<h2 id="ettr-advisor">ETTR advisor<a class="headerlink" href="#ettr-advisor" title="Permanent link">#</a></h2>
+<p>ETTR means <em>Expose To The Right</em>: maximize captured signal while preserving important highlights.</p>
+<p>CineMate evaluates the brightest RGB channel rather than luma alone. A display such as <strong>ETTR +0.8 EV</strong> means the monitoring signal appears to have roughly 0.8 stops of highlight headroom. A message such as <strong>ETTR: RGB near clip 0.15%</strong> means part of the sampled preview has entered the near-clipping range.</p>
+<p>ETTR is an aid, not an instruction to increase exposure regardless of the shot. Aperture, shutter angle, motion blur, depth of field and intended highlight treatment still matter.</p>
+<h2 id="mobile-and-landscape-use">Mobile and landscape use<a class="headerlink" href="#mobile-and-landscape-use" title="Permanent link">#</a></h2>
+<p>The monitoring controls are designed to remain usable in landscape on phones and tablets.</p>
+<p><img alt="Actual CineMate mobile landscape view" src="../images/monitoring/mobile-landscape-monitoring.png" /></p>
+<p><em>Actual CineMate landscape interface on a phone-sized viewport.</em></p>
+<p>If the screen becomes crowded, enable only the tools needed for the current task rather than leaving every scope active.</p>
+<h2 id="luts-and-monitoring">LUTs and monitoring<a class="headerlink" href="#luts-and-monitoring" title="Permanent link">#</a></h2>
+<p>Creative LUTs are applied to the displayed preview. The monitoring analysis remains source-referred to the underlying Rec.709 preview.</p>
+<p>That means a LUT can make the image look warmer, cooler, brighter or more contrasty without changing what Zebra, Histogram, Waveform, Vectorscope and Peaking measure.</p>
+<p>For the most literal camera-side judgement, use LOOK: none or CinePi Rec.709 Reference.</p>
+<h2 id="accuracy-and-limitations">Accuracy and limitations<a class="headerlink" href="#accuracy-and-limitations" title="Permanent link">#</a></h2>
+<p>Monitoring analysis runs on a reduced <strong>480 × 270</strong> working frame to keep the browser responsive. The visible preview and 3D LUT remain at display resolution.</p>
+<p>As a result:</p>
+<ul>
+<li>very small features may not appear in the scopes</li>
+<li>Peaking is not full-resolution RAW focus analysis</li>
+<li>Zebra and ETTR do not read Bayer photosites directly</li>
+<li>Waveform and Vectorscope are field tools, not laboratory compliance scopes</li>
+</ul>
+<h2 id="quick-reference">Quick reference<a class="headerlink" href="#quick-reference" title="Permanent link">#</a></h2>
+<table>
+<thead>
+<tr>
+<th>Tool</th>
+<th>Best question to ask</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HIST</td>
+<td>Are shadows, highlights or individual RGB channels bunching at an edge?</td>
+</tr>
+<tr>
+<td>WAVE</td>
+<td>Where in the frame are those exposure levels?</td>
+</tr>
+<tr>
+<td>VECT</td>
+<td>Which hue direction and saturation dominate?</td>
+</tr>
+<tr>
+<td>ZEBRA</td>
+<td>Which regions exceed the selected IRE threshold?</td>
+</tr>
+<tr>
+<td>PEAK</td>
+<td>Where is strong fine detail likely to be focused?</td>
+</tr>
+<tr>
+<td>LEVEL</td>
+<td>Is the camera level in roll and pitch, and how stable is it?</td>
+</tr>
+<tr>
+<td>ETTR</td>
+<td>How much highlight headroom appears to remain?</td>
+</tr>
+</tbody>
+</table>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../rec709-post-workflow/" class="btn btn-neutral float-left" title="Rec.709 and post workflow"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../monitoring-tools/" class="btn btn-neutral float-right" title="Monitoring tools — implementation">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../rec709-post-workflow/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../monitoring-tools/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

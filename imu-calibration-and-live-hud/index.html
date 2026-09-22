@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/imu-calibration-and-live-hud/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>IMU calibration, HDMI preview and live HUD - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "IMU calibration, HDMI preview and live HUD";
+        var mkdocs_page_input_path = "imu-calibration-and-live-hud.md";
+        var mkdocs_page_url = "/cinematepi5/imu-calibration-and-live-hud/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../3d-luts/">Real 3D LUTs</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+      <li class="breadcrumb-item active">IMU calibration, HDMI preview and live HUD</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/imu-calibration-and-live-hud.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="imu-calibration-hdmi-preview-and-live-hud">IMU calibration, HDMI preview and live HUD<a class="headerlink" href="#imu-calibration-hdmi-preview-and-live-hud" title="Permanent link">#</a></h1>
+<p>Local development state for the IMX283 / Raspberry Pi 5 camera build, validated on 2026-09-20.</p>
+<p>This page documents the local work currently present on the camera. These changes are not yet pushed to the public fork and should not be confused with upstream Cinemate behavior.</p>
+<h2 id="current-architecture">Current architecture<a class="headerlink" href="#current-architecture" title="Permanent link">#</a></h2>
+<p>The camera display uses two independent layers:</p>
+<ul>
+<li>cinepi-raw is C++ and owns the live camera preview through a DRM/KMS hardware plane.</li>
+<li>Cinemate SimpleGUI is Python and draws the camera UI and HUD to /dev/fb0 using Pillow.</li>
+<li>The browser control UI is Flask + Socket.IO on HTTP port 5000.</li>
+<li>The clean browser preview stream is served separately on port 8000.</li>
+</ul>
+<p>The live camera process currently runs the IMX283 at 3936 x 2176, 12-bit RAW, with a 1302 x 720 lores preview stream.</p>
+<p>A full-screen maintenance UI such as IMU calibration must own the framebuffer. While imu_cal_active is 1, CinePiManager enforces preview off centrally and launches cinepi-raw with --nopreview. This invariant also survives a Cinemate process restart.</p>
+<h2 id="imu-hardware-and-service">IMU hardware and service<a class="headerlink" href="#imu-hardware-and-service" title="Permanent link">#</a></h2>
+<p>The IMU is an ICM-42688 at address 0x69. gyrologd runs as:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/.cinemate-env/bin/python3 /home/pi/gyrologd/gyrologd.py
+</code></pre></div>
+
+<p>Systemd unit:</p>
+<div class="codehilite"><pre><span></span><code>gyrologd.service
+</code></pre></div>
+
+<p>The sensor is configured for:</p>
+<ul>
+<li>gyro: +/-1000 deg/s at 1 kHz</li>
+<li>accelerometer: +/-4 g at 1 kHz</li>
+<li>FIFO accel + gyro packets</li>
+<li>raw Gyroflow sidecar logging for each clip</li>
+</ul>
+<p>The calibration engine lives in:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/gyrologd/imu_calibration.py
+</code></pre></div>
+
+<p>Persistent files:</p>
+<div class="codehilite"><pre><span></span><code>/home/pi/gyrologd/imu_calibration.json
+/home/pi/gyrologd/level_zero.json
+/home/pi/gyrologd/level_cal.json
+</code></pre></div>
+
+<p>imu_calibration.json contains the physical sensor calibration. level_zero.json is the operator horizon zero. The legacy level_cal.json remains for compatibility with an uncalibrated camera.</p>
+<p>Physical calibration and shooting horizon zero are deliberately separate.</p>
+<h2 id="guided-imu-calibration">Guided IMU calibration<a class="headerlink" href="#guided-imu-calibration" title="Permanent link">#</a></h2>
+<p>Calibration is started from the web UI:</p>
+<div class="codehilite"><pre><span></span><code>http://cinepi.local:5000
+</code></pre></div>
+
+<p>or by IP:</p>
+<div class="codehilite"><pre><span></span><code>http://192.168.1.94:5000
+</code></pre></div>
+
+<p>The server is plain HTTP, not HTTPS.</p>
+<p>Open the LEVEL panel and press IMU CALIBRATION. The HDMI preview plane is disabled and a full-screen calibration UI takes over.</p>
+<p>The calibration sequence is:</p>
+<ol>
+<li>
+<p>Gyroscope zero-rate bias.
+   Keep the camera completely still for approximately 8 seconds. Motion resets the stable acquisition.</p>
+</li>
+<li>
+<p>Accelerometer orientation coverage.
+   Slowly tumble the camera through roll and pitch so gravity is observed from many sensor directions. Coverage uses a 3D spherical map. A finite 22 degree geodesic brush is used per accepted gravity direction; this is intentionally different from the older one-point-per-cell logic that made coverage unreasonably slow.</p>
+</li>
+<li>
+<p>Accelerometer ellipsoid fit.
+   Coverage and fit samples are separate. Normal hand motion can contribute to coverage, while only cleaner quasi-static observations are retained for the fit.</p>
+</li>
+<li>
+<p>Six-face camera-frame alignment.
+   The guided poses are normal, upside down, right side down, left side down, lens down and lens up.</p>
+</li>
+<li>
+<p>Validation and save.
+   The result screen reports gyro noise, accelerometer norm error, camera-frame alignment error and orientation coverage. Calibration is written atomically only after save.</p>
+</li>
+</ol>
+<p>Camera body convention after alignment:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">+</span><span class="n">X</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">forward</span><span class="w"> </span><span class="n">through</span><span class="w"> </span><span class="n">lens</span>
+<span class="o">+</span><span class="n">Y</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nb">camera</span><span class="w"> </span><span class="k">right</span>
+<span class="o">+</span><span class="n">Z</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">down</span>
+</code></pre></div>
+
+<p>The current calibration was physically validated and saved successfully.</p>
+<p>Validation values from the saved calibration:</p>
+<ul>
+<li>orientation coverage: 94.8 percent</li>
+<li>gyro noise RMS: approximately 0.040 deg/s</li>
+<li>accelerometer RMS gravity error after correction: approximately 0.0267 g</li>
+<li>maximum six-face alignment error: approximately 4.65 degrees</li>
+<li>overall grade: good</li>
+</ul>
+<h2 id="calibration-ui">Calibration UI<a class="headerlink" href="#calibration-ui" title="Permanent link">#</a></h2>
+<p>The calibration sphere is now a real software-rendered 3D mesh rather than a flat circle with projected dots.</p>
+<p>The renderer:</p>
+<ul>
+<li>builds a triangulated unit sphere</li>
+<li>rotates vertices in 3D</li>
+<li>back-face culls rear geometry</li>
+<li>performs perspective projection</li>
+<li>shades facets using a light vector</li>
+<li>paints covered regions directly onto the mesh</li>
+<li>slowly auto-rotates to make depth unambiguous</li>
+<li>marks the current gravity vector and a target uncovered region</li>
+</ul>
+<p>The final visual design is intentionally restrained: black instrument background, minimal typography, thin separators and limited accent colors.</p>
+<p>Known UI follow-up:</p>
+<ul>
+<li>make the current gravity/vector direction more immediately readable</li>
+<li>reduce the remaining time needed for the coverage phase slightly without reducing fit quality</li>
+</ul>
+<h2 id="physical-controls">Physical controls<a class="headerlink" href="#physical-controls" title="Permanent link">#</a></h2>
+<p>Local direct-GPIO rotary configuration:</p>
+<table>
+<thead>
+<tr>
+<th>Control</th>
+<th style="text-align: right;">CLK</th>
+<th style="text-align: right;">DT</th>
+<th style="text-align: right;">Push button</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shutter</td>
+<td style="text-align: right;">GPIO 23</td>
+<td style="text-align: right;">GPIO 24</td>
+<td style="text-align: right;">GPIO 25</td>
+</tr>
+<tr>
+<td>White balance</td>
+<td style="text-align: right;">GPIO 6</td>
+<td style="text-align: right;">GPIO 13</td>
+<td style="text-align: right;">GPIO 5</td>
+</tr>
+<tr>
+<td>ISO</td>
+<td style="text-align: right;">GPIO 17</td>
+<td style="text-align: right;">GPIO 27</td>
+<td style="text-align: right;">GPIO 4</td>
+</tr>
+</tbody>
+</table>
+<p>Current hardware state:</p>
+<ul>
+<li>shutter and white-balance rotary movement are usable</li>
+<li>the physical click buttons are not currently reliable</li>
+<li>the ISO rotary encoder is not currently working despite wiring checks</li>
+<li>calibration can therefore be completed entirely from the web UI</li>
+</ul>
+<p>The WB hold path still exists in code, but calibration must not depend on it until the button issue is fixed.</p>
+<h2 id="hdmi-preview-optimization">HDMI preview optimization<a class="headerlink" href="#hdmi-preview-optimization" title="Permanent link">#</a></h2>
+<p>The camera preview itself was already receiving one lores frame for each completed camera request. Direct cp_stats timing measured a stable 32.999 to 33.000 FPS with zero camera-frame drops.</p>
+<p>The expensive path was the Python framebuffer HUD.</p>
+<p>Before optimization:</p>
+<ul>
+<li>SimpleGUI cap: 12 FPS</li>
+<li>full-frame 1920 x 1080 RGBA to RGB565 conversion used NumPy</li>
+<li>conversion cost: approximately 51.4 ms per frame</li>
+<li>conversion-only ceiling: approximately 19.4 FPS</li>
+<li>framebuffer code reopened /dev/fb0 for every frame</li>
+</ul>
+<p>Current implementation:</p>
+<ul>
+<li>SimpleGUI target: 30 FPS</li>
+<li>RGB565 conversion uses OpenCV COLOR_RGBA2BGR565</li>
+<li>OpenCV is limited to one worker thread to preserve camera CPU headroom</li>
+<li>output was verified byte-for-byte against the legacy NumPy converter on diagnostic and random-pixel frames</li>
+<li>end-to-end Pillow to NumPy view to OpenCV RGB565 conversion: approximately 11.2 ms per 1920 x 1080 frame</li>
+<li>direct OpenCV conversion itself: approximately 2.7 ms in the isolated benchmark</li>
+<li>framebuffer write is unbuffered</li>
+<li>the old NumPy converter remains as fallback</li>
+</ul>
+<p>Files:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">pi</span><span class="o">/</span><span class="nx">cinemate</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">module</span><span class="o">/</span><span class="nx">framebuffer</span><span class="p">.</span><span class="nx">py</span>
+<span class="o">/</span><span class="nx">home</span><span class="o">/</span><span class="nx">pi</span><span class="o">/</span><span class="nx">cinemate</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">module</span><span class="o">/</span><span class="nx">simple_gui</span><span class="p">.</span><span class="nx">py</span>
+</code></pre></div>
+
+<h2 id="raw-recording-stress-validation">RAW recording stress validation<a class="headerlink" href="#raw-recording-stress-validation" title="Permanent link">#</a></h2>
+<p>The optimized preview/HUD path was validated while recording a workload harder than the 30 FPS requirement:</p>
+<ul>
+<li>3936 x 2176</li>
+<li>12-bit RAW</li>
+<li>approximately 33 FPS</li>
+<li>HDMI preview active</li>
+<li>30 FPS Python GUI active</li>
+<li>calibrated IMU service active</li>
+<li>USB-powered HDMI monitor attached</li>
+</ul>
+<p>A 12-second preview stress test measured:</p>
+<ul>
+<li>approximately 405 MiB/s sustained writes</li>
+<li>0 dropped camera frames</li>
+<li>0 write failures</li>
+<li>RAM buffer peak: 5 frames out of 148</li>
+<li>minimum MemAvailable: approximately 2.93 GiB</li>
+<li>cinepi-raw RSS peak: approximately 323 MiB</li>
+<li>GUI RSS peak: approximately 115 MiB</li>
+<li>maximum temperature: approximately 54.5 C</li>
+</ul>
+<p>The test take was intentionally left on the SSD.</p>
+<p>A later power stress take is:</p>
+<div class="codehilite"><pre><span></span><code>/media/RAW/CINEPI_26-09-20_022715_F27_C00001_cam1
+</code></pre></div>
+
+<p>It contains:</p>
+<ul>
+<li>269 DNG frames</li>
+<li>approximately 3.3 GiB of media</li>
+<li>8382 gyro data rows</li>
+<li>proxy and thumbnail sidecars</li>
+</ul>
+<h2 id="phase-b-low-latency-level-and-shake">Phase B: low-latency LEVEL and SHAKE<a class="headerlink" href="#phase-b-low-latency-level-and-shake" title="Permanent link">#</a></h2>
+<p>The old live HUD mixed intentional angular motion and shake. Phase B separates them.</p>
+<p>LEVEL signal chain:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">ICM</span><span class="o">-</span><span class="mi">42688</span><span class="w"> </span><span class="n">accel</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">kHz</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="mi">3</span><span class="n">x3</span><span class="w"> </span><span class="n">accelerometer</span><span class="w"> </span><span class="n">correction</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">IMU</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="nb">camera</span><span class="w"> </span><span class="n">rotation</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">short</span><span class="w"> </span><span class="n">batch</span><span class="w"> </span><span class="n">mean</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">approximately</span><span class="w"> </span><span class="mi">25</span><span class="w"> </span><span class="n">ms</span><span class="w"> </span><span class="n">low</span><span class="o">-</span><span class="n">pass</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">roll</span><span class="w"> </span><span class="n">and</span><span class="w"> </span><span class="n">pitch</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">operator</span><span class="w"> </span><span class="n">horizon</span><span class="w"> </span><span class="n">zero</span>
+</code></pre></div>
+
+<p>SHAKE signal chain:</p>
+<div class="codehilite"><pre><span></span><code><span class="n">ICM</span><span class="o">-</span><span class="mi">42688</span><span class="w"> </span><span class="n">gyro</span><span class="w"> </span><span class="n">at</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="n">kHz</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">calibrated</span><span class="w"> </span><span class="n">gyro</span><span class="w"> </span><span class="n">bias</span><span class="w"> </span><span class="n">removal</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">IMU</span><span class="o">-</span><span class="n">to</span><span class="o">-</span><span class="nb">camera</span><span class="w"> </span><span class="n">rotation</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="mf">1.5</span><span class="w"> </span><span class="n">Hz</span><span class="w"> </span><span class="n">low</span><span class="o">-</span><span class="n">pass</span><span class="w"> </span><span class="n">trend</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">intentional</span><span class="w"> </span><span class="nb">camera</span><span class="w"> </span><span class="n">motion</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">high</span><span class="o">-</span><span class="k">frequency</span><span class="w"> </span><span class="n">residual</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="mi">60</span><span class="w"> </span><span class="n">ms</span><span class="w"> </span><span class="n">RMS</span><span class="o">-</span><span class="n">like</span><span class="w"> </span><span class="n">envelope</span>
+<span class="w">  </span><span class="o">-</span><span class="p">&gt;</span><span class="w"> </span><span class="n">calibrated</span><span class="w"> </span><span class="n">gyro</span><span class="o">-</span><span class="n">noise</span><span class="o">-</span><span class="k">floor</span><span class="w"> </span><span class="n">compensation</span>
+</code></pre></div>
+
+<p>Redis publishes:</p>
+<ul>
+<li>imu_roll</li>
+<li>imu_pitch</li>
+<li>imu_shake</li>
+<li>imu_motion</li>
+<li>imu_seq</li>
+<li>imu_filter = phaseB-v1</li>
+</ul>
+<p>Stationary Phase B measurements after calibration are typically:</p>
+<ul>
+<li>SHAKE: approximately 0.00 to 0.04 deg/s</li>
+<li>motion: approximately 0.00 to 0.02 deg/s</li>
+</ul>
+<p>Physical testing confirmed that the new indicator feels substantially more immediate and useful than the previous implementation.</p>
+<h3 id="hdmi-near-zero-display-stabilization">HDMI near-zero display stabilization<a class="headerlink" href="#hdmi-near-zero-display-stabilization" title="Permanent link">#</a></h3>
+<p>The HDMI LEVEL renderer intentionally keeps the IMU signal chain untouched and stabilizes only the final presentation around level. At the current one-decimal HDMI readout precision:</p>
+<ul>
+<li>|roll| &lt; 0.05° is displayed as unsigned 0.0°;</li>
+<li>the circle's horizon line uses the same snapped display value and is therefore exactly horizontal inside that range;</li>
+<li>roll at and beyond the display threshold is not suppressed and immediately regains its +/- sign and normal tilt;</li>
+<li>SHAKE remains independent and continues to render from imu_shake.</li>
+</ul>
+<p>This addresses two manifestations of the same sub-pixel jitter: sign flicker around zero and apparent horizon-line thickness changes as an almost-horizontal 3-pixel line moves between framebuffer rows. The snap is display-only; imu_roll, imu_pitch, calibration state, raw Gyroflow logging and Phase-B filtering are not altered.</p>
+<p>Regression coverage exercises the actual renderer path, including positive/negative sub-threshold roll, just-outside-threshold roll, large signed roll, non-zero SHAKE while LEVEL is snapped, and saturated SHAKE.</p>
+<h2 id="i2c-bandwidth-fix">I2C bandwidth fix<a class="headerlink" href="#i2c-bandwidth-fix" title="Permanent link">#</a></h2>
+<p>The original Pi 5 RP1 I2C1 bus was running at 100 kHz.</p>
+<p>The ICM-42688 generates roughly 16 bytes per FIFO sample at 1 kHz. The raw FIFO payload alone therefore exceeds the practical bandwidth of 100 kHz I2C once addressing, ACK and transaction overhead are included.</p>
+<p>Symptoms at 100 kHz:</p>
+<ul>
+<li>gyrologd blocked in kernel state i2c_dw_xfer</li>
+<li>approximately 200 ms service cycles</li>
+<li>live IMU publish rate only approximately 5 Hz</li>
+</ul>
+<p>The boot configuration now contains under the all section:</p>
+<div class="codehilite"><pre><span></span><code>dtparam=i2c_arm_baudrate=400000
+</code></pre></div>
+
+<p>After reboot the live device-tree value was verified at:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">/</span><span class="n">proc</span><span class="o">/</span><span class="n">device</span><span class="o">-</span><span class="n">tree</span><span class="o">/</span><span class="n">axi</span><span class="o">/</span><span class="n">pcie</span><span class="mi">@1000120000</span><span class="o">/</span><span class="n">rp1</span><span class="o">/</span><span class="n">i2c</span><span class="mi">@74000</span><span class="o">/</span><span class="n">clock</span><span class="o">-</span><span class="n">frequency</span>
+</code></pre></div>
+
+<p>and reads:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">400000</span>
+</code></pre></div>
+
+<p>Measured Phase B publish rate after the change:</p>
+<ul>
+<li>approximately 30.5 Hz</li>
+<li>median update interval approximately 35.7 ms</li>
+<li>95th-percentile update interval approximately 41.4 ms</li>
+</ul>
+<p>The target was originally 50 Hz, but 30 Hz already matches the HDMI HUD cadence and is a better conservative operating point than moving immediately to unofficial 1 MHz I2C.</p>
+<h2 id="power-investigation">Power investigation<a class="headerlink" href="#power-investigation" title="Permanent link">#</a></h2>
+<p>Before the I2C reboot, vcgencmd reported:</p>
+<div class="codehilite"><pre><span></span><code>throttled=0x50000
+</code></pre></div>
+
+<p>This is a sticky historical state indicating that undervoltage and throttling had occurred sometime during that old boot. Neither condition was active at the time it was first inspected.</p>
+<p>The camera uses the official Raspberry Pi 27 W USB-C supply. Firmware power data confirmed these advertised fixed PDOs:</p>
+<ul>
+<li>5 V at 5.0 A</li>
+<li>9 V at 3.0 A</li>
+<li>12 V at 2.25 A</li>
+<li>15 V at 1.8 A</li>
+</ul>
+<p>The Pi reports:</p>
+<ul>
+<li>max_current = 5000 mA</li>
+<li>usb_max_current_enable = 1</li>
+<li>usb_over_current_detected = 0</li>
+<li>power_reset = 0</li>
+</ul>
+<p>The HDMI monitor is powered from a Pi USB port and does not enumerate as a USB data device, consistent with a power-only USB connection.</p>
+<p>After a clean reboot with the monitor still attached:</p>
+<div class="codehilite"><pre><span></span><code>get_throttled = 0x0
+</code></pre></div>
+
+<p>PMIC EXT5V measurements:</p>
+<p>Idle:</p>
+<ul>
+<li>minimum approximately 4.888 V</li>
+<li>mean approximately 4.935 V</li>
+<li>maximum approximately 4.974 V</li>
+</ul>
+<p>During full-resolution 12-bit RAW recording:</p>
+<ul>
+<li>minimum approximately 4.882 V</li>
+<li>mean approximately 4.913 V</li>
+<li>maximum approximately 4.953 V</li>
+<li>no sample below 4.85 V</li>
+<li>get_throttled remained 0x0 for every sample</li>
+<li>final sticky get_throttled remained 0x0</li>
+<li>no USB over-current was recorded</li>
+</ul>
+<p>Conclusion: there is no reproducible present power fault. The previous 0x50000 was a historical transient from the previous boot. The exact original event cannot be timestamped from the sticky flag alone.</p>
+<p>Do not change the power configuration based only on that historical flag. If undervoltage returns, compare behavior with the HDMI monitor powered independently and inspect PMIC EXT5V again.</p>
+<p>Useful commands:</p>
+<div class="codehilite"><pre><span></span><code>vcgencmd get_throttled
+vcgencmd pmic_read_adc
+vcgencmd measure_temp
+</code></pre></div>
+
+<h2 id="monitor-auto-rotation">Monitor auto-rotation<a class="headerlink" href="#monitor-auto-rotation" title="Permanent link">#</a></h2>
+<p>No Cinemate or Pi-side display-rotation code was found responsible for the monitor turning 180 degrees when the camera is inverted. cinepi-raw is launched with rotation 0.</p>
+<p>The observed double-black flash followed by a 180-degree flip is consistent with monitor-side automatic image flipping. On FEELWORLD monitors this may be called Auto Mirror or a similar setting. If it recurs, disable automatic monitor rotation in the monitor OSD rather than adding a compensating Pi-side rotation.</p>
+<h2 id="web-calibration-and-http">Web calibration and HTTP<a class="headerlink" href="#web-calibration-and-http" title="Permanent link">#</a></h2>
+<p>The web UI is:</p>
+<div class="codehilite"><pre><span></span><code>http://cinepi.local:5000
+</code></pre></div>
+
+<p>or the Pi IP on port 5000.</p>
+<p>Do not use HTTPS. The server does not provide TLS; attempting https:// on port 5000 produces browser errors such as SSL_ERROR_RX_RECORD_TOO_LONG and appears in the Flask log as malformed HTTP input.</p>
+<p>The LEVEL panel includes:</p>
+<ul>
+<li>web level toggle</li>
+<li>HDMI level toggle</li>
+<li>ETTR advisor</li>
+<li>set zero</li>
+<li>IMU CALIBRATION</li>
+<li>CONTINUE while the wizard is active</li>
+<li>CANCEL while the wizard is active</li>
+</ul>
+<h2 id="important-rollback-snapshots">Important rollback snapshots<a class="headerlink" href="#important-rollback-snapshots" title="Permanent link">#</a></h2>
+<p>The local camera has been backed up before each major modification.</p>
+<p>Important snapshots include:</p>
+<div class="codehilite"><pre><span></span><code><span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">imu</span><span class="o">-</span><span class="n">calibration</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">005627</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">web</span><span class="o">-</span><span class="n">cal</span><span class="o">-</span><span class="n">button</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">011547</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">imu</span><span class="o">-</span><span class="mi">3</span><span class="n">d</span><span class="o">-</span><span class="n">sphere</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">012108</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">calibration</span><span class="o">-</span><span class="n">initial</span><span class="o">-</span><span class="n">preview</span><span class="o">-</span><span class="n">fix</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">012514</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">central</span><span class="o">-</span><span class="n">preview</span><span class="o">-</span><span class="n">invariant</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">012558</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">patchA</span><span class="o">-</span><span class="n">redesign</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">015632</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">preview</span><span class="o">-</span><span class="n">fps</span><span class="o">-</span><span class="n">optimization</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">021431</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">phaseB</span><span class="o">-</span><span class="n">imu</span><span class="o">-</span><span class="n">latency</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">022007</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">i2c400k</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">022516</span>
+<span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">pi</span><span class="o">/</span><span class="n">backups</span><span class="o">-</span><span class="n">before</span><span class="o">-</span><span class="n">documentation</span><span class="o">-</span><span class="n">update</span><span class="o">/</span><span class="mi">20260920</span><span class="o">-</span><span class="mi">023226</span>
+</code></pre></div>
+
+<p>The first IMU backup contains full Git bundles for both Cinemate and gyrologd plus working-tree state.</p>
+<h2 id="source-control-state">Source-control state<a class="headerlink" href="#source-control-state" title="Permanent link">#</a></h2>
+<p>These changes are intentionally local at the time of writing.</p>
+<p>Cinemate:</p>
+<ul>
+<li>repository: /home/pi/cinemate</li>
+<li>branch: dev</li>
+<li>local branch was already substantially ahead of upstream before this work</li>
+<li>current IMU/preview changes are uncommitted</li>
+</ul>
+<p>gyrologd:</p>
+<ul>
+<li>repository: /home/pi/gyrologd</li>
+<li>branch: master</li>
+<li>calibration and Phase B changes are local and uncommitted</li>
+</ul>
+<p>cinepi-raw:</p>
+<ul>
+<li>repository: /home/pi/cinepi-raw</li>
+<li>branch: dev</li>
+<li>the C++ recorder/DRM preview source was inspected but not modified during this calibration/preview work</li>
+</ul>
+<p>Do not assume the public fork contains the running camera state.</p>
+<h2 id="next-work">Next work<a class="headerlink" href="#next-work" title="Permanent link">#</a></h2>
+<p>The next planned phase is web-preview/UI work.</p>
+<p>Keep these future improvements in scope:</p>
+<ul>
+<li>make the calibration gravity/vector cue clearer</li>
+<li>slightly shorten orientation coverage while preserving fit quality</li>
+<li>diagnose all physical encoder push buttons</li>
+<li>diagnose the ISO rotary encoder</li>
+<li>preserve the calibration-preview invariant whenever new camera restart paths are added</li>
+<li>continue checking power sticky flags after long real-world sessions</li>
+</ul>
+<h2 id="web-ui-responsivepwa-and-preview-quality-phase">Web UI responsive/PWA and preview-quality phase<a class="headerlink" href="#web-ui-responsivepwa-and-preview-quality-phase" title="Permanent link">#</a></h2>
+<p>After Phase B, the browser UI was reworked for desktop, tablet and phone use.</p>
+<p>Live, Clips and Offload now share a responsive stylesheet and common fullscreen/PWA JavaScript. Portrait and landscape are treated as first-class layouts rather than scaling a fixed desktop page.</p>
+<p>The web MJPEG encoder is configurable. The current validated profile is 1446 x 800 at JPEG quality 80 and approximately 33 FPS. Higher 1732 x 958 / Q85 and 1534 x 848 / Q82 profiles were rejected because they left less real-time margin during simultaneous 3936 x 2176 12-bit RAW stress testing.</p>
+<p>The final Q80 / 1446 x 800 profile passed a reset-aware 10-second stress test with zero camera drops and zero write failures while an MJPEG client remained connected.</p>
+<p>The PWA shell and iOS Home Screen metadata are present. Android true-PWA installation still needs a trusted HTTPS reverse-proxy layer because the current camera UI and stream are served over plain HTTP.</p>
+<h2 id="web-preview-phase-update">Web-preview phase update<a class="headerlink" href="#web-preview-phase-update" title="Permanent link">#</a></h2>
+<p>The subsequent web-preview phase is now implemented locally. The live camera page, Clips page and Offload page share a responsive/PWA shell, and the production web-preview profile is currently 1446 x 800 JPEG Q80 at approximately 33 FPS.</p>
+<p>A reset-aware simultaneous RAW + active-MJPEG stress test confirmed droppedFrames=0 and writeFailures=0 for the retained profile.</p>
+<p>See web-gui.md for responsive behavior, PWA/fullscreen behavior and preview-quality benchmark details.</p>
+<h2 id="web-preview-phase-validation">Web preview phase validation<a class="headerlink" href="#web-preview-phase-validation" title="Permanent link">#</a></h2>
+<p>The subsequent web-UI phase retained the 30 FPS HDMI HUD and added a responsive/PWA browser controller.</p>
+<p>The final validated browser-preview profile is:</p>
+<div class="codehilite"><pre><span></span><code><span class="mf">1446</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="mf">800</span>
+<span class="n">JPEG</span><span class="w"> </span><span class="n">Q80</span>
+<span class="n">approximately</span><span class="w"> </span><span class="mf">33</span><span class="w"> </span><span class="n">fps</span>
+</code></pre></div>
+
+<p>With a continuous MJPEG client connected, 3936 x 2176 12-bit RAW at 33 fps completed both 30-second and 40-second validation takes with zero DNG sequence drops and zero write failures after obsolete test recordings were removed from the SSD.</p>
+<p>See <a href="../web-preview-responsive-pwa/">Web preview, responsive UI, PWA and Clips live state</a> for the complete browser and storage validation record.</p>
+</div>
+
+            </div>
+          </div><footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

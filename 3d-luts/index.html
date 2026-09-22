@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><link rel="canonical" href="https://yassinebkr.github.io/cinematepi5/3d-luts/" />
+      <link rel="shortcut icon" href="../img/favicon.ico" />
+    <title>Real 3D LUTs - CineMate Pi 5 Docs</title>
+    <link rel="stylesheet" href="../css/theme.css" />
+    <link rel="stylesheet" href="../css/theme_extra.css" />
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github.min.css" />
+        <link href="../templates/styles.scss" rel="stylesheet" />
+        <link href="../stylesheets/extra.css" rel="stylesheet" />
+        <link href="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.css" rel="stylesheet" />
+    
+      <script>
+        // Current page data
+        var mkdocs_page_name = "Real 3D LUTs";
+        var mkdocs_page_input_path = "3d-luts.md";
+        var mkdocs_page_url = "/cinematepi5/3d-luts/";
+      </script>
+    
+    <!--[if lt IE 9]>
+      <script src="../js/html5shiv.min.js"></script>
+    <![endif]-->
+      <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+      <script>hljs.highlightAll();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+          <a href=".." class="icon icon-home"> CineMate Pi 5 Docs
+        </a><div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="..">Home</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../readme/">Overview</a>
+                </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../getting-started/">Quick start</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Using the camera</span></p>
+              <ul class="current">
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui/">Reading the camera screen</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../web-gui/">Web GUI</a>
+                  </li>
+                  <li class="toctree-l1 current"><a class="reference internal current" href="#">Real 3D LUTs</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#scope">Scope</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#files-and-api">Files and API</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#supported-cube-syntax">Supported .cube syntax</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#metadata-sidecar">Metadata sidecar</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#runtime-pipeline">Runtime pipeline</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#catalog-and-state">Catalog and state</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#fetch-and-parse">Fetch and parse</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#gpu-representation">GPU representation</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#interpolation-shader">Interpolation shader</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#texture-orientation-important-implementation-detail">Texture orientation: important implementation detail</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#gpu-self-test">GPU self-test</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#canvas-presentation">Canvas presentation</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#live-preview-cors-requirement">Live-preview CORS requirement</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#colour-space-requirement">Colour-space requirement</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#official-cinepi-rec709-lut-pack">Official CinePi Rec.709 LUT pack</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#adding-a-lut">Adding a LUT</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#troubleshooting">Troubleshooting</a>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#related-documentation">Related documentation</a>
+    </li>
+    </ul>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../rec709-post-workflow/">Rec.709 and post workflow</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools-user-guide/">Monitoring tools — operator guide</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../monitoring-tools/">Monitoring tools — implementation</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../sensors/">Camera sensors and frame rates</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-recording/">Audio recording</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../digital-zoom/">Digital zoom</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../speed-ramping/">Speed ramping & shutter angle synchronization</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../dual-sensors/">Dual sensors</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-commands/">Cinemate terminal commands</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Configuring</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../ssh/">Connecting via SSH</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-json/">Custom settings</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../settings-editor/">Settings editor</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hardware-controls/">Additional hardware</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../config-txt/">Switching sensors (config.txt)</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../hotspot-logic/">Configuring the Wi-Fi hotspot</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Install & maintenance</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../system-services/">System services</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../recovery-console/">Recovery console</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../storage-preroll/">Storage pre-roll warm-up</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../backing-up-sd-card/">Backing up the SD card</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Reference</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../cli-user-guide/">CinePi RAW terminal commands</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-guide/">Redis API</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../redis-keys/">Key reference</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../changelog/">Changelog</a>
+                  </li>
+              </ul>
+              <ul>
+                <li class="toctree-l1"><a class="reference internal" href="../troubleshooting/">Troubleshooting</a>
+                </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Advanced</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../installation-steps/">Installation & building from source</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../compiling-cinepi-raw/">Recompiling cinepi-raw</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../audio-sync/">Audio sync & drift</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../imx283-color-calibration/">IMX283 colour calibration</a>
+                  </li>
+                  <li class="toctree-l1"><a class="reference internal" href="../simple-gui-refresh-tuning/">Simple GUI refresh tuning</a>
+                  </li>
+              </ul>
+              <p class="caption"><span class="caption-text">Contributing</span></p>
+              <ul>
+                  <li class="toctree-l1"><a class="reference internal" href="../acknowledgments/">Acknowledgements</a>
+                  </li>
+              </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+      <nav class="wy-nav-top" role="navigation" aria-label="Mobile navigation menu">
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="..">CineMate Pi 5 Docs</a>
+        
+      </nav>
+      <div class="wy-nav-content">
+        <div class="rst-content"><div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".." class="icon icon-home" aria-label="Docs"></a></li>
+          <li class="breadcrumb-item">Using the camera</li>
+      <li class="breadcrumb-item active">Real 3D LUTs</li>
+    <li class="wy-breadcrumbs-aside">
+          <a href="https://github.com/yassinebkr/cinematepi5/blob/main/docs/3d-luts.md" class="icon icon-github"> Edit on GitHub</a>
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+            <div class="section" itemprop="articleBody">
+              
+<div class="markdown-body">
+  <h1 id="real-3d-luts-in-cinemate">Real 3D LUTs in CineMate<a class="headerlink" href="#real-3d-luts-in-cinemate" title="Permanent link">#</a></h1>
+<p>This document describes the current CineMate display-LUT implementation used by
+both the live Camera page and the Clips player.</p>
+<p>The implementation deliberately uses real .cube transforms. It does <strong>not</strong>
+approximate a look with CSS filters, SVG tables or hand-written colour
+matrices.</p>
+<h2 id="scope">Scope<a class="headerlink" href="#scope" title="Permanent link">#</a></h2>
+<p>A CineMate LUT is currently a <strong>display transform only</strong>.</p>
+<ul>
+<li>Camera mode: the LUT is applied to the browser live preview.</li>
+<li>Clips mode: the LUT is applied to the browser proxy player.</li>
+<li>CinemaDNG/RAW frames are not modified.</li>
+<li>The proxy file on disk is not modified.</li>
+<li>Camera and Clips LUT selections are independent.</li>
+</ul>
+<p>This is intentional: a monitoring look must never change the recorded RAW
+negative unless an explicit future export/bake operation is requested.</p>
+<h2 id="files-and-api">Files and API<a class="headerlink" href="#files-and-api" title="Permanent link">#</a></h2>
+<p>Runtime files:</p>
+<ul>
+<li>luts/*.cube - 3D LUT data.</li>
+<li>luts/*.json - optional provenance and colour-space metadata.</li>
+<li>src/module/app/static/js/cube-lut-engine.js - parser and WebGL2 renderer.</li>
+<li>src/module/app/templates/template.html - Camera integration.</li>
+<li>src/module/app/templates/clips.html - Clips integration.</li>
+<li>src/module/app/main/routes.py - LUT catalog/file endpoints and client
+  diagnostics.</li>
+</ul>
+<p>HTTP endpoints:</p>
+<ul>
+<li>GET /api/luts - catalog of usable LUTs.</li>
+<li>GET /api/luts/<name> - .cube payload.</li>
+<li>POST /api/client-log - renderer diagnostics from the browser.</li>
+<li>GET /api/client-log - recent local renderer diagnostics.</li>
+</ul>
+<p>Files whose names start with an underscore are hidden from the normal LUT list
+and are reserved for validation.</p>
+<h2 id="supported-cube-syntax">Supported .cube syntax<a class="headerlink" href="#supported-cube-syntax" title="Permanent link">#</a></h2>
+<p>The parser supports real 3D LUTs containing:</p>
+<ul>
+<li>LUT_3D_SIZE</li>
+<li>DOMAIN_MIN</li>
+<li>DOMAIN_MAX</li>
+<li>floating-point RGB rows</li>
+<li>comments and a TITLE</li>
+</ul>
+<p>1D-only LUTs are rejected.</p>
+<p>The renderer supports tetrahedral interpolation by default and trilinear
+interpolation when requested by metadata.</p>
+<p>The maximum LUT dimension is checked against the browser GPU
+MAX_3D_TEXTURE_SIZE.</p>
+<h2 id="metadata-sidecar">Metadata sidecar<a class="headerlink" href="#metadata-sidecar" title="Permanent link">#</a></h2>
+<p>A LUT may have a JSON sidecar with the same basename.</p>
+<p>Example:</p>
+<div class="codehilite"><pre><span></span><code>{
+  "display_name": "CinePi Natural",
+  "source": "CinePi",
+  "input_space": "Rec.709 display-referred",
+  "output_space": "Rec.709 creative look",
+  "interpolation": "tetrahedral",
+  "official_cinepi": true,
+  "verified": true
+}
+</code></pre></div>
+
+<p>The .cube file defines numeric RGB mapping but normally does not identify its
+intended input and output colour spaces. The sidecar is therefore part of the
+colour-management contract, not decorative metadata.</p>
+<p>verified=true means CineMate has recorded provenance for that file. It does not
+mean the look is suitable for every camera encoding.</p>
+<h2 id="runtime-pipeline">Runtime pipeline<a class="headerlink" href="#runtime-pipeline" title="Permanent link">#</a></h2>
+<h3 id="catalog-and-state">Catalog and state<a class="headerlink" href="#catalog-and-state" title="Permanent link">#</a></h3>
+<p>The page loads /api/luts and populates the selector.</p>
+<p>Camera and Clips keep separate state:</p>
+<ul>
+<li>Camera selection: cameraCubeLut in browser local storage.</li>
+<li>Clips selection: per-clip mapping in clipLuts.</li>
+</ul>
+<p>Changing a clip LUT must not change the live Camera LUT.</p>
+<h3 id="fetch-and-parse">Fetch and parse<a class="headerlink" href="#fetch-and-parse" title="Permanent link">#</a></h3>
+<p>When a look is selected, cube-lut-engine.js fetches the .cube, validates the
+row count and converts it into an in-memory floating-point representation.</p>
+<p>The parsed cube is cached in memory for later selections.</p>
+<p>At the HTTP layer .cube responses support gzip and browser caching. For
+example the current 33x33x33 Golden Hour LUT is roughly 970 kB as plain text
+and about 350 kB as the gzip payload.</p>
+<h3 id="gpu-representation">GPU representation<a class="headerlink" href="#gpu-representation" title="Permanent link">#</a></h3>
+<p>The LUT is uploaded as an RGBA8 WebGL2 3D texture.</p>
+<p>The browser display path is 8-bit, so a 32-bit floating-point texture did not
+provide useful displayed precision here and added mobile-GPU compatibility
+risk.</p>
+<p>The source frame is a 2D texture:</p>
+<ul>
+<li>Camera: CORS-enabled MJPEG image from port 8000.</li>
+<li>Clips: same-origin proxy video.</li>
+</ul>
+<h3 id="interpolation-shader">Interpolation shader<a class="headerlink" href="#interpolation-shader" title="Permanent link">#</a></h3>
+<p>The fragment shader normalises source RGB through DOMAIN_MIN and DOMAIN_MAX,
+then samples the 3D LUT using tetrahedral or trilinear interpolation.</p>
+<p>The full-screen pass uses an explicit WebGL2 VAO/VBO and active position
+attribute. This avoids relying on driver-specific behaviour for an
+attribute-less draw call.</p>
+<h2 id="texture-orientation-important-implementation-detail">Texture orientation: important implementation detail<a class="headerlink" href="#texture-orientation-important-implementation-detail" title="Permanent link">#</a></h2>
+<p>UNPACK_FLIP_Y_WEBGL is stateful WebGL unpack state.</p>
+<p>CineMate therefore applies it explicitly:</p>
+<div class="codehilite"><pre><span></span><code><span class="mi">2</span><span class="n">D</span><span class="w"> </span><span class="n">camera</span><span class="o">/</span><span class="n">video</span><span class="w"> </span><span class="n">source</span><span class="w"> </span><span class="n">upload</span><span class="p">:</span><span class="w"> </span><span class="n">UNPACK_FLIP_Y_WEBGL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">true</span>
+<span class="mi">3</span><span class="n">D</span><span class="w"> </span><span class="n">LUT</span><span class="w"> </span><span class="n">volume</span><span class="w"> </span><span class="n">upload</span><span class="p">:</span><span class="w">          </span><span class="n">UNPACK_FLIP_Y_WEBGL</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="bp">false</span>
+</code></pre></div>
+
+<p>Leaving the flag enabled for the 3D volume corrupts LUT indexing.</p>
+<p>A real failure observed during development made this especially clear. For the
+Golden Hour LUT:</p>
+<div class="codehilite"><pre><span></span><code>expected white (1,1,1) output: 250,247,219
+incorrect GPU output:           250,24,10
+</code></pre></div>
+
+<p>250,24,10 is the LUT's pure-red corner (1,0,0), proving that the LUT file and
+parser were valid but the 3D texture rows had been rearranged during upload.
+The current renderer explicitly separates the 2D source orientation
+state from the 3D LUT upload state.</p>
+<h2 id="gpu-self-test">GPU self-test<a class="headerlink" href="#gpu-self-test" title="Permanent link">#</a></h2>
+<p>Before a selected LUT is allowed to replace the source picture, CineMate runs
+a 1x1 GPU self-test:</p>
+<ol>
+<li>Upload a known white source pixel.</li>
+<li>Draw it through the selected 3D LUT.</li>
+<li>Read the output pixel back with readPixels.</li>
+<li>Compare the result with the white corner stored in the .cube.</li>
+</ol>
+<p>This tests the actual browser GPU path: parsing, 3D upload, shader execution,
+interpolation and readback.</p>
+<p>A self-test failure is considered a real renderer failure. CineMate should
+leave the original source visible rather than presenting a black LUT canvas.</p>
+<h2 id="canvas-presentation">Canvas presentation<a class="headerlink" href="#canvas-presentation" title="Permanent link">#</a></h2>
+<p>The LUT result is rendered to an overlay canvas positioned over the source
+image/video.</p>
+<p>Only after the first valid LUT frame is drawn does the renderer hide the
+underlying source. Disabling the LUT restores the source immediately.</p>
+<p>The Clips player uses one consistent player UI whether a LUT is active or not.
+LUT loading must never swap between a native video player and a second LUT
+player.</p>
+<h2 id="live-preview-cors-requirement">Live-preview CORS requirement<a class="headerlink" href="#live-preview-cors-requirement" title="Permanent link">#</a></h2>
+<p>The Camera MJPEG stream is served on port 8000, while the web app uses another
+origin/port. WebGL is only allowed to sample that image when both conditions
+are met:</p>
+<ol>
+<li>The MJPEG response includes Access-Control-Allow-Origin.</li>
+<li>The browser image is created with crossorigin="anonymous".</li>
+</ol>
+<p>The current streamer sends:</p>
+<div class="codehilite"><pre><span></span><code>Access-Control-Allow-Origin: *
+</code></pre></div>
+
+<p>and the Camera image opts into anonymous CORS.</p>
+<h2 id="colour-space-requirement">Colour-space requirement<a class="headerlink" href="#colour-space-requirement" title="Permanent link">#</a></h2>
+<p>A mathematically correct LUT can still give the wrong artistic result when the
+input encoding is wrong.</p>
+<p>Examples:</p>
+<ul>
+<li>an S-Log3 LUT expects S-Log3 input;</li>
+<li>a LogC4 LUT expects LogC4 input;</li>
+<li>a Rec.709 creative LUT expects a display-referred Rec.709-like signal.</li>
+</ul>
+<p>CineMate therefore stores input_space and output_space metadata whenever the
+LUT source provides enough information.</p>
+<p>The current browser preview/proxy pipeline is an ISP-produced display image,
+not the original Bayer RAW data. A look intended for a log negative must not
+be assumed correct on this preview simply because the file extension is
+.cube.</p>
+<h2 id="official-cinepi-rec709-lut-pack">Official CinePi Rec.709 LUT pack<a class="headerlink" href="#official-cinepi-rec709-lut-pack" title="Permanent link">#</a></h2>
+<p>The normal LUT menu now serves only first-party CinePi looks generated by
+tools/generate_cinepi_luts.py:</p>
+<table>
+<thead>
+<tr>
+<th>Display name</th>
+<th>Category</th>
+<th>Intent</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CinePi Rec.709 Reference</td>
+<td>technical</td>
+<td>Identity/reference transform</td>
+</tr>
+<tr>
+<td>CinePi Natural</td>
+<td>natural</td>
+<td>Subtle neutral monitoring look</td>
+</tr>
+<tr>
+<td>CinePi Filmic Neutral</td>
+<td>cinematic</td>
+<td>Restrained filmic contrast and split tone</td>
+</tr>
+<tr>
+<td>CinePi Cinema Warm</td>
+<td>cinematic</td>
+<td>Moderate warm cinematic rendering</td>
+</tr>
+<tr>
+<td>CinePi Soft Portrait</td>
+<td>portrait</td>
+<td>Gentle portrait rendering</td>
+</tr>
+</tbody>
+</table>
+<p>Every file is generated deterministically at 33x33x33, has a JSON sidecar and
+is listed with SHA-256 in luts/cinepi-official-manifest.json.</p>
+<p>Downloaded LUTs used during development were moved to
+luts/third_party_dev/. They are intentionally outside the top-level LUT API
+scan and are not part of the CinePi shipping set.</p>
+<p>See <a href="../rec709-post-workflow/">CinePi Rec.709 and post-production workflow</a> for
+Camera/Clips/Resolve interoperability and the distinction between reference
+record-time proxies and approximate regenerated proxies.</p>
+<h2 id="adding-a-lut">Adding a LUT<a class="headerlink" href="#adding-a-lut" title="Permanent link">#</a></h2>
+<ol>
+<li>Put the real file in luts/.</li>
+<li>Add a sidecar JSON when provenance or colour-space information is known.</li>
+<li>Reload Camera or Clips.</li>
+<li>Confirm it appears in /api/luts.</li>
+<li>Select it and verify that the GPU self-test passes.</li>
+<li>Compare LOOK: none and the look on neutrals, saturated colours, highlights
+   and shadows.</li>
+<li>Confirm Camera and Clips selections remain independent.</li>
+</ol>
+<p>Do not silently convert an unknown internet LUT into a verified CineMate look.
+Preserve its original source, licence and intended input colour space.</p>
+<h2 id="troubleshooting">Troubleshooting<a class="headerlink" href="#troubleshooting" title="Permanent link">#</a></h2>
+<p>Useful /api/client-log events include:</p>
+<ul>
+<li>webgl-init</li>
+<li>lut-fetch-start</li>
+<li>lut-loaded</li>
+<li>lut-uploaded</li>
+<li>lut-self-test</li>
+<li>lut-set-active</li>
+<li>lut-first-frame</li>
+<li>lut-render-error</li>
+</ul>
+<p>If the selector changes but the image does not, inspect those events.</p>
+<p>If a look appears wrong while the self-test passes, investigate colour-space
+mismatch before changing the LUT math.</p>
+<h2 id="related-documentation">Related documentation<a class="headerlink" href="#related-documentation" title="Permanent link">#</a></h2>
+<ul>
+<li><a href="../web-preview-responsive-pwa/">Web preview, responsive UI, PWA and Clips live state</a></li>
+<li><a href="../imx283-color-calibration/">IMX283 colour calibration</a></li>
+<li>luts/README.md</li>
+</ul>
+</div>
+
+            </div>
+          </div><footer>
+    <div class="rst-footer-buttons" role="navigation" aria-label="Footer Navigation">
+        <a href="../web-gui/" class="btn btn-neutral float-left" title="Web GUI"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+        <a href="../rec709-post-workflow/" class="btn btn-neutral float-right" title="Rec.709 and post workflow">Next <span class="icon icon-circle-arrow-right"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+          
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="Versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+        <span>
+          <a href="https://github.com/yassinebkr/cinematepi5" class="fa fa-github" style="color: #fcfcfc"> GitHub</a>
+        </span>
+    
+    
+      <span><a href="../web-gui/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../rec709-post-workflow/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script src="../js/jquery-3.6.0.min.js"></script>
+    <script>var base_url = "..";</script>
+    <script src="../js/theme_extra.js"></script>
+    <script src="../js/theme.js"></script>
+      <script src="https://unpkg.com/highlightjs-copy@1/dist/highlightjs-copy.min.js"></script>
+      <script src="../js/ko-fi-widget.js"></script>
+      <script src="../js/copybutton-init.js"></script>
+      <script src="../search/main.js"></script>
+    <script>
+        jQuery(function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        });
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="650" viewBox="0 0 1200 650">
+<rect width="1200" height="650" fill="#0b0b0b"/>
+<rect x="150" y="55" width="1000" height="500" rx="6" fill="#c7aa62" stroke="#555"/>
+<rect x="0" y="0" width="1200" height="40" fill="#111"/>
+<text x="18" y="26" fill="#ddd" font-family="sans-serif" font-size="16">FPS 33   Shutter 180°   ISO 800   WB 5600 K   3936×2176</text>
+<rect x="12" y="55" width="118" height="32" rx="4" fill="#202020" stroke="#555"/><text x="24" y="77" fill="#fff" font-family="sans-serif" font-size="14">LOOK: none</text>
+<g font-family="sans-serif" font-size="13" font-weight="bold">
+<rect x="12" y="100" width="88" height="30" rx="3" fill="#2a7d4f"/><text x="27" y="120" fill="#fff">HIST</text>
+<rect x="12" y="138" width="88" height="30" rx="3" fill="#2a7d4f"/><text x="24" y="158" fill="#fff">WAVE</text>
+<rect x="12" y="176" width="88" height="30" rx="3" fill="#2a7d4f"/><text x="24" y="196" fill="#fff">VECT</text>
+<rect x="12" y="214" width="88" height="30" rx="3" fill="#2a7d4f"/><text x="20" y="234" fill="#fff">Z 90</text>
+<rect x="12" y="252" width="88" height="30" rx="3" fill="#2a7d4f"/><text x="23" y="272" fill="#fff">PEAK</text>
+<rect x="12" y="290" width="88" height="30" rx="3" fill="#333"/><text x="20" y="310" fill="#fff">LEVEL</text>
+</g>
+<rect x="10" y="360" width="120" height="68" fill="#111" stroke="#444"/>
+<polyline points="12,423 25,400 35,407 47,389 58,409 72,395 90,401 110,385 128,397" fill="none" stroke="#eee" stroke-width="2"/>
+<rect x="10" y="438" width="120" height="90" fill="#111" stroke="#444"/>
+<circle cx="70" cy="483" r="34" fill="none" stroke="#777"/><line x1="70" y1="443" x2="70" y2="523" stroke="#555"/><line x1="30" y1="483" x2="110" y2="483" stroke="#555"/>
+<path d="M70,483 C54,468 48,473 42,462" stroke="#e9c66a" stroke-width="5" fill="none"/>
+<rect x="10" y="538" width="120" height="92" fill="#111" stroke="#444"/>
+<path d="M15,620 C30,590 45,610 60,570 C80,610 100,585 125,610" fill="none" stroke="#fff"/>
+<path d="M15,625 C35,600 50,615 65,584 C83,615 100,594 125,615" fill="none" stroke="#f66"/>
+<path d="M15,628 C32,608 48,620 62,590 C85,618 100,605 125,618" fill="none" stroke="#6f6"/>
+<path d="M15,630 C30,612 49,623 64,597 C86,620 102,610 125,620" fill="none" stroke="#69f"/>
+<g font-family="sans-serif" font-size="18" font-weight="bold">
+<circle cx="122" cy="115" r="16" fill="#e2b84f"/><text x="117" y="121" fill="#000">1</text>
+<circle cx="122" cy="191" r="16" fill="#e2b84f"/><text x="117" y="197" fill="#000">2</text>
+<circle cx="122" cy="229" r="16" fill="#e2b84f"/><text x="117" y="235" fill="#000">3</text>
+<circle cx="122" cy="267" r="16" fill="#e2b84f"/><text x="117" y="273" fill="#000">4</text>
+<circle cx="122" cy="305" r="16" fill="#e2b84f"/><text x="117" y="311" fill="#000">5</text>
+</g>
+<g font-family="sans-serif" font-size="16" fill="#eee">
+<text x="170" y="590">1 Histogram · exposure distribution / RGB clipping</text>
+<text x="170" y="615">2 Waveform + vectorscope · where brightness and colour live in the image</text>
+<text x="640" y="590">3 Zebra · threshold warning (default 90 IRE)</text>
+<text x="640" y="615">4 Peaking · focus edges   5 Level · roll / pitch / shake</text>
+</g>
+</svg>
