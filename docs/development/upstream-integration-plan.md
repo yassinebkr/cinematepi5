@@ -4,7 +4,7 @@ This document tracks selective integration from the current upstream CineMate re
 
     https://github.com/Tiramisioux/cinemate
 
-The Pi 5 branch has substantial independent work, so upstream is integrated feature by feature rather than through a bulk merge or rebase.
+This downstream fork has substantial independent work, so upstream is integrated feature by feature rather than through a bulk merge or rebase.
 
 ## Repository relationship
 

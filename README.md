@@ -1,25 +1,24 @@
-# CineMate Pi 5
+# CineMate
 
 ## Fork status
 
-This repository is a downstream fork of [Tiramisioux/cinemate](https://github.com/Tiramisioux/cinemate). It retains CineMate as its foundation, but this fork has substantially diverged in architecture, Raspberry Pi 5 / PiSP assumptions, reliability hardening, recovery and configuration tooling, monitoring UX, IMU workflow, and IMX283-focused development.
+This repository is a downstream fork of [Tiramisioux/cinemate](https://github.com/Tiramisioux/cinemate). It retains CineMate as its foundation, but this fork has substantially diverged in reliability hardening, recovery and configuration tooling, monitoring UX, IMU workflow, IMX283 integration, installation architecture, and regression coverage.
 
 Treat the code, documentation, installation procedures, and compatibility claims in this repository as specific to this fork unless explicitly stated otherwise. Upstream work is still reviewed and credited where relevant, but changes here should not be assumed to be upstream-supported or directly suitable for upstream.
 
-CineMate is an open-source camera-control and monitoring stack for building a Raspberry Pi 5 digital cinema camera around CinePi RAW.
+CineMate is an open-source camera-control and monitoring stack for building digital cinema cameras around CinePi RAW.
 
 The project combines 12-bit CinemaDNG recording, a responsive browser controller, HDMI monitoring, physical controls, storage management, IMU telemetry and post-production helpers in one camera-oriented runtime.
 
 ## Current focus
 
-This Pi 5 branch is being hardened around a Sony IMX283 camera, while keeping the sensor database and control architecture usable with other supported CinePi sensors.
+This fork is currently being hardened around the Sony IMX283 while retaining CineMate's broader sensor database and control architecture.
 
 The current development priorities are reliability, deterministic configuration, colour-management clarity, useful field monitoring, reproducible installation and regression coverage.
 
 ## Main capabilities
 
 - 12-bit CinemaDNG recording through CinePi RAW
-- Raspberry Pi 5 / PiSP camera pipeline
 - browser-based Camera and Clips interfaces
 - responsive phone, tablet and desktop layouts
 - real WebGL2 3D .cube LUT monitoring
