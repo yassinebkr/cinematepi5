@@ -40,6 +40,8 @@ LEVEL uses the ICM-42688 accelerometer after physical calibration and camera-fra
 
 The HDMI GUI currently targets 30 FPS. The IMU service publishes at approximately 30 Hz after the Pi 5 I2C1 bus was increased to 400 kHz.
 
+To avoid visible jitter when the camera is effectively level, the HDMI LEVEL HUD applies a **display-only near-zero snap** to roll. At the current one-decimal display precision, values with |roll| < 0.05° are rendered as exactly 0.0° and the horizon line is drawn perfectly horizontal. Values at or beyond that threshold retain their normal sign and geometry. This does **not** modify IMU calibration, filtering, Redis telemetry, recorded gyro data, or the SHAKE signal.
+
 The LEVEL panel in the browser can enable/disable the HDMI HUD, set the operator horizon zero, and launch the guided IMU calibration.
 
 See [IMU calibration, HDMI preview and live HUD](imu-calibration-and-live-hud.md).

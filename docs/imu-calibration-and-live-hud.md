@@ -242,6 +242,19 @@ Stationary Phase B measurements after calibration are typically:
 
 Physical testing confirmed that the new indicator feels substantially more immediate and useful than the previous implementation.
 
+### HDMI near-zero display stabilization
+
+The HDMI LEVEL renderer intentionally keeps the IMU signal chain untouched and stabilizes only the final presentation around level. At the current one-decimal HDMI readout precision:
+
+- |roll| < 0.05° is displayed as unsigned 0.0°;
+- the circle's horizon line uses the same snapped display value and is therefore exactly horizontal inside that range;
+- roll at and beyond the display threshold is not suppressed and immediately regains its +/- sign and normal tilt;
+- SHAKE remains independent and continues to render from imu_shake.
+
+This addresses two manifestations of the same sub-pixel jitter: sign flicker around zero and apparent horizon-line thickness changes as an almost-horizontal 3-pixel line moves between framebuffer rows. The snap is display-only; imu_roll, imu_pitch, calibration state, raw Gyroflow logging and Phase-B filtering are not altered.
+
+Regression coverage exercises the actual renderer path, including positive/negative sub-threshold roll, just-outside-threshold roll, large signed roll, non-zero SHAKE while LEVEL is snapped, and saturated SHAKE.
+
 ## I2C bandwidth fix
 
 The original Pi 5 RP1 I2C1 bus was running at 100 kHz.

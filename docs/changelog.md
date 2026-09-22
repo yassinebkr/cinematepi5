@@ -13,6 +13,8 @@ This section describes the running local IMX283 / Raspberry Pi 5 camera and is n
 - Replaced the slow NumPy 1920 x 1080 RGB565 framebuffer conversion with a byte-equivalent single-threaded OpenCV path and raised SimpleGUI from 12 to 30 FPS.
 - Validated 3936 x 2176 12-bit RAW at approximately 33 FPS with HDMI preview and 30 FPS GUI: 0 camera-frame drops, 0 write failures, low RAM-buffer occupancy and substantial remaining RAM.
 - Added Phase B low-latency LEVEL and cinematography-oriented SHAKE filtering.
+- Stabilized the HDMI LEVEL presentation around zero with a display-only < 0.05° roll snap shared by the numeric readout and horizon-line geometry, removing sign/sub-pixel line flicker without modifying IMU telemetry or SHAKE.
+- Added renderer-level regression tests for near-zero, threshold, large signed roll and non-zero/saturated SHAKE cases.
 - Increased Pi 5 I2C1 from 100 kHz to 400 kHz for the 1 kHz ICM-42688 FIFO; measured live IMU publication improved from approximately 5 Hz to approximately 30.5 Hz.
 - Investigated historical throttled=0x50000. A clean reboot and full RAW stress test with the USB-powered HDMI monitor attached remained at throttled=0x0; official 27 W PSU negotiation is 5 V / 5 A and no USB over-current was detected.
 

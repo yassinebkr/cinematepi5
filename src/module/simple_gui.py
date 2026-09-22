@@ -44,6 +44,21 @@ def _to_int(value, default=None):
         return default
 
 
+def _snap_level_hud_roll(value, decimals=1):
+    """Snap visually sub-precision roll noise to zero for the HDMI HUD only."""
+    numeric = float(value)
+    threshold = 0.5 * (10.0 ** -int(decimals))
+    return 0.0 if abs(numeric) < threshold else numeric
+
+
+def _format_level_hud_roll(value, decimals=1):
+    """Format the display roll without a meaningless sign on snapped zero."""
+    snapped = _snap_level_hud_roll(value, decimals)
+    if snapped == 0.0:
+        return f"{0.0:.{int(decimals)}f}°"
+    return f"{snapped:+.{int(decimals)}f}°"
+
+
 def _calculate_preview_guide_rect(
     frame_width,
     frame_height,
@@ -1582,6 +1597,7 @@ class SimpleGUI(threading.Thread):
         g = lambda k: (rc.get(k) or b'0').decode()
         roll = float(g('imu_roll') or 0)
         shake = float(g('imu_shake') or 0)
+        display_roll = _snap_level_hud_roll(roll, 1)
         w = self.disp_width or 1920
         h = self.disp_height or 1080
         try:
@@ -1600,7 +1616,7 @@ class SimpleGUI(threading.Thread):
         ok = abs(roll) < 0.7
         col = (60, 255, 100, 255) if ok else (255, 255, 255, 255)
         draw.ellipse((cx - R, cy - R, cx + R, cy + R), outline=(150, 150, 150, 255), width=2)
-        a = _m.radians(-roll)
+        a = _m.radians(-display_roll)
         dx, dy = _m.cos(a) * (R - 6), _m.sin(a) * (R - 6)
         draw.line([(cx - dx, cy - dy), (cx + dx, cy + dy)], fill=col, width=3)
         draw.line([(cx - R, cy), (cx - R + 10, cy)], fill=(170, 170, 170, 255), width=2)
@@ -1612,7 +1628,7 @@ class SimpleGUI(threading.Thread):
             except Exception:
                 font = ImageFont.load_default()
             self._hud_font = font
-        draw.text((cx - 30, cy + R + 8), '%+.1f\u00b0' % roll, fill=col, font=font)
+        draw.text((cx - 30, cy + R + 8), _format_level_hud_roll(roll, 1), fill=col, font=font)
         bw, bh2 = max(60, sw - 40), 10
         bx, by = cx - bw // 2, cy + R + 44
         # Phase-B SHAKE is high-frequency residual motion rather than total
