@@ -1,11 +1,10 @@
 # CineMate Pi 5
 
-> [!IMPORTANT]
-> **Downstream fork notice**
->
-> This repository is a downstream fork of [Tiramisioux/cinemate](https://github.com/Tiramisioux/cinemate). It retains CineMate as its foundation, but this fork has substantially diverged in architecture, Raspberry Pi 5 / PiSP assumptions, reliability hardening, recovery and configuration tooling, monitoring UX, IMU workflow, and IMX283-focused development.
->
-> Treat the code, documentation, installation procedures, and compatibility claims in this repository as specific to this fork unless explicitly stated otherwise. Upstream work is still reviewed and credited where relevant, but changes here should not be assumed to be upstream-supported or directly suitable for upstream.
+## Fork status
+
+This repository is a downstream fork of [Tiramisioux/cinemate](https://github.com/Tiramisioux/cinemate). It retains CineMate as its foundation, but this fork has substantially diverged in architecture, Raspberry Pi 5 / PiSP assumptions, reliability hardening, recovery and configuration tooling, monitoring UX, IMU workflow, and IMX283-focused development.
+
+Treat the code, documentation, installation procedures, and compatibility claims in this repository as specific to this fork unless explicitly stated otherwise. Upstream work is still reviewed and credited where relevant, but changes here should not be assumed to be upstream-supported or directly suitable for upstream.
 
 CineMate is an open-source camera-control and monitoring stack for building a Raspberry Pi 5 digital cinema camera around CinePi RAW.
 
