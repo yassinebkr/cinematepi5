@@ -1,8 +1,8 @@
 # ───────────────────────────
 # Project basics
 # ───────────────────────────
-site_name: CineMate Pi 5 Docs
-site_description: Documentation for CineMate on Raspberry Pi 5
+site_name: CineMate Docs
+site_description: Documentation for this downstream CineMate fork
 site_url: https://yassinebkr.github.io/cinematepi5/
 repo_url: https://github.com/yassinebkr/cinematepi5
 edit_uri: blob/main/docs/

@@ -1,10 +1,9 @@
 name: build-and-deploy-doc
 
-# grant the job permission to push and deploy Pages
+# The workflow publishes the built site to the gh-pages branch.
+# Keep token permissions at the minimum required for that push.
 permissions:
   contents: write
-  pages: write
-  id-token: write
 
 on:
   push:
